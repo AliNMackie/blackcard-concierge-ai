@@ -25,31 +25,28 @@ async def init_connection_pool():
     if settings.DB_INSTANCE_CONNECTION_NAME:
         logger.info(f"Connecting to Cloud SQL: {settings.DB_INSTANCE_CONNECTION_NAME}")
         
-        # Load password from Secret Manager if configured, or expect it in environment?
-        # For simplicity in this iteration, we assume GCP Auth handles the difficult parts,
-        # but the connector needs a user/pass/db. 
-        # In a real deployed env, retrieve pass from Secret Manager here using google-cloud-secret-manager.
-        
-        # NOTE for Reviewer: In a full prod app, we'd use SecretManagerServiceClient here.
-        # For MVP, we'll allow passing password via env var `DB_PASS` purely for the connector logic,
-        # or implement the secret look up.
-        
-        # Let's try to get the password from the environment which Cloud Run could populate 
-        # from the secret as an env var (standard practice).
+        from google.cloud.sql.connector import Connector, IPTypes
         import os
-        db_pass = os.getenv("DB_PASS", "placeholder-pass-if-not-set")
-
-        # Initialize Connector
-        connector = Connector()
+        
+        # We'll use a local connector inside the creator to avoid event loop issues
+        # although usually a global one is fine if initialized in the right loop.
+        # However, making it lazy inside getconn is safest.
+        
+        connector = None
 
         async def getconn():
+            nonlocal connector
+            if connector is None:
+                connector = Connector()
+            
+            db_pass = os.getenv("DB_PASS", "placeholder")
             conn = await connector.connect_async(
                 settings.DB_INSTANCE_CONNECTION_NAME,
                 "asyncpg",
                 user=settings.DB_USER,
                 password=db_pass,
                 db=settings.DB_NAME,
-                ip_type=IPTypes.PUBLIC,  # Using Public IP for MVP as per terraform
+                ip_type=IPTypes.PUBLIC,
             )
             return conn
 
