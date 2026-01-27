@@ -19,8 +19,16 @@ from app.config import settings, logger
 class GeminiClient:
     def __init__(self):
         self.model = None
+        self._initialized = False
+
+    def _ensure_init(self):
+        if self._initialized:
+            return
+        
         if settings.is_production():
             try:
+                import vertexai
+                from vertexai.generative_models import GenerativeModel
                 vertexai.init(project=settings.PROJECT_ID, location=settings.GCP_REGION)
                 self.model = GenerativeModel(settings.GEMINI_MODEL_ID)
                 logger.info(f"Vertex AI initialized with model: {settings.GEMINI_MODEL_ID}")
@@ -28,8 +36,11 @@ class GeminiClient:
                 logger.error(f"Vertex AI init failed: {e}")
         else:
             logger.warning("Running in MOCK mode. Vertex AI calls will return placeholder text.")
+        
+        self._initialized = True
 
     def generate_content(self, prompt: str) -> str:
+        self._ensure_init()
         if not self.model:
             return f"[MOCK_LLM_RESPONSE] Response to: {prompt[:30]}..."
         
