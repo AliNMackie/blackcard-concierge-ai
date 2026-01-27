@@ -1,0 +1,11 @@
+{
+    "name": "projects/blackcard-concierge-ai/locations/global/workloadIdentityPools/github-pool/providers/github-provider",
+    "displayName": "GitHub Actions Provider",
+    "oidc": {
+        "issuerUri": "https://token.actions.githubusercontent.com"
+    },
+    "attributeMapping": {
+        "google.subject": "assertion.sub",
+        "attribute.repository": "assertion.repository"
+    }
+}

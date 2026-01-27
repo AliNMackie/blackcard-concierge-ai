@@ -1,0 +1,20 @@
+{
+    "type": "daily",
+    "user": {
+        "provider": "OURA",
+        "user_id": "oura-user-888"
+    },
+    "data": [
+        {
+            "date": "2024-05-28",
+            "scores": {
+                "recovery": 25,
+                "strain": 18,
+                "sleep": 60
+            },
+            "device_data": {
+                "name": "Oura Ring Gen 3"
+            }
+        }
+    ]
+}
