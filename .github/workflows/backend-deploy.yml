@@ -101,4 +101,4 @@ jobs:
             ELITE_API_KEY=elite-demo-key-2026
           secrets: |
             DB_PASS=elite-concierge-db-pass:latest
-          flags: '--quiet --add-cloudsql-instances=blackcard-concierge-ai:europe-west2:elite-concierge-db-22d9a1a9'
+          flags: '--quiet --network=default --add-cloudsql-instances=blackcard-concierge-ai:europe-west2:elite-concierge-db-22d9a1a9'
