@@ -99,6 +99,7 @@ jobs:
             GCP_REGION=${{ env.REGION }}
             DB_INSTANCE_CONNECTION_NAME=blackcard-concierge-ai:europe-west2:elite-concierge-db-22d9a1a9
             ELITE_API_KEY=elite-demo-key-2026
+            ENV=production
           secrets: |
             DB_PASS=elite-concierge-db-pass:latest
           flags: '--quiet --network=default --add-cloudsql-instances=blackcard-concierge-ai:europe-west2:elite-concierge-db-22d9a1a9'
