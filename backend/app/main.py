@@ -49,7 +49,7 @@ app.include_router(webhook_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], # In production, lock this down
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
