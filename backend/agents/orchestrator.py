@@ -131,8 +131,9 @@ async def get_workout_plan(client_id: str):
     except Exception as e:
         return f"AI Initialization Failed: {e}"
 
-    # 1. Fetch Context (Recent Logs)
+    # 1. Fetch Context (Recent Logs & Travel Status)
     sleep_score = 75 # Default
+    is_traveling = False
     
     async with database.async_engine.connect() as conn:
          # Find latest wearable event
@@ -151,13 +152,27 @@ async def get_workout_plan(client_id: str):
                  sleep_score = p["sleep_score"]
              elif "data" in p and "scores" in p["data"]:
                  sleep_score = p["data"]["scores"].get("recovery", 50)
+         
+         # Check Travel Status
+         from app.models import User
+         user_stmt = select(User.is_traveling).where(User.id == client_id)
+         user_result = await conn.execute(user_stmt)
+         is_traveling = user_result.scalar_one_or_none() or False
     
-    logger.info(f"Orchestrator: Client {client_id} has Sleep Score {sleep_score}")
+    logger.info(f"Orchestrator: Client {client_id} has Sleep Score {sleep_score}, Traveling={is_traveling}")
 
     # 2. Construct Prompt
     system_prompt = get_system_prompt(coach_style="hyrox_competitor") # Default to hyrox for now
+    
+    travel_injection = ""
+    if is_traveling:
+        travel_injection = """
+        **CRITICAL CONTEXT:** Client is currently TRAVELING. RESTRICT equipment usage to: Bodyweight, Resistance Bands, and Hotel Dumbbells only. Focus on Mobility and metabolic conditioning. Do NOT prescribe heavy barbells or sleds.
+        """
+
     prompt = f"""
     {system_prompt}
+    {travel_injection}
     
     Client ID: {client_id}
     Recovery Score: {sleep_score}/100.

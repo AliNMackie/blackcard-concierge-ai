@@ -99,6 +99,27 @@ async def seed():
             agent_message="Critical recovery warning. Sleep score 45 indicates severe under-recovery. Recommended: Active Recovery only."
         )
         session.add(red_flag)
+        
+        print("Seeding Additional Events for Dashboard...")
+        # Alice (Optimal)
+        alice_event = EventLog(
+            user_id="auth0|alice",
+            event_type="wearable",
+            payload={"sleep_score": 85, "hrv": 65, "rhr": 52},
+            agent_decision="GREEN",
+            agent_message="Recovery is optimal. High intensity Hyrox session recommended."
+        )
+        session.add(alice_event)
+        
+        # Ian (Vision/Rehab)
+        ian_event = EventLog(
+            user_id="auth0|ian",
+            event_type="vision",
+            payload={"detected_equipment": ["Kettlebell", "Mat"], "session_type": "mobility"},
+            agent_decision="WORKOUT_GENERATED",
+            agent_message="Detected equipment for knee rehab. mobility protocol active."
+        )
+        session.add(ian_event)
 
         await session.commit()
         print("Seed Complete! Database is populated.")

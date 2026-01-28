@@ -11,6 +11,7 @@ class User(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True) # e.g. "auth0|123" or phone number
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     profile_data: Mapped[Optional[dict]] = mapped_column(JSON, default={})
+    is_traveling: Mapped[bool] = mapped_column(default=False)
 
 class EventLog(Base):
     __tablename__ = "events"

@@ -55,6 +55,28 @@ export async function triggerIntervention(clientId: string) {
     return res.json();
 }
 
+export async function toggleTravel() {
+    const url = `${API_BASE}/users/me/toggle-travel`;
+    const headers: HeadersInit = {};
+    if (process.env.NEXT_PUBLIC_API_KEY) {
+        headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
+    }
+    const res = await fetch(url, { method: 'POST', headers });
+    if (!res.ok) throw new Error('Failed to toggle travel');
+    return res.json();
+}
+
+export async function fetchTravelStatus() {
+    const url = `${API_BASE}/users/me/travel-status`;
+    const headers: HeadersInit = {};
+    if (process.env.NEXT_PUBLIC_API_KEY) {
+        headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
+    }
+    const res = await fetch(url, { headers });
+    if (!res.ok) throw new Error('Failed to fetch travel status');
+    return res.json();
+}
+
 export async function triggerOverride(userId: string, action: string) {
     const url = BACKEND_URL ? `${API_BASE}/events/override` : `/api/trainer/override`;
 

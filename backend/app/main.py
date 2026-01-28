@@ -191,6 +191,32 @@ async def handle_chat(event: ChatEvent, db: AsyncSession = Depends(get_db)):
         logger.error(f"Error processing chat event: {e}")
         raise HTTPException(status_code=500, detail="Internal processing error")
 
+@app.post("/users/me/toggle-travel")
+async def toggle_travel(db: AsyncSession = Depends(get_db)):
+    """
+    Toggles the travel mode for User 1 (Demo Client).
+    """
+    stmt = select(User).where(User.id == "1")
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    user.is_traveling = not user.is_traveling
+    await db.commit()
+    return {"is_traveling": user.is_traveling}
+
+@app.get("/users/me/travel-status")
+async def get_travel_status(db: AsyncSession = Depends(get_db)):
+    """
+    Gets the travel status for User 1 (Demo Client).
+    """
+    stmt = select(User.is_traveling).where(User.id == "1")
+    result = await db.execute(stmt)
+    is_traveling = result.scalar_one_or_none()
+    return {"is_traveling": is_traveling or False}
+
 @app.post("/events/intervention/{client_id}")
 async def trigger_intervention(client_id: str, db: AsyncSession = Depends(get_db)):
     """

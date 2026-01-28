@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckCircle, Clock, PlayCircle } from "lucide-react";
+import { CheckCircle, Clock, PlayCircle, Camera } from "lucide-react";
 import { clsx } from "clsx";
 
 export type Exercise = {
@@ -52,11 +52,22 @@ export default function ExerciseCard({ exercise, onComplete, isActive }: Exercis
         <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
 
             {/* Header */}
-            <div className="mb-4">
-                <h2 className="text-3xl font-bold uppercase tracking-tighter text-white">{exercise.name}</h2>
-                <p className="text-gray-500 text-xs uppercase tracking-widest">
-                    Set {currentSet} of {exercise.sets}
-                </p>
+            <div className="mb-4 flex justify-between items-start">
+                <div>
+                    <h2 className="text-3xl font-bold uppercase tracking-tighter text-white">{exercise.name}</h2>
+                    <p className="text-gray-500 text-xs uppercase tracking-widest">
+                        Set {currentSet} of {exercise.sets}
+                    </p>
+                </div>
+                <button
+                    onClick={() => console.log("Camera opened for form check")}
+                    className="flex flex-col items-center gap-1 text-zinc-600 hover:text-amber-500 transition-colors group"
+                >
+                    <div className="p-3 rounded-full bg-zinc-900 border border-zinc-800 group-hover:border-amber-500/50">
+                        <Camera size={20} />
+                    </div>
+                    <span className="text-[8px] uppercase font-black tracking-widest">Record Form</span>
+                </button>
             </div>
 
             {/* Video Placeholder */}
