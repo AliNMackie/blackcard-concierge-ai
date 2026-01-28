@@ -50,7 +50,7 @@ resource "google_project_iam_member" "sql_client" {
 resource "google_sql_database_instance" "main" {
   name             = "elite-concierge-db-${random_id.db_suffix.hex}"
   database_version = "POSTGRES_15"
-  region           = var.region
+  region           = "europe-west2"
 
   settings {
     tier = "db-f1-micro"
@@ -105,5 +105,5 @@ variable "project_id" {
 variable "region" {
   description = "GCP Region"
   type        = string
-  default     = "us-central1"
+  default     = "europe-west2"
 }
