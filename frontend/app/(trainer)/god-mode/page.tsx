@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { fetchEvents, EventLog, triggerOverride } from '@/lib/api';
+import { fetchEvents, EventLog, triggerIntervention } from '@/lib/api';
 import { Activity, Zap, CheckCircle, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
@@ -31,11 +31,15 @@ export default function GodModePage() {
         setLoading(false);
     }
 
-    async function handleOverride(id: number) {
-        if (confirm("Confirm Manual Intervention Override?")) {
-            await triggerOverride(id.toString(), "MANUAL_INTERVENTION");
-            alert("Intervention Protocol Initiated.");
+    async function handleIntervention(clientId: string) {
+        setLoading(true);
+        try {
+            await triggerIntervention(clientId);
+            await loadData(); // Refresh list to show new AI result
+        } catch (err) {
+            alert("Ghostwriter failed to engage. Check logs.");
         }
+        setLoading(false);
     }
 
     return (
@@ -91,6 +95,9 @@ export default function GodModePage() {
                                         )}>
                                             {event.event_type}
                                         </span>
+                                        {event.event_type === 'intervention' && (
+                                            <span className="ml-2 px-2 py-1 rounded text-[10px] font-black uppercase bg-blue-500 text-black">AI Triggered</span>
+                                        )}
                                     </td>
                                     <td className="py-4 text-sm font-medium">
                                         {event.agent_decision === "RED" && <span className="text-red-500 flex items-center gap-2"><AlertTriangle size={14} /> RED ALERT</span>}
@@ -103,10 +110,10 @@ export default function GodModePage() {
                                     </td>
                                     <td className="py-4 text-right">
                                         <button
-                                            onClick={() => handleOverride(event.id)}
-                                            className="text-xs uppercase font-bold text-gray-600 hover:text-white transition group-hover:visible"
+                                            onClick={() => handleIntervention(event.user_id)}
+                                            className="bg-blue-600/10 text-blue-400 border border-blue-600/20 px-3 py-1 rounded text-[10px] font-black uppercase tracking-tighter hover:bg-blue-600 hover:text-white transition"
                                         >
-                                            Override
+                                            Generate Intervention
                                         </button>
                                     </td>
                                 </tr>

@@ -12,6 +12,7 @@ from app.database import get_db, create_tables, init_connection_pool
 from app.models import EventLog, Exercise, WorkoutTemplate
 from app.webhooks import router as webhook_router
 from app.workouts import router as workout_router
+from agents.orchestrator import get_workout_plan
 from fastapi.security import APIKeyHeader
 from typing import Optional
 import os
@@ -189,6 +190,37 @@ async def handle_chat(event: ChatEvent, db: AsyncSession = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error processing chat event: {e}")
         raise HTTPException(status_code=500, detail="Internal processing error")
+
+@app.post("/events/intervention/{client_id}")
+async def trigger_intervention(client_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Manually triggers the Ghostwriter to generate an intervention based on client context.
+    """
+    try:
+        # 1. Run Brain
+        ai_response = await get_workout_plan(client_id)
+        
+        # 2. Extract decision (Simple hack for demo)
+        decision = "WORKOUT_GENERATED"
+        if "recovery" in ai_response.lower() or "rest" in ai_response.lower():
+            decision = "RED"
+        
+        # 3. Persist to Log
+        if db:
+            log_entry = EventLog(
+                user_id=client_id,
+                event_type="intervention",
+                payload={"trigger": "manual_trainer_intervention"},
+                agent_decision=decision,
+                agent_message=ai_response
+            )
+            db.add(log_entry)
+            await db.commit()
+            
+        return {"status": "ok", "message": ai_response, "decision": decision}
+    except Exception as e:
+        logger.error(f"Intervention Trigger Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

@@ -40,6 +40,21 @@ export async function fetchEvents(limit = 50): Promise<EventLog[]> {
     }
 }
 
+export async function triggerIntervention(clientId: string) {
+    const url = `${API_BASE}/events/intervention/${clientId}`;
+    const headers: HeadersInit = {};
+    if (process.env.NEXT_PUBLIC_API_KEY) {
+        headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
+    }
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers
+    });
+    if (!res.ok) throw new Error('Failed to trigger intervention');
+    return res.json();
+}
+
 export async function triggerOverride(userId: string, action: string) {
     const url = BACKEND_URL ? `${API_BASE}/events/override` : `/api/trainer/override`;
 
