@@ -188,6 +188,26 @@ async def handle_chat(event: ChatEvent, db: AsyncSession = Depends(get_db)):
         logger.error(f"Error processing chat event: {e}")
         raise HTTPException(status_code=500, detail="Internal processing error")
 
+@app.delete("/events/cleanup")
+async def cleanup_errors(db: AsyncSession = Depends(get_db), auth: str = Depends(get_api_key)):
+    """
+    Emergency cleanup to remove 404/LLM errors from the logs.
+    """
+    logger.info("Starting cleanup of error logs...")
+    try:
+        # Delete rows where agent_message contains '404' or 'LLM_ERROR'
+        # We use text() for a raw delete since we might not have a full ORM filter setup for 'contains' on all fields easily ready
+        from sqlalchemy import text
+        stmt = text("DELETE FROM event_logs WHERE agent_message LIKE '%404%' OR agent_message LIKE '%LLM_ERROR%'")
+        result = await db.execute(stmt)
+        await db.commit()
+        deleted_count = result.rowcount
+        logger.info(f"Cleanup complete. Deleted {deleted_count} error logs.")
+        return {"status": "ok", "deleted_count": deleted_count}
+    except Exception as e:
+        logger.error(f"Cleanup failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Cleanup failed: {e}")
+
 if __name__ == "__main__":
     import uvicorn
     logger.info(f"Starting server on port 8080")
