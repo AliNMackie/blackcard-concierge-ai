@@ -18,6 +18,10 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 // If BACKEND_URL is set, use it. Otherwise use internal BFF (/api/client).
 const API_BASE = BACKEND_URL ? `${BACKEND_URL}` : '/api/client';
 
+export function getApiUrl() {
+    return API_BASE;
+}
+
 export async function fetchEvents(limit = 50): Promise<EventLog[]> {
     try {
         const url = BACKEND_URL ? `${API_BASE}/events?limit=${limit}` : `${API_BASE}/events`;
