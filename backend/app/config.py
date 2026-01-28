@@ -1,5 +1,6 @@
 import os
 import logging
+from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -18,7 +19,7 @@ class Settings(BaseSettings):
     DB_INSTANCE_CONNECTION_NAME: str = os.getenv("DB_INSTANCE_CONNECTION_NAME", "")
     DB_USER: str = os.getenv("DB_USER", "elite-concierge-user")
     DB_NAME: str = os.getenv("DB_NAME", "concierge_db")
-    DB_SECRET_ID: str = os.getenv("DB_SECRET_ID", "elite-concierge-db-pass")
+    DB_PASS: str = os.getenv("DB_PASS", "") # Injected via Secret
 
     # Auth
     ELITE_API_KEY: str = os.getenv("ELITE_API_KEY", "dev-secret-123")
@@ -32,6 +33,18 @@ class Settings(BaseSettings):
 
     def is_production(self) -> bool:
         return self.ENV.lower() == "production"
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not self.DATABASE_URL and self.DB_PASS and self.DB_INSTANCE_CONNECTION_NAME:
+            # Construct AsyncPG URL for Cloud SQL
+            # postgresql+asyncpg://user:pass@/dbname?host=/cloudsql/instance
+            encoded_user = quote_plus(self.DB_USER)
+            encoded_pass = quote_plus(self.DB_PASS)
+            self.DATABASE_URL = (
+                f"postgresql+asyncpg://{encoded_user}:{encoded_pass}@/"
+                f"{self.DB_NAME}?host=/cloudsql/{self.DB_INSTANCE_CONNECTION_NAME}"
+            )
 
 # Singleton
 settings = Settings()

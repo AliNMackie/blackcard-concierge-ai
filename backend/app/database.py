@@ -1,84 +1,62 @@
-import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase
-from google.cloud.sql.connector import Connector, IPTypes
+from sqlalchemy.orm import declarative_base
+from sqlalchemy import text
 from app.config import settings, logger
 
-# Database Models Base
-class Base(DeclarativeBase):
-    pass
+# Create Base for models
+Base = declarative_base()
 
-# Global DB components
+# Global engine and session factory
 async_engine = None
 AsyncSessionLocal = None
 
 async def init_connection_pool():
-    global async_engine
+    global async_engine, AsyncSessionLocal
     
-    # 1. Local Dev / Explicit URL (Postgres or SQLite)
-    if settings.DATABASE_URL:
-        logger.info(f"Connecting to DB via URL: {settings.DATABASE_URL}")
-        async_engine = create_async_engine(settings.DATABASE_URL)
+    database_url = settings.DATABASE_URL
+    if not database_url:
+        logger.warning("DATABASE_URL not set. Database features will fail.")
         return
 
-    # 2. Cloud SQL Connector (Production/Staging)
-    if settings.DB_INSTANCE_CONNECTION_NAME:
-        logger.info(f"Connecting to Cloud SQL: {settings.DB_INSTANCE_CONNECTION_NAME}")
-        
-        from google.cloud.sql.connector import Connector, IPTypes
-        import os
-        
-        # We'll use a local connector inside the creator to avoid event loop issues
-        # although usually a global one is fine if initialized in the right loop.
-        # However, making it lazy inside getconn is safest.
-        
-        connector = None
+    # Create Async Engine
+    async_engine = create_async_engine(
+        database_url,
+        echo=False,  # Set to True for SQL debugging
+        future=True,
+    )
 
-        async def getconn():
-            nonlocal connector
-            current_loop = asyncio.get_running_loop()
-            
-            # Ensure connector uses the current running loop
-            if connector is None or connector._loop != current_loop:
-                logger.info("Initializing Cloud SQL Connector (New Loop detected)")
-                connector = Connector(loop=current_loop)
-            
-            db_pass = os.getenv("DB_PASS", "placeholder").strip()
-            logger.info(f"DB_PASS injected: {'Yes' if db_pass != 'placeholder' else 'No'}, Length: {len(db_pass)} (stripped)")
-            conn = await connector.connect_async(
-                settings.DB_INSTANCE_CONNECTION_NAME,
-                "asyncpg",
-                user=settings.DB_USER,
-                password=db_pass,
-                db=settings.DB_NAME,
-                ip_type=IPTypes.PUBLIC,
-            )
-            return conn
-
-        async_engine = create_async_engine(
-            "postgresql+asyncpg://",
-            async_creator=getconn,
-        )
-        return
-    
-    logger.warning("No Database Configured. Persistence will be disabled.")
-
+    # Create Session Factory
+    AsyncSessionLocal = async_sessionmaker(
+        bind=async_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+        autoflush=False,
+    )
+    logger.info("Database connection pool initialized.")
 
 async def get_db():
-    if not async_engine:
-        await init_connection_pool()
-        
-    if not async_engine:
-        # Fallback if config is missing (e.g. tests without mock)
-        yield None
-        return
-
-    async_session = async_sessionmaker(async_engine, expire_on_commit=False)
-    async with async_session() as session:
+    """Dependency for ensuring a database session."""
+    if AsyncSessionLocal is None:
+         # Fallback or raise error? For now, yield nothing or raise
+         raise RuntimeError("Database not initialized.")
+         
+    async with AsyncSessionLocal() as session:
         yield session
 
 async def create_tables():
-    """Simple auto-migration for MVP"""
+    """Simple auto-migration for MVP. Added manual column check for Travel Mode."""
     if async_engine:
         async with async_engine.begin() as conn:
+            # 1. Standard SQLAlchemy create
             await conn.run_sync(Base.metadata.create_all)
+            
+            # 2. Manual migration: Add 'is_traveling' if missing
+            try:
+                # Direct SQL check and add for Users table
+                await conn.execute(
+                    text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_traveling BOOLEAN DEFAULT FALSE;")
+                )
+                logger.info("Database Migration Check: is_traveling column verified/added.")
+            except Exception as e:
+                # If column exists or other error, log it but don't crash
+                logger.warning(f"Note: Table migration check skipped/failed: {e}")

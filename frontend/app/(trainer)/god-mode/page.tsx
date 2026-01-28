@@ -74,6 +74,7 @@ export default function GodModePage() {
                         <thead>
                             <tr className="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800">
                                 <th className="py-4 font-normal">Timestamp</th>
+                                <th className="py-4 font-normal">Client</th>
                                 <th className="py-4 font-normal">Event Type</th>
                                 <th className="py-4 font-normal">Agent Decision</th>
                                 <th className="py-4 font-normal">AI Message</th>
@@ -85,6 +86,9 @@ export default function GodModePage() {
                                 <tr key={event.id} className="group hover:bg-gray-900/50 transition duration-150">
                                     <td className="py-4 text-sm text-gray-400">
                                         {formatDistanceToNow(new Date(event.created_at), { addSuffix: true })}
+                                    </td>
+                                    <td className="py-4 text-sm font-mono text-blue-400/80">
+                                        {event.user_id}
                                     </td>
                                     <td className="py-4">
                                         <span className={clsx(

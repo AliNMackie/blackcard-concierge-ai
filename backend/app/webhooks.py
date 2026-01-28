@@ -7,7 +7,6 @@ from app.database import get_db
 from app.models import EventLog
 from app.schema import ChatEvent, WearableEvent, AgentResponse
 from app.graph import app_graph
-from app.config import logger
 from langchain_core.messages import HumanMessage
 
 router = APIRouter(prefix="/webhooks", tags=["integrations"])
@@ -54,11 +53,11 @@ async def whatsapp_webhook(payload: WhatsAppPayload, db: AsyncSession = Depends(
         
         # Fallback if agent returns None
         if not response:
-             response = AgentResponse(
-                 agent_name="Concierge",
-                 message="Received. Processing your request.",
+            response = AgentResponse(
+                 agent_name="System",
+                 message="I received your message! Processing...",
                  suggested_action="ACK"
-             )
+            )
 
         # 3. Persist Log
         if db:

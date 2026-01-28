@@ -1,15 +1,16 @@
 # Use official Python runtime as a parent image
-FROM python:3.11-slim
+FROM python:3.11
 
 # Set environment variables
+# PYTHONUNBUFFERED=1 ensures logs are visible in Cloud Logging
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev && rm -rf /var/lib/apt/lists/*
+# Install system dependencies (Full image has gcc, but we need libpq-dev and libyaml-dev)
+RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev libyaml-dev && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install
 COPY requirements.txt .
@@ -25,4 +26,5 @@ COPY agents ./agents
 EXPOSE 8080
 
 # Command to run the application
+# Use the PORT environment variable strictly
 CMD exec uvicorn app.main:app --host 0.0.0.0 --port $PORT

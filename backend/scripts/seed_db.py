@@ -34,6 +34,8 @@ async def seed():
             User(id="auth0|alice", profile_data={"name": "Athlete Alice", "type": "Hyrox Pro", "goals": ["Sub 60 Hyrox"]}),
             User(id="auth0|bob", profile_data={"name": "Executive Bob", "type": "Traveler", "goals": ["Maintenance", "Health"]}),
             User(id="auth0|ian", profile_data={"name": "Injured Ian", "type": "Rehab", "goals": ["Knee Rehab"]}),
+            # Demo User for Travel Mode Toggle
+            User(id="1", profile_data={"name": "Demo Client", "type": "VIP", "goals": ["Look Good Naked"]}),
         ]
         
         for client in clients:

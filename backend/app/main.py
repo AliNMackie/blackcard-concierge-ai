@@ -1,21 +1,20 @@
-from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi import FastAPI, Depends, HTTPException, Security, Request, status
+from fastapi.security import APIKeyHeader
+from app.config import settings, logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from contextlib import asynccontextmanager
+from datetime import datetime
 import time
 from langchain_core.messages import HumanMessage
-
-from app.schema import WearableEvent, VisionEvent, AgentResponse, ChatEvent
-from app.graph import app_graph
-from app.config import settings, logger
-from app.database import get_db, create_tables, init_connection_pool
-from app.models import EventLog, Exercise, WorkoutTemplate
+import os
 from app.webhooks import router as webhook_router
 from app.workouts import router as workout_router
-from agents.orchestrator import get_workout_plan
-from fastapi.security import APIKeyHeader
-from typing import Optional
-import os
+from app.database import get_db, init_connection_pool, create_tables
+from app.models import User, EventLog
+from app.schema import AgentResponse, WearableEvent, VisionEvent, ChatEvent
+# AI Graph
+from app.graph import app_graph
 
 # Auth Configuration
 API_KEY_NAME = "X-Elite-Key"
@@ -51,8 +50,12 @@ app.include_router(workout_router)
 # Enable CORS for local/pwa development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, lock this down
-    allow_credentials=False,
+    allow_origins=[
+        "*", 
+        "https://blackcard-concierge.netlify.app", 
+        "http://localhost:3000"
+    ],
+    allow_credentials=True, # Set to True to handle credentials if needed by browser
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -93,7 +96,7 @@ async def handle_wearable(event: WearableEvent, db: AsyncSession = Depends(get_d
     
     # Run Agent
     state = {
-        "messages": [HumanMessage(content=f"Wearable Data: {event.recovery_score}")],
+        "messages": [],
         "wearable_data": event,
         "vision_data": None,
         "next_agent": ""
@@ -101,12 +104,15 @@ async def handle_wearable(event: WearableEvent, db: AsyncSession = Depends(get_d
     
     try:
         result = await app_graph.ainvoke(state)
-        response = result["final_response"]
+        response = result.get("final_response")
         
+        if not response:
+             response = AgentResponse(agent_name="System", message="Processing completed.", suggested_action="LOGGED")
+
         # Persist
         if db:
             log_entry = EventLog(
-                user_id="default_user", # Placeholder
+                user_id="1", # Linked to Demo Client (User 1) for dashboard visibility
                 event_type="wearable",
                 payload=event.model_dump(),
                 agent_decision=response.suggested_action,
@@ -124,21 +130,25 @@ async def handle_wearable(event: WearableEvent, db: AsyncSession = Depends(get_d
 async def handle_vision(event: VisionEvent, db: AsyncSession = Depends(get_db)):
     logger.info(f"Event: Vision, Equipment Count: {len(event.detected_equipment)}")
     
+    # Run Agent
     state = {
-        "messages": [HumanMessage(content="Vision Request")],
+        "messages": [],
         "wearable_data": None,
         "vision_data": event,
         "next_agent": ""
     }
-    
+
     try:
         result = await app_graph.ainvoke(state)
-        response = result["final_response"]
+        response = result.get("final_response")
+        
+        if not response:
+             response = AgentResponse(agent_name="System", message="Processing completed.", suggested_action="LOGGED")
         
         # Persist
         if db:
             log_entry = EventLog(
-                user_id="default_user",
+                user_id="1", # Demo Client
                 event_type="vision",
                 payload=event.model_dump(),
                 agent_decision=response.suggested_action,
@@ -156,23 +166,20 @@ async def handle_vision(event: VisionEvent, db: AsyncSession = Depends(get_db)):
 async def handle_chat(event: ChatEvent, db: AsyncSession = Depends(get_db)):
     logger.info(f"Event: Chat, User: {event.user_id}")
     
+    # Run Agent
     state = {
         "messages": [HumanMessage(content=event.message)],
         "wearable_data": None,
         "vision_data": None,
         "next_agent": ""
     }
-    
+
     try:
         result = await app_graph.ainvoke(state)
         response = result.get("final_response")
         
-        if not response: # Stub handling for Concierge
-             response = AgentResponse(
-                 agent_name="Concierge",
-                 message=f"I received your message: '{event.message}'. Chat capabilities coming soon.",
-                 suggested_action="CHAT_ACK"
-             )
+        if not response:
+             response = AgentResponse(agent_name="System", message="I heard you, but I'm thinking.", suggested_action="ACK")
         
         # Persist
         if db:
@@ -201,6 +208,7 @@ async def toggle_travel(db: AsyncSession = Depends(get_db)):
     user = result.scalar_one_or_none()
     
     if not user:
+        # Create user if missing for resilience? No, just 404.
         raise HTTPException(status_code=404, detail="User not found")
         
     user.is_traveling = not user.is_traveling
@@ -223,13 +231,20 @@ async def trigger_intervention(client_id: str, db: AsyncSession = Depends(get_db
     Manually triggers the Ghostwriter to generate an intervention based on client context.
     """
     try:
-        # 1. Run Brain
-        ai_response = await get_workout_plan(client_id)
+        # 1. Run Brain (Manual Intervention Trigger)
+        # We simulate a "System Instruction" to the Concierge/Orchestrator
+        state = {
+            "messages": [HumanMessage(content=f"Generate a motivational intervention for client {client_id}. They might be slacking.")],
+            "wearable_data": None,
+            "vision_data": None,
+            "next_agent": ""
+        }
         
-        # 2. Extract decision (Simple hack for demo)
-        decision = "WORKOUT_GENERATED"
-        if "recovery" in ai_response.lower() or "rest" in ai_response.lower():
-            decision = "RED"
+        result = await app_graph.ainvoke(state)
+        response = result.get("final_response")
+        
+        ai_msg = response.message if response else "Intervention generated."
+        decision = response.suggested_action if response else "MANUAL_INTERVENTION"
         
         # 3. Persist to Log
         if db:
@@ -238,12 +253,12 @@ async def trigger_intervention(client_id: str, db: AsyncSession = Depends(get_db
                 event_type="intervention",
                 payload={"trigger": "manual_trainer_intervention"},
                 agent_decision=decision,
-                agent_message=ai_response
+                agent_message=ai_msg
             )
             db.add(log_entry)
             await db.commit()
             
-        return {"status": "ok", "message": ai_response, "decision": decision}
+        return {"status": "ok", "message": ai_msg, "decision": decision}
     except Exception as e:
         logger.error(f"Intervention Trigger Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
