@@ -7,18 +7,35 @@ import { formatDistanceToNow } from 'date-fns';
 
 export default function ClientDashboard() {
     const [events, setEvents] = useState<EventLog[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        fetchEvents(10).then(setEvents);
+        loadData();
     }, []);
+
+    async function loadData() {
+        setLoading(true);
+        const data = await fetchEvents(10);
+        setEvents(data);
+        setLoading(false);
+    }
 
     return (
         <div className="min-h-screen bg-black text-white font-sans max-w-md mx-auto border-x border-gray-900">
 
             {/* Header */}
-            <div className="p-8 pb-4">
-                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 mb-1">Elite Concierge</h2>
-                <h1 className="text-4xl font-light tracking-tight text-white">Hello, Alastair.</h1>
+            <div className="p-8 pb-4 flex justify-between items-end">
+                <div>
+                    <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 mb-1">Elite Concierge</h2>
+                    <h1 className="text-4xl font-light tracking-tight text-white">Hello, Alastair.</h1>
+                </div>
+                <button
+                    onClick={loadData}
+                    disabled={loading}
+                    className="text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-white transition disabled:opacity-50"
+                >
+                    {loading ? 'Syncing...' : 'Refresh'}
+                </button>
             </div>
 
             {/* Main Status Card */}
@@ -37,7 +54,9 @@ export default function ClientDashboard() {
             <div className="px-6 space-y-4">
                 <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4">Recent Activity</h3>
 
-                {events.map((evt) => (
+                {loading && events.length === 0 ? (
+                    <div className="text-center py-10 text-gray-700 text-xs animate-pulse">Syncing biometric data...</div>
+                ) : events.map((evt) => (
                     <div key={evt.id} className="flex gap-4 items-start py-3 border-b border-gray-900/50">
                         <div className="mt-1">
                             {evt.event_type === 'wearable' && <Heart className="text-red-500" size={20} />}
@@ -59,7 +78,7 @@ export default function ClientDashboard() {
                     </div>
                 ))}
 
-                {events.length === 0 && (
+                {!loading && events.length === 0 && (
                     <div className="text-center py-10 text-gray-700 text-sm">
                         Waiting for biometric stream...
                     </div>
