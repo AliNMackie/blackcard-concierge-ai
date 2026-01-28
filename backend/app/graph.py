@@ -29,7 +29,11 @@ class GeminiClient:
             try:
                 import vertexai
                 from vertexai.generative_models import GenerativeModel
-                vertexai.init(project=settings.PROJECT_ID, location=settings.GCP_REGION)
+                vertexai.init(
+                    project=settings.PROJECT_ID, 
+                    location=settings.GCP_REGION,
+                    api_endpoint=f"{settings.GCP_REGION}-aiplatform.googleapis.com"
+                )
                 self.model = GenerativeModel(settings.GEMINI_MODEL_ID)
                 logger.info(f"Vertex AI initialized with model: {settings.GEMINI_MODEL_ID}")
             except Exception as e:

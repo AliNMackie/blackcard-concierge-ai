@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     # Vertex AI / Gemini
     PROJECT_ID: str = os.getenv("PROJECT_ID", "blackcard-concierge-ai")
     GCP_REGION: str = os.getenv("GCP_REGION", "europe-west2")
-    GEMINI_MODEL_ID: str = os.getenv("GEMINI_MODEL_ID", "gemini-2.0-flash")
+    GEMINI_MODEL_ID: str = os.getenv("GEMINI_MODEL_ID", "gemini-2.5-flash")
 
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
