@@ -26,7 +26,7 @@ export async function fetchEvents(limit = 50): Promise<EventLog[]> {
             headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
         }
 
-        const res = await fetch(url, { headers });
+        const res = await fetch(url, { headers, cache: 'no-store' });
         if (res.status === 403) throw new Error('AUTH_ERROR');
         if (!res.ok) throw new Error('Failed to fetch events');
         return res.json();
