@@ -39,6 +39,11 @@ resource "google_cloud_run_v2_service" "api" {
          name = "DB_SECRET_ID"
          value = google_secret_manager_secret.db_pass_secret.secret_id
       }
+      
+      env {
+        name  = "ENV"
+        value = "production"
+      }
     }
   }
 
