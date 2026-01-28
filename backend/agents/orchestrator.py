@@ -179,7 +179,7 @@ async def get_workout_plan(client_id: str):
     chat = model.start_chat()
     
     # 1st Turn: Send Prompt
-    response = await chat.send_message(prompt)
+    response = await chat.send_message_async(prompt)
     
     # Loop for Function Calling (Simple 1-turn loop for MVP)
     # response.candidates[0].content.parts might contain a function call
@@ -201,7 +201,7 @@ async def get_workout_plan(client_id: str):
                 )
                 
                 # Send Tool Output back to Model
-                response_final = await chat.send_message(
+                response_final = await chat.send_message_async(
                     Part.from_function_response(
                         name=fn_name,
                         response={"content": tool_output}
