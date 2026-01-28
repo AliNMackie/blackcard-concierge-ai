@@ -129,7 +129,7 @@ async def get_workout_plan(client_id: str):
         # Init Vertex inside function to avoid startup errors if auth missing locally
         vertexai.init(project=settings.PROJECT_ID, location=settings.GCP_REGION)
         # Use Configured Model
-        model = GenerativeModel(settings.GEMINI_MODEL_ID) 
+        model = GenerativeModel(settings.GEMINI_MODEL_ID, tools=[training_tools])
     except Exception as e:
         return f"AI Initialization Failed: {e}"
 
@@ -176,7 +176,7 @@ async def get_workout_plan(client_id: str):
     """
     
     # 3. Chat Interaction with Tool Use
-    chat = model.start_chat(tools=[training_tools])
+    chat = model.start_chat()
     
     # 1st Turn: Send Prompt
     response = await chat.send_message(prompt)
