@@ -11,6 +11,7 @@ from app.config import settings, logger
 from app.database import get_db, create_tables, init_connection_pool
 from app.models import EventLog, Exercise, WorkoutTemplate
 from app.webhooks import router as webhook_router
+from app.workouts import router as workout_router
 from fastapi.security import APIKeyHeader
 from typing import Optional
 import os
@@ -44,6 +45,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=settings.APP_NAME, version=settings.VERSION, lifespan=lifespan)
 app.include_router(webhook_router)
+app.include_router(workout_router)
 
 # Enable CORS for local/pwa development
 app.add_middleware(
