@@ -96,10 +96,11 @@ jobs:
           region: ${{ env.REGION }}
           env_vars: |
             PROJECT_ID=${{ env.PROJECT_ID }}
-            GCP_REGION=${{ env.REGION }}
-            DB_INSTANCE_CONNECTION_NAME=blackcard-concierge-ai:europe-west2:elite-concierge-db-22d9a1a9
+            GCP_REGION=us-central1
+            GEMINI_MODEL_ID=gemini-2.5-flash-001
+            DB_INSTANCE_CONNECTION_NAME=blackcard-concierge-ai:us-central1:elite-concierge-db-ff9b3a7b
             ELITE_API_KEY=elite-demo-key-2026
             ENV=production
           secrets: |
             DB_PASS=elite-concierge-db-pass:latest
-          flags: '--quiet --network=default --add-cloudsql-instances=blackcard-concierge-ai:europe-west2:elite-concierge-db-22d9a1a9'
+          flags: '--quiet --network=default --add-cloudsql-instances=blackcard-concierge-ai:us-central1:elite-concierge-db-ff9b3a7b'
