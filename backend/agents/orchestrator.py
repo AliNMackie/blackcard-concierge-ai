@@ -37,7 +37,7 @@ async def execute_sql_tool(muscle_group: str = None, category: str = None, is_hy
     """
     logger.info(f"Agent executing SQL Tool: Group={muscle_group}, Cat={category}, Hyrox={is_hyrox}")
     
-    stmt = select(Exercise)
+    stmt = select(Exercise.name, Exercise.category, Exercise.equipment)
     if category:
         stmt = stmt.where(Exercise.category == category)
     if muscle_group:
@@ -48,13 +48,11 @@ async def execute_sql_tool(muscle_group: str = None, category: str = None, is_hy
     try:
         async with database.async_engine.connect() as conn:
             result = await conn.execute(stmt)
-            # result row: (ExerciseObj,)
             rows = result.all()
             
             data = []
             for row in rows: 
-                 ex = row[0]
-                 data.append(f"- {ex.name} (Cat: {ex.category}, Equip: {ex.equipment})")
+                 data.append(f"- {row.name} (Cat: {row.category}, Equip: {row.equipment})")
                  
             if not data:
                 return "No exercises found matching criteria."
