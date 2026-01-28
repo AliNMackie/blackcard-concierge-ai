@@ -158,9 +158,8 @@ async def get_workout_plan(client_id: str):
     logger.info(f"Orchestrator: Client {client_id} has Sleep Score {sleep_score}")
 
     # 2. Construct Prompt
-    # 2. Construct Prompt
     system_prompt = get_system_prompt(coach_style="hyrox_competitor") # Default to hyrox for now
-    prompt = f\"\"\"
+    prompt = f"""
     {system_prompt}
     
     Client ID: {client_id}
