@@ -1,38 +1,43 @@
 import os
 import logging
-from typing import Optional
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    # Application Config
-    APP_NAME: str = "elite-concierge-backend"
+    # App Info
+    APP_NAME: str = "Elite Concierge AI"
     VERSION: str = "0.1.0"
-    LOG_LEVEL: str = "INFO"
-    
-    # GCP Config
-    PROJECT_ID: str = "mock-project-id"
-    GCP_REGION: str = "europe-west2"
-    
-    # Vertex AI Config
-    GEMINI_MODEL_ID: str = "gemini-1.5-flash-002"
+    ENV: str = os.getenv("ENV", "development")
 
-    # Database Config
-    DB_INSTANCE_CONNECTION_NAME: Optional[str] = None # e.g. project:region:instance
-    DB_SECRET_ID: Optional[str] = None # e.g. projects/123/secrets/db-pass/versions/1
-    DB_USER: str = "elite-concierge-user"
-    DB_NAME: str = "concierge_db"
-    
-    # Local Dev Override (if not using Cloud SQL Connector)
-    DATABASE_URL: Optional[str] = None 
+    # Vertex AI / Gemini
+    PROJECT_ID: str = os.getenv("PROJECT_ID", "blackcard-concierge-ai")
+    GCP_REGION: str = os.getenv("GCP_REGION", "europe-west2")
+    GEMINI_MODEL_ID: str = os.getenv("GEMINI_MODEL_ID", "gemini-2.0-flash-001")
+
+    # Database
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    DB_INSTANCE_CONNECTION_NAME: str = os.getenv("DB_INSTANCE_CONNECTION_NAME", "")
+    DB_USER: str = os.getenv("DB_USER", "elite-concierge-user")
+    DB_NAME: str = os.getenv("DB_NAME", "concierge_db")
+    DB_SECRET_ID: str = os.getenv("DB_SECRET_ID", "elite-concierge-db-pass")
+
+    # Auth
+    ELITE_API_KEY: str = os.getenv("ELITE_API_KEY", "dev-secret-123")
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
     def is_production(self) -> bool:
-        return self.PROJECT_ID != "mock-project-id"
+        return self.ENV.lower() == "production"
 
+# Singleton
 settings = Settings()
 
-# Configure Logging
+# Logging Configuration
 logging.basicConfig(
-    level=getattr(logging, settings.LOG_LEVEL.upper()),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
-logger = logging.getLogger(settings.APP_NAME)
+logger = logging.getLogger("elite-concierge")

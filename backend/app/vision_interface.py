@@ -15,7 +15,7 @@ def describe_gym_equipment(image_bytes: Optional[bytes]) -> GymEquipmentDescript
     ```python
     from vertexai.generative_models import GenerativeModel, Part, Image
     
-    model = GenerativeModel("gemini-1.5-pro-vision") # Upgrade to gemini-3-vision when available
+    model = GenerativeModel("gemini-2.0-flash-001") # stable 2.0 model for europe-west2
     
     image_part = Image.from_bytes(image_bytes)
     
