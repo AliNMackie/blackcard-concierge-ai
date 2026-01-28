@@ -8,7 +8,8 @@ from sqlalchemy import select
 # Assuming scripts/seed_db.py is executed from backend root or scripts dir
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.database import init_connection_pool, async_engine, Base
+from app import database
+from app.database import init_connection_pool, Base
 from app.models import User, Exercise, WorkoutTemplate, EventLog
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
@@ -16,16 +17,16 @@ async def seed():
     print("Initializing DB Connection...")
     await init_connection_pool()
     
-    if not async_engine:
+    if not database.async_engine:
         print("Failed to initialize database connection. Check config.")
         return
 
     # Create tables if they don't exist (Useful for local dev / quickstart)
     print("Ensuring local schema...")
-    async with async_engine.begin() as conn:
+    async with database.async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    async_session = async_sessionmaker(async_engine, expire_on_commit=False)
+    async_session = async_sessionmaker(database.async_engine, expire_on_commit=False)
     
     async with async_session() as session:
         print("Seeding Users...")

@@ -51,7 +51,7 @@ async def init_connection_pool():
                 user=settings.DB_USER,
                 password=db_pass,
                 db=settings.DB_NAME,
-                ip_type=IPTypes.PRIVATE,
+                ip_type=IPTypes.PUBLIC,
             )
             return conn
 
