@@ -36,8 +36,12 @@ async def init_connection_pool():
 
         async def getconn():
             nonlocal connector
-            if connector is None:
-                connector = Connector()
+            current_loop = asyncio.get_running_loop()
+            
+            # Ensure connector uses the current running loop
+            if connector is None or connector._loop != current_loop:
+                logger.info("Initializing Cloud SQL Connector (New Loop detected)")
+                connector = Connector(loop=current_loop)
             
             db_pass = os.getenv("DB_PASS", "placeholder")
             conn = await connector.connect_async(
