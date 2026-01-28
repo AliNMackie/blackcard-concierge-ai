@@ -138,7 +138,7 @@ async def get_workout_plan(client_id: str):
     
     async with database.async_engine.connect() as conn:
          # Find latest wearable event
-         stmt = select(EventLog).where(
+         stmt = select(EventLog.payload).where(
              EventLog.user_id == client_id, 
              EventLog.event_type == "wearable"
          ).order_by(EventLog.created_at.desc()).limit(1)
@@ -148,7 +148,7 @@ async def get_workout_plan(client_id: str):
          
          if log:
              # Handle different payload structures (Terra vs Seed)
-             p = log.payload
+             p = log
              if "sleep_score" in p:
                  sleep_score = p["sleep_score"]
              elif "data" in p and "scores" in p["data"]:
