@@ -9,7 +9,7 @@ from app.schema import WearableEvent, VisionEvent, AgentResponse, ChatEvent
 from app.graph import app_graph
 from app.config import settings, logger
 from app.database import get_db, create_tables, init_connection_pool
-from app.models import EventLog
+from app.models import EventLog, Exercise, WorkoutTemplate
 from app.webhooks import router as webhook_router
 from fastapi.security import APIKeyHeader
 from typing import Optional
