@@ -43,8 +43,8 @@ async def init_connection_pool():
                 logger.info("Initializing Cloud SQL Connector (New Loop detected)")
                 connector = Connector(loop=current_loop)
             
-            db_pass = os.getenv("DB_PASS", "placeholder")
-            logger.info(f"DB_PASS injected: {'Yes' if db_pass != 'placeholder' else 'No'}, Length: {len(db_pass)}")
+            db_pass = os.getenv("DB_PASS", "placeholder").strip()
+            logger.info(f"DB_PASS injected: {'Yes' if db_pass != 'placeholder' else 'No'}, Length: {len(db_pass)} (stripped)")
             conn = await connector.connect_async(
                 settings.DB_INSTANCE_CONNECTION_NAME,
                 "asyncpg",
