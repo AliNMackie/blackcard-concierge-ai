@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     GCP_REGION: str = "europe-west2"
     
     # Vertex AI Config
-    GEMINI_MODEL_ID: str = "gemini-3-flash-preview"
+    GEMINI_MODEL_ID: str = "gemini-1.5-flash-002"
 
     # Database Config
     DB_INSTANCE_CONNECTION_NAME: Optional[str] = None # e.g. project:region:instance
