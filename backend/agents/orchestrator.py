@@ -144,10 +144,9 @@ async def get_workout_plan(client_id: str):
          ).order_by(EventLog.created_at.desc()).limit(1)
          
          result = await conn.execute(stmt)
-         row = result.first()
+         log = result.scalar_one_or_none()
          
-         if row:
-             log = row[0]
+         if log:
              # Handle different payload structures (Terra vs Seed)
              p = log.payload
              if "sleep_score" in p:
