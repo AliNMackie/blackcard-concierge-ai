@@ -74,7 +74,7 @@ async def get_demo_workout(client_id: str, db: AsyncSession = Depends(get_db)):
                  "id": str(ex.id),
                  "name": ex.name,
                  "sets": 3,
-                 "reps": 10 if ex.category != "Hyrox" else 15, // Hyrox usually higher reps
+                 "reps": 10 if ex.category != "Hyrox" else 15, # Hyrox usually higher reps
                  "weight": 0,
                  "video_url": ex.video_url
              })
