@@ -22,6 +22,7 @@ class Settings(BaseSettings):
 
     # Auth
     ELITE_API_KEY: str = os.getenv("ELITE_API_KEY", "dev-secret-123")
+    TERRA_API_SECRET: str = os.getenv("TERRA_API_SECRET", "terra-secret-placeholder")
 
     model_config = SettingsConfigDict(
         env_file=".env",
