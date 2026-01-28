@@ -198,7 +198,7 @@ async def cleanup_errors(db: AsyncSession = Depends(get_db), auth: str = Depends
         # Delete rows where agent_message contains '404' or 'LLM_ERROR'
         # We use text() for a raw delete since we might not have a full ORM filter setup for 'contains' on all fields easily ready
         from sqlalchemy import text
-        stmt = text("DELETE FROM event_logs WHERE agent_message LIKE '%404%' OR agent_message LIKE '%LLM_ERROR%'")
+        stmt = text("DELETE FROM events WHERE agent_message LIKE '%404%' OR agent_message LIKE '%LLM_ERROR%'")
         result = await db.execute(stmt)
         await db.commit()
         deleted_count = result.rowcount
