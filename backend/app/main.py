@@ -42,8 +42,15 @@ from fastapi.middleware.cors import CORSMiddleware
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    await init_connection_pool()
-    await create_tables() # Auto-create tables for MVP
+    try:
+        await init_connection_pool()
+        await create_tables() # Auto-create tables for MVP
+        logger.info("Startup complete: DB connected and tables verified.")
+    except Exception as e:
+        logger.critical(f"CRITICAL STARTUP ERROR: {e}")
+        # We don't re-raise here to allow the container to start and emit logs, 
+        # otherwise Cloud Run kills it instantly, hiding the error.
+        
     yield
     # Shutdown
     # (Optional) close engine
