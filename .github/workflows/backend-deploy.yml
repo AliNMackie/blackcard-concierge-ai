@@ -89,6 +89,7 @@ jobs:
       # 4. Deploy to Cloud Run
       # ----------------------------------------------------------------
       - name: Deploy to Cloud Run
+        id: deploy
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ env.SERVICE_NAME }}-api
@@ -104,3 +105,13 @@ jobs:
           secrets: |
             DB_PASS=elite-concierge-db-pass:latest
           flags: '--quiet --network=default --add-cloudsql-instances=blackcard-concierge-ai:europe-west2:elite-concierge-db-ff9b3a7b'
+
+      # ----------------------------------------------------------------
+      # 5. Smoke Test
+      # ----------------------------------------------------------------
+      - name: Smoke Test /health
+        run: |
+           # Use the URL output from the deploy step if available, or construct it
+           # The google-github-actions/deploy-cloudrun action outputs 'url'
+           echo "Verifying health at ${{ steps.deploy.outputs.url }}/health"
+           curl -f "${{ steps.deploy.outputs.url }}/health"
