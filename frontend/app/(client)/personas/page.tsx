@@ -1,6 +1,6 @@
 'use client';
 
-import PersonasPage from '../../../src/pages/Personas'; // Importing the component I just made, assuming a src/pages pattern, but looking at structure, I might need to adjust.
+
 // Actually, I should just write the component directly into the app router file for simplicity if `src/pages` isn't the pattern.
 // Let me check structure again.
 // The list_dir showed `app/(client)/gym-mode/page.tsx`.
@@ -10,6 +10,8 @@ import PersonasPage from '../../../src/pages/Personas'; // Importing the compone
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { Activity, Users, Trophy, MessageSquare } from 'lucide-react';
+import Link from 'next/link';
 
 const PERSONAS = [
     {
@@ -161,6 +163,13 @@ export default function Personas() {
                         </div>
                     </motion.div>
                 ))}
+            </div>
+            {/* Navigation */}
+            <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/90 backdrop-blur pb-6 pt-4 flex justify-around text-gray-400 max-w-7xl mx-auto z-50 md:hidden">
+                <Link href="/dashboard"><Activity size={24} className="hover:text-black transition" /></Link>
+                <Link href="/personas"><div className="text-black relative"><Users size={24} /><div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full"></div></div></Link>
+                <Link href="/performance"><Trophy size={24} className="hover:text-black transition" /></Link>
+                <Link href="/messages"><MessageSquare size={24} className="hover:text-black transition" /></Link>
             </div>
         </div>
     );

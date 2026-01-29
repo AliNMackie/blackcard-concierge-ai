@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Activity, Users, Trophy, MessageSquare } from "lucide-react";
+import Link from 'next/link';
 
 export default function MessagesPage() {
     const router = useRouter();
@@ -42,8 +43,8 @@ export default function MessagesPage() {
                         className={`flex flex-col ${msg.sender === "User" ? "items-end" : "items-start"}`}
                     >
                         <div className={`max-w-[80%] p-4 rounded-2xl text-sm ${msg.sender === "User"
-                                ? "bg-zinc-800 text-white rounded-tr-none"
-                                : "bg-zinc-100 text-black rounded-tl-none font-medium"
+                            ? "bg-zinc-800 text-white rounded-tr-none"
+                            : "bg-zinc-100 text-black rounded-tl-none font-medium"
                             }`}>
                             {msg.text}
                         </div>
@@ -55,7 +56,7 @@ export default function MessagesPage() {
             </main>
 
             {/* Input Placeholder */}
-            <footer className="p-6 border-t border-gray-900 bg-black/50 backdrop-blur pb-10">
+            <div className="p-4 border-t border-gray-900 bg-black pb-24">
                 <div className="relative">
                     <input
                         type="text"
@@ -66,7 +67,15 @@ export default function MessagesPage() {
                         <Send size={20} />
                     </button>
                 </div>
-            </footer>
+            </div>
+
+            {/* Navigation */}
+            <div className="fixed bottom-0 left-0 right-0 border-t border-gray-900 bg-black/90 backdrop-blur pb-6 pt-4 flex justify-around text-gray-500 max-w-md mx-auto z-50">
+                <Link href="/dashboard"><Activity size={24} className="hover:text-white transition" /></Link>
+                <Link href="/personas"><Users size={24} className="hover:text-white transition" /></Link>
+                <Link href="/performance"><Trophy size={24} className="hover:text-white transition" /></Link>
+                <Link href="/messages"><div className="text-white relative"><MessageSquare size={24} /><div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full"></div></div></Link>
+            </div>
         </div>
     );
 }
