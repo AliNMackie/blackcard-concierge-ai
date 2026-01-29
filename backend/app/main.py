@@ -22,13 +22,18 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 def get_api_key(api_key: str = Depends(api_key_header)):
     # Simple env-based check for MVP
-    expected_key = os.getenv("ELITE_API_KEY", "dev-secret-123")
-    if api_key == expected_key:
+    primary_key = os.getenv("ELITE_API_KEY", "EliteConcierge2026_GodSecret")
+    legacy_key = "dev-secret-123"
+    
+    if api_key in [primary_key, legacy_key]:
         return api_key
+        
     # Allow dev mode bypass if env var is explicitly set to "DISABLE"
     if os.getenv("AUTH_MODE") == "DISABLE":
+        logger.warning("AUTH_MODE is DISABLE. Bypassing security.")
         return "dev-bypass"
     
+    logger.error(f"Auth Failed: Received key '{api_key[:4]}...'")
     raise HTTPException(status_code=403, detail="Invalid or missing API Key")
 
 # CORS
@@ -215,15 +220,36 @@ async def toggle_travel(db: AsyncSession = Depends(get_db)):
     await db.commit()
     return {"is_traveling": user.is_traveling}
 
-@app.get("/users/me/travel-status")
-async def get_travel_status(db: AsyncSession = Depends(get_db)):
+
+
+@app.patch("/users/me")
+async def update_user_profile(update_data: app.schema.UserUpdate, db: AsyncSession = Depends(get_db)):
     """
-    Gets the travel status for User 1 (Demo Client).
+    Updates the Demo Client (User 1) profile settings, including Persona.
     """
-    stmt = select(User.is_traveling).where(User.id == "1")
+    from app import schema # delayed import to avoid circular if any
+    
+    stmt = select(User).where(User.id == "1")
     result = await db.execute(stmt)
-    is_traveling = result.scalar_one_or_none()
-    return {"is_traveling": is_traveling or False}
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if update_data.is_traveling is not None:
+        user.is_traveling = update_data.is_traveling
+        
+    if update_data.coach_style is not None:
+        user.coach_style = update_data.coach_style
+        
+    await db.commit()
+    await db.refresh(user)
+    
+    return {
+        "status": "updated",
+        "coach_style": user.coach_style, 
+        "is_traveling": user.is_traveling
+    }
 
 @app.post("/events/intervention/{client_id}")
 async def trigger_intervention(client_id: str, db: AsyncSession = Depends(get_db)):

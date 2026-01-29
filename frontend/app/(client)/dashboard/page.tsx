@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { clsx } from 'clsx';
 import { fetchEvents, EventLog, toggleTravel, fetchTravelStatus } from '@/lib/api';
-import { Activity, Heart, Camera, MessageSquare, Plane } from 'lucide-react';
+import { Activity, Heart, Camera, MessageSquare, Plane, Users } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 
@@ -147,6 +147,7 @@ export default function ClientDashboard() {
             {/* Tab Bar Placeholder */}
             <div className="fixed bottom-0 left-0 right-0 border-t border-gray-900 bg-black/90 backdrop-blur pb-6 pt-4 flex justify-around text-gray-500 max-w-md mx-auto">
                 <Link href="/dashboard"><Activity size={24} className="text-white" /></Link>
+                <Link href="/personas"><Users size={24} className="hover:text-white transition" /></Link>
                 <Link href="/messages"><MessageSquare size={24} className="hover:text-white transition" /></Link>
             </div>
 

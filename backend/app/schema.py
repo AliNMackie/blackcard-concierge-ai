@@ -19,3 +19,7 @@ class AgentResponse(BaseModel):
     agent_name: str
     message: str
     suggested_action: str
+
+class UserUpdate(BaseModel):
+    coach_style: Optional[str] = None
+    is_traveling: Optional[bool] = None
