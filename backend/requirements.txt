@@ -16,3 +16,4 @@ langchain-google-vertexai
 langgraph
 numpy<2
 pytest
+pytest-asyncio
