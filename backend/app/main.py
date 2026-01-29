@@ -251,6 +251,30 @@ async def update_user_profile(update_data: app.schema.UserUpdate, db: AsyncSessi
         "is_traveling": user.is_traveling
     }
 
+@app.patch("/admin/users/{user_id}")
+async def admin_update_user(user_id: str, update_data: app.schema.UserUpdate, db: AsyncSession = Depends(get_db), auth: str = Depends(get_api_key)):
+    """
+    God Mode: Force update a client's profile (Persona/Travel Status).
+    """
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if update_data.coach_style is not None:
+        user.coach_style = update_data.coach_style
+        logger.info(f"GOD MODE: Updated User {user_id} persona to {user.coach_style}")
+        
+    if update_data.is_traveling is not None:
+        user.is_traveling = update_data.is_traveling
+
+    await db.commit()
+    await db.refresh(user)
+    
+    return user
+
 @app.post("/events/intervention/{client_id}")
 async def trigger_intervention(client_id: str, db: AsyncSession = Depends(get_db)):
     """

@@ -1,15 +1,23 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { fetchEvents, EventLog, triggerIntervention } from '@/lib/api';
-import { Activity, Zap, CheckCircle, AlertTriangle } from 'lucide-react';
+import { fetchEvents, EventLog, triggerIntervention, adminUpdateUser } from '@/lib/api';
+import { Activity, Zap, CheckCircle, AlertTriangle, UserCog, RefreshCw } from 'lucide-react';
 import { clsx } from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
+
+const PERSONAS = [
+    { id: 'hyrox_competitor', label: 'Hyrox Athlete' },
+    { id: 'empowered_mum', label: 'Empowered Mum' },
+    { id: 'muscle_architect', label: 'Muscle Architect' },
+    { id: 'bio_optimizer', label: 'Bio-Optimizer' }
+];
 
 export default function GodModePage() {
     const [events, setEvents] = useState<EventLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activePersona, setActivePersona] = useState<string>("hyrox_competitor"); // Default state for demo
 
     useEffect(() => {
         loadData();
@@ -21,6 +29,7 @@ export default function GodModePage() {
         try {
             const data = await fetchEvents();
             setEvents(data);
+            // In a real app, we'd fetch all users. For MVP, we assume User "1" is the main demo.
         } catch (err: any) {
             if (err.message === 'AUTH_ERROR') {
                 setError('AUTH');
@@ -31,11 +40,22 @@ export default function GodModePage() {
         setLoading(false);
     }
 
+    async function handlePersonaChange(newStyle: string) {
+        // Optimistic UI update
+        setActivePersona(newStyle);
+        try {
+            await adminUpdateUser("1", { coach_style: newStyle });
+            alert(`Client Persona forced to: ${newStyle}`);
+        } catch (e) {
+            alert("Failed to override persona");
+        }
+    }
+
     async function handleIntervention(clientId: string) {
         setLoading(true);
         try {
             await triggerIntervention(clientId);
-            await loadData(); // Refresh list to show new AI result
+            await loadData();
         } catch (err) {
             alert("Ghostwriter failed to engage. Check logs.");
         }
@@ -44,16 +64,36 @@ export default function GodModePage() {
 
     return (
         <div className="min-h-screen bg-black text-white p-6 font-sans">
-            <header className="mb-10 flex justify-between items-center border-b border-gray-800 pb-4">
+            <header className="mb-10 flex justify-between items-start border-b border-gray-800 pb-6">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tighter">GOD MODE</h1>
-                    <p className="text-gray-500 text-sm tracking-widest uppercase">Elite Concierge Overview</p>
+                    <h1 className="text-3xl font-bold tracking-tighter text-white">GOD MODE</h1>
+                    <p className="text-gray-500 text-sm tracking-widest uppercase mb-4">Elite Concierge Overview</p>
+
+                    {/* Active Client Control (MVP: Hardcoded for Demo Client) */}
+                    <div className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 p-3 rounded-lg">
+                        <UserCog size={20} className="text-blue-400" />
+                        <div>
+                            <p className="text-[10px] text-gray-500 uppercase font-bold">Client: Alastair (Demo)</p>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-300">Force Persona:</span>
+                                <select
+                                    value={activePersona}
+                                    onChange={(e) => handlePersonaChange(e.target.value)}
+                                    className="bg-black border border-gray-700 text-xs rounded px-2 py-1 text-white focus:outline-none focus:border-blue-500"
+                                >
+                                    {PERSONAS.map(p => (
+                                        <option key={p.id} value={p.id}>{p.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <button
                     onClick={loadData}
-                    className="bg-white text-black px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition"
+                    className="flex items-center gap-2 bg-white text-black px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition rounded-sm"
                 >
-                    Refresh Data
+                    <RefreshCw size={16} /> Refresh Stream
                 </button>
             </header>
 
