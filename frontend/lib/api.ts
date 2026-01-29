@@ -120,3 +120,63 @@ export async function adminUpdateUser(userId: string, data: { coach_style?: stri
 
     return res.json();
 }
+
+// Vision API (Supports Image & Video)
+export async function analyzeVision(mediaBase64: string, isVideo = false) {
+    // Basic cleaning if header is present
+    const cleanBase64 = mediaBase64.replace(/^data:(image|video)\/\w+;base64,/, "");
+
+    const payload: any = {
+        detected_equipment: [],
+        user_query: isVideo ? "Check my form" : "Identify gym equipment and suggest a workout"
+    };
+
+    if (isVideo) {
+        payload.video_base64 = cleanBase64;
+    } else {
+        payload.image_base64 = cleanBase64;
+    }
+
+    const url = `${API_BASE}/events/vision`;
+
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+    };
+    if (process.env.NEXT_PUBLIC_API_KEY) {
+        headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
+    }
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error('Analysis failed');
+    return res.json();
+}
+
+// Chat API for Voice/Text
+export async function sendChatMessage(userId: string, message: string) {
+    const url = `${API_BASE}/events/chat`;
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+    };
+    if (process.env.NEXT_PUBLIC_API_KEY) {
+        headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
+    }
+
+    const payload = {
+        user_id: userId,
+        message: message
+    };
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error('Failed to send chat message');
+    return res.json();
+}

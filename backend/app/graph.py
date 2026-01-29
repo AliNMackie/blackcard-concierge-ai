@@ -12,7 +12,7 @@ from vertexai.generative_models import GenerativeModel
 # Internal Imports
 from app.schema import WearableEvent, VisionEvent, AgentResponse
 from rag.retriever import retriever
-from app.vision_interface import describe_gym_equipment
+from app.vision_interface import describe_gym_equipment, analyze_form
 from app.config import settings, logger
 
 # Helper: Vertex Client Abstraction
@@ -135,7 +135,32 @@ def vision_node(state: AgentState) -> dict:
     logger.info("Vision Agent: Analysis started")
     data = state['vision_data']
     
-    # Analyze image if provided
+    # 1. Video Analysis Path
+    if data.video_base64:
+        try:
+            video_bytes = base64.b64decode(data.video_base64)
+            logger.info(f"Vision Agent: Processing {len(video_bytes)} video bytes")
+            
+            feedback = analyze_form(video_bytes)
+            
+            return {
+                "final_response": AgentResponse(
+                    agent_name="Vision Coach",
+                    message=feedback,
+                    suggested_action="FORM_CHECK_COMPLETE"
+                )
+            }
+        except Exception as e:
+            logger.error(f"Video Processing Error: {e}")
+            return {
+                 "final_response": AgentResponse(
+                    agent_name="Vision Coach",
+                    message="Failed to process video. Please try again.",
+                    suggested_action="ERROR"
+                )
+            }
+
+    # 2. Image Analysis Path
     detected = data.detected_equipment
     
     # Decode image from base64 if provided

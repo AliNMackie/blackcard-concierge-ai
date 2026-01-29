@@ -70,3 +70,35 @@ def describe_gym_equipment(image_bytes: Optional[bytes]) -> GymEquipmentDescript
         logger.error(f"Gemini Vision Error: {e}")
         # Fallback to avoid breaking flow
         return GymEquipmentDescription(detected_equipment=["Unavailable - Vision Error"], confidence_score=0.0)
+
+def analyze_form(video_bytes: bytes) -> str:
+    """
+    Analyzes a video clip of an exercise and provides form feedback.
+    """
+    if not settings.is_production() and not settings.PROJECT_ID:
+        return "MOCK: Your squat depth looks good, but keep your chest up. (Dev Mode)"
+
+    try:
+        # Initialize Vertex AI
+        vertexai.init(project=settings.PROJECT_ID, location=settings.GCP_REGION)
+        model = GenerativeModel(settings.GEMINI_MODEL_ID)
+
+        # Create Video Part (Gemini 1.5/2.0 supports inline data for small clips)
+        video_part = Part.from_data(data=video_bytes, mime_type="video/mp4")
+        
+        prompt = """
+        You are an elite Strength & Conditioning Coach.
+        Analyze this video clip of a client performing an exercise.
+        Identify the exercise.
+        Critique their form (Technique, Stability, Tempo).
+        Provide 1-2 actionable cues to improve.
+        Be encouraging but technical.
+        """
+
+        response = model.generate_content([video_part, prompt])
+        logger.info("Video Analysis Success")
+        return response.text
+
+    except Exception as e:
+        logger.error(f"Gemini Video Error: {e}")
+        return "I couldn't analyze the video properly. Please try again with better lighting or a clearer angle."
