@@ -138,14 +138,21 @@ def vision_node(state: AgentState) -> dict:
     # Analyze image if provided
     detected = data.detected_equipment
     
-    # If no structured data is provided, but we have an image URL (or placeholder bytes in real app)
-    # We call the vision interface
-    if not detected and data.image_url:
+    # Decode image from base64 if provided
+    image_bytes = None
+    if data.image_base64:
+        try:
+            image_bytes = base64.b64decode(data.image_base64)
+            logger.info(f"Vision Agent: Decoded {len(image_bytes)} bytes from base64")
+        except Exception as e:
+            logger.error(f"Base64 Decode Error: {e}")
+
+    # If no structured data is provided, but we have image bytes
+    if not detected and image_bytes:
         logger.info("Vision Agent: Delegating to Vision Interface")
-        # NOTE: In a real scenario, we would download bytes from image_url or use a helper
-        # passing b"placeholder" for now to exercise the mock
-        analysis = describe_gym_equipment(b"placeholder_bytes") 
+        analysis = describe_gym_equipment(image_bytes) 
         detected = analysis['detected_equipment']
+        logger.info(f"Vision Agent: Detected {detected}")
 
     equip_list = ", ".join(detected) if detected else "Bodyweight only"
     user_q = data.user_query or "Build a workout"

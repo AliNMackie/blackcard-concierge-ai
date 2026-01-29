@@ -8,6 +8,7 @@ class WearableEvent(BaseModel):
 
 class VisionEvent(BaseModel):
     image_url: Optional[str] = None
+    image_base64: Optional[str] = None # Support for direct uploads
     detected_equipment: List[str] = []
     user_query: Optional[str] = None
 
