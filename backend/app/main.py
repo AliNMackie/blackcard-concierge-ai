@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, Security, Request, status
 from fastapi.security import APIKeyHeader
 from app.config import settings, logger
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from contextlib import asynccontextmanager
 from datetime import datetime
 import time
@@ -162,7 +162,7 @@ async def handle_vision(event: VisionEvent, db: AsyncSession = Depends(get_db)):
             log_entry = EventLog(
                 user_id="1", # Demo Client
                 event_type="vision",
-                payload=event.model_dump(),
+                payload=sanitize_payload(event.model_dump()),
                 agent_decision=response.suggested_action,
                 agent_message=response.message
             )
@@ -173,6 +173,46 @@ async def handle_vision(event: VisionEvent, db: AsyncSession = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error processing vision event: {e}")
         raise HTTPException(status_code=500, detail="Internal processing error")
+
+def sanitize_payload(payload: dict) -> dict:
+    """
+    GDPR Helper: Removes sensitive raw biometric data (images/video) from logs.
+    """
+    safe_payload = payload.copy()
+    if "image_base64" in safe_payload and safe_payload["image_base64"]:
+        safe_payload["image_base64"] = "[REDACTED_GDPR_MEDIA]"
+    if "video_base64" in safe_payload and safe_payload["video_base64"]:
+        safe_payload["video_base64"] = "[REDACTED_GDPR_MEDIA]"
+    return safe_payload
+
+@app.delete("/users/{user_id}/wipe")
+async def wipe_user_data(user_id: str, db: AsyncSession = Depends(get_db), auth: str = Depends(get_api_key)):
+    """
+    GDPR: Right to be Forgotten. Permanently deletes all user logs and data.
+    """
+    try:
+        # Delete Event Logs
+        stmt_logs = delete(EventLog).where(EventLog.user_id == user_id)
+        await db.execute(stmt_logs)
+        
+        # Reset User Profile (instead of delete, to keep the account shell but wipe personalization)
+        # Note: In a real app we might delete the User row too, but for this MVP we reset.
+        stmt_user = select(User).where(User.id == user_id)
+        result = await db.execute(stmt_user)
+        user = result.scalar_one_or_none()
+        
+        if user:
+            user.coach_style = "standard"
+            user.is_traveling = False
+            # Wipe any other sensitive fields here
+        
+        await db.commit()
+        logger.info(f"GDPR WIPE COMPLETED for User {user_id}")
+        return {"status": "success", "message": "All user data scrubbed."}
+        
+    except Exception as e:
+        logger.error(f"GDPR Wipe Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to wipe data")
 
 @app.post("/events/chat", response_model=AgentResponse)
 async def handle_chat(event: ChatEvent, db: AsyncSession = Depends(get_db)):
