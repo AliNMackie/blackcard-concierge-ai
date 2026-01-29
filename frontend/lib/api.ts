@@ -97,3 +97,26 @@ export async function triggerOverride(userId: string, action: string) {
     });
     return res.json();
 }
+
+export async function adminUpdateUser(userId: string, data: { coach_style?: string, is_traveling?: boolean }) {
+    const url = `${API_BASE}/admin/users/${userId}`;
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+    };
+    if (process.env.NEXT_PUBLIC_API_KEY) {
+        headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
+    }
+
+    const res = await fetch(url, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify(data)
+    });
+
+    if (!res.ok) {
+        const error = await res.json().catch(() => ({ detail: 'Failed to update user' }));
+        throw new Error(error.detail || 'Failed to update user');
+    }
+
+    return res.json();
+}
