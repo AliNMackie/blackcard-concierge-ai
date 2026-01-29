@@ -6,6 +6,7 @@ import { fetchEvents, EventLog, toggleTravel, fetchTravelStatus } from '@/lib/ap
 import { Activity, Heart, Camera, MessageSquare, Plane, Users, Trophy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
+import VoiceInput from '@/components/voice/VoiceInput'; // Import Voice Component
 
 export default function ClientDashboard() {
     const [events, setEvents] = useState<EventLog[]>([]);
@@ -145,12 +146,18 @@ export default function ClientDashboard() {
             </div>
 
             {/* Tab Bar Placeholder */}
-            <div className="fixed bottom-0 left-0 right-0 border-t border-gray-900 bg-black/90 backdrop-blur pb-6 pt-4 flex justify-around text-gray-500 max-w-md mx-auto">
+            <div className="fixed bottom-0 left-0 right-0 border-t border-gray-900 bg-black/90 backdrop-blur pb-6 pt-4 flex justify-around text-gray-500 max-w-md mx-auto z-40">
                 <Link href="/dashboard"><Activity size={24} className="text-white" /></Link>
                 <Link href="/personas"><Users size={24} className="hover:text-white transition" /></Link>
                 <Link href="/performance"><Trophy size={24} className="hover:text-white transition" /></Link>
                 <Link href="/messages"><MessageSquare size={24} className="hover:text-white transition" /></Link>
             </div>
+
+            {/* Voice Assistant Overlay */}
+            <VoiceInput
+                onMessageSent={() => loadData()} // Refresh feed when user speaks
+                onResponseReceived={() => loadData()} // Refresh feed when AI replies (to show in feed)
+            />
 
         </div>
     );
