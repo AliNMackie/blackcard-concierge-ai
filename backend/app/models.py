@@ -25,8 +25,7 @@ class EventLog(Base):
     agent_decision: Mapped[Optional[str]] = mapped_column(String, nullable=True) # "RED", "WORKOUT_GENERATED"
     agent_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-
+    
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 class Exercise(Base):
