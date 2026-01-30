@@ -4,6 +4,7 @@ from typing import TypedDict, Annotated, List, Union
 
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import BaseMessage
+import base64
 
 # Vertex AI imports
 import vertexai

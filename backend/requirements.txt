@@ -12,6 +12,7 @@ httpx
 PyYAML==6.0.1
 langchain
 langchain-core
+google-cloud-aiplatform
 langchain-google-vertexai
 langgraph
 numpy<2

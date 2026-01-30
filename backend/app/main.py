@@ -12,7 +12,7 @@ from app.webhooks import router as webhook_router
 from app.workouts import router as workout_router
 from app.database import get_db, init_connection_pool, create_tables
 from app.models import User, EventLog
-from app.schema import AgentResponse, WearableEvent, VisionEvent, ChatEvent
+from app.schema import AgentResponse, WearableEvent, VisionEvent, ChatEvent, UserUpdate
 # AI Graph
 from app.graph import app_graph
 
@@ -270,7 +270,7 @@ async def toggle_travel(db: AsyncSession = Depends(get_db)):
 
 
 @app.patch("/users/me")
-async def update_user_profile(update_data: app.schema.UserUpdate, db: AsyncSession = Depends(get_db)):
+async def update_user_profile(update_data: UserUpdate, db: AsyncSession = Depends(get_db)):
     """
     Updates the Demo Client (User 1) profile settings, including Persona.
     """
@@ -299,7 +299,7 @@ async def update_user_profile(update_data: app.schema.UserUpdate, db: AsyncSessi
     }
 
 @app.patch("/admin/users/{user_id}")
-async def admin_update_user(user_id: str, update_data: app.schema.UserUpdate, db: AsyncSession = Depends(get_db), auth: str = Depends(get_api_key)):
+async def admin_update_user(user_id: str, update_data: UserUpdate, db: AsyncSession = Depends(get_db), auth: str = Depends(get_api_key)):
     """
     God Mode: Force update a client's profile (Persona/Travel Status).
     """
