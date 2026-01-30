@@ -51,7 +51,9 @@ async def get_demo_workout(client_id: str, db: AsyncSession = Depends(get_db)):
         # Fallback for demo if seed hasn't run or using different ID
         user_name = "Client" 
     else:
-        user_name = user.profile_data.get("name", "Client")
+        # Null-safe access to profile_data
+        profile = user.profile_data or {}
+        user_name = profile.get("name", "Client")
 
     # 2. Construct Demo Workout Logic
     # We'll just return a hardcoded structure similar to the seed data for MVP
