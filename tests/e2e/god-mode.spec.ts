@@ -6,7 +6,7 @@ test.describe('Trainer God Mode', () => {
         await page.goto('/god-mode');
 
         // Check Header/Title
-        await expect(page.getByText(/Live Client Monitoring/i)).toBeVisible();
+        await expect(page.getByText(/GOD MODE/i)).toBeVisible();
 
         // Check for the events table/list
         // We expect some rows or at least the container.

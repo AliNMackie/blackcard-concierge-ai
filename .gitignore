@@ -42,3 +42,8 @@ Thumbs.db
 # Build artifacts
 *.exe
 local_dev.db
+
+# Playwright
+test-results/
+playwright-report/
+test_output.txt
