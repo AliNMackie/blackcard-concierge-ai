@@ -221,7 +221,7 @@ export default function PerformancePage() {
                                 <YAxis stroke="#666" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `${Math.round(val / 60)}m`} domain={['dataMin', 'dataMax']} />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', fontSize: '12px' }}
-                                    formatter={(value: any, name: string) => {
+                                    formatter={(value: any, name: string | undefined) => {
                                         // A bit hacky to find the original string, but for visual demo:
                                         if (value > 2000) return [(value / 60).toFixed(1) + ' min', name];
                                         return [value, name];
