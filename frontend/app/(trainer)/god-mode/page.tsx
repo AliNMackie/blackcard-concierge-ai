@@ -89,12 +89,20 @@ export default function GodModePage() {
                         </div>
                     </div>
                 </div>
-                <button
-                    onClick={loadData}
-                    className="flex items-center gap-2 bg-white text-black px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition rounded-sm"
-                >
-                    <RefreshCw size={16} /> Refresh Stream
-                </button>
+                <div className="flex items-center gap-3">
+                    <a
+                        href="/personas"
+                        className="flex items-center gap-2 bg-zinc-800 text-white px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-zinc-700 transition rounded-sm border border-zinc-700"
+                    >
+                        <UserCog size={16} /> View Personas
+                    </a>
+                    <button
+                        onClick={loadData}
+                        className="flex items-center gap-2 bg-white text-black px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition rounded-sm"
+                    >
+                        <RefreshCw size={16} /> Refresh Stream
+                    </button>
+                </div>
             </header>
 
             {error === 'AUTH' ? (
