@@ -25,3 +25,17 @@ class AgentResponse(BaseModel):
 class UserUpdate(BaseModel):
     coach_style: Optional[str] = None
     is_traveling: Optional[bool] = None
+
+class MetricCreate(BaseModel):
+    category: str # "strength", "engine", "body"
+    name: str # e.g. "squat"
+    value: float
+    unit: str
+    timestamp: Optional[datetime] = None
+    notes: Optional[str] = None
+
+class MetricResponse(MetricCreate):
+    id: str
+    user_id: str
+    logged_by: str
+    timestamp: datetime

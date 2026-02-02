@@ -11,6 +11,7 @@ import os
 from app.webhooks import router as webhook_router
 from app.workouts import router as workout_router
 from app.users import router as users_router, get_trainer_client_ids
+from app.analytics import router as analytics_router
 from app.database import get_db, init_connection_pool, create_tables
 from app.models import User, EventLog
 from app.schema import AgentResponse, WearableEvent, VisionEvent, ChatEvent, UserUpdate
@@ -60,6 +61,7 @@ app = FastAPI(title=settings.APP_NAME, version=settings.VERSION, lifespan=lifesp
 app.include_router(webhook_router)
 app.include_router(workout_router)
 app.include_router(users_router)
+app.include_router(analytics_router)
 
 # Enable CORS for local/pwa development
 app.add_middleware(

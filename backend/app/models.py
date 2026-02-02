@@ -59,3 +59,16 @@ class WorkoutTemplate(Base):
     coach_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=True) # Coach who created it
     
     blocks: Mapped[dict] = mapped_column(JSON, default={}) # The actual workout logic
+
+class PerformanceMetric(Base):
+    __tablename__ = "performance_metrics"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, index=True)
+    category: Mapped[str] = mapped_column(String) # "strength", "engine", "body"
+    name: Mapped[str] = mapped_column(String) # "squat", "bench", "weight", "10k"
+    value: Mapped[float] = mapped_column()
+    unit: Mapped[str] = mapped_column(String) # "kg", "sec", "%"
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    logged_by: Mapped[str] = mapped_column(String) # uid of person who logged it
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
