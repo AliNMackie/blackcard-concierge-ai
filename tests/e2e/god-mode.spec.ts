@@ -11,7 +11,7 @@ test.describe('Trainer God Mode', () => {
         // Check for the events table/list
         // We expect some rows or at least the container.
         // Assuming there's a refresh button we can click
-        const refreshButton = page.getByRole('button', { name: /Refresh Data/i });
+        const refreshButton = page.getByRole('button', { name: /Refresh Stream/i });
         await expect(refreshButton).toBeVisible();
         await refreshButton.click();
 
