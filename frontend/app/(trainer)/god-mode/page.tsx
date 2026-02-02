@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { fetchEvents, EventLog, triggerIntervention, adminUpdateUser } from '@/lib/api';
-import { Activity, Zap, CheckCircle, AlertTriangle, UserCog, RefreshCw } from 'lucide-react';
+import { fetchEvents, EventLog, triggerIntervention, adminUpdateUser, sendTrainerMessage } from '@/lib/api';
+import { Activity, Zap, CheckCircle, AlertTriangle, UserCog, RefreshCw, MessageSquare, Send, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -17,7 +17,13 @@ export default function GodModePage() {
     const [events, setEvents] = useState<EventLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [activePersona, setActivePersona] = useState<string>("hyrox_competitor"); // Default state for demo
+    const [activePersona, setActivePersona] = useState<string>("hyrox_competitor");
+
+    // Messaging state
+    const [messageModalOpen, setMessageModalOpen] = useState(false);
+    const [messageClientId, setMessageClientId] = useState<string | null>(null);
+    const [messageText, setMessageText] = useState("");
+    const [sendingMessage, setSendingMessage] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -29,7 +35,6 @@ export default function GodModePage() {
         try {
             const data = await fetchEvents();
             setEvents(data);
-            // In a real app, we'd fetch all users. For MVP, we assume User "1" is the main demo.
         } catch (err: any) {
             if (err.message === 'AUTH_ERROR') {
                 setError('AUTH');
@@ -41,7 +46,6 @@ export default function GodModePage() {
     }
 
     async function handlePersonaChange(newStyle: string) {
-        // Optimistic UI update
         setActivePersona(newStyle);
         try {
             await adminUpdateUser("1", { coach_style: newStyle });
@@ -60,6 +64,28 @@ export default function GodModePage() {
             alert("Ghostwriter failed to engage. Check logs.");
         }
         setLoading(false);
+    }
+
+    function openMessageModal(clientId: string) {
+        setMessageClientId(clientId);
+        setMessageText("");
+        setMessageModalOpen(true);
+    }
+
+    async function handleSendMessage() {
+        if (!messageClientId || !messageText.trim()) return;
+
+        setSendingMessage(true);
+        try {
+            await sendTrainerMessage(messageClientId, messageText.trim());
+            setMessageModalOpen(false);
+            setMessageText("");
+            await loadData(); // Refresh to show new message in stream
+            alert("Message sent!");
+        } catch (err: any) {
+            alert(`Failed to send: ${err.message}`);
+        }
+        setSendingMessage(false);
     }
 
     return (
@@ -159,7 +185,14 @@ export default function GodModePage() {
                                         <td className="py-4 text-sm text-gray-400 max-w-xs truncate">
                                             {event.agent_message}
                                         </td>
-                                        <td className="py-4 pr-6 text-right">
+                                        <td className="py-4 pr-6 text-right space-x-2">
+                                            <button
+                                                onClick={() => openMessageModal(event.user_id)}
+                                                className="bg-green-600/10 text-green-400 border border-green-600/20 px-3 py-1 rounded text-[10px] font-black uppercase tracking-tighter hover:bg-green-600 hover:text-white transition"
+                                            >
+                                                <MessageSquare size={12} className="inline mr-1" />
+                                                Message
+                                            </button>
                                             <button
                                                 onClick={() => handleIntervention(event.user_id)}
                                                 className="bg-blue-600/10 text-blue-400 border border-blue-600/20 px-3 py-1 rounded text-[10px] font-black uppercase tracking-tighter hover:bg-blue-600 hover:text-white transition"
@@ -206,18 +239,68 @@ export default function GodModePage() {
                                     <div className="text-[10px] text-zinc-600 font-mono">
                                         ID: {event.user_id}
                                     </div>
-                                    <button
-                                        onClick={() => handleIntervention(event.user_id)}
-                                        className="flex items-center gap-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 hover:text-white transition border border-blue-500/20"
-                                    >
-                                        <Zap size={12} /> Trigger Intervention
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => openMessageModal(event.user_id)}
+                                            className="flex items-center gap-2 bg-green-500/10 text-green-400 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-green-500 hover:text-white transition border border-green-500/20"
+                                        >
+                                            <MessageSquare size={12} /> Message
+                                        </button>
+                                        <button
+                                            onClick={() => handleIntervention(event.user_id)}
+                                            className="flex items-center gap-2 bg-blue-500/10 text-blue-400 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 hover:text-white transition border border-blue-500/20"
+                                        >
+                                            <Zap size={12} /> Intervene
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Decor */}
                                 {event.agent_decision === "RED" && <div className="absolute right-0 top-0 w-20 h-20 bg-red-500/10 blur-2xl pointer-events-none" />}
                             </div>
                         ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Message Modal */}
+            {messageModalOpen && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-lg p-6 relative">
+                        <button
+                            onClick={() => setMessageModalOpen(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <h2 className="text-xl font-bold text-white mb-2">Send Message</h2>
+                        <p className="text-gray-400 text-sm mb-4">To client: <span className="text-blue-400 font-mono">{messageClientId}</span></p>
+
+                        <textarea
+                            value={messageText}
+                            onChange={(e) => setMessageText(e.target.value)}
+                            placeholder="Type your message to the client..."
+                            className="w-full h-32 bg-black border border-zinc-700 rounded-lg p-4 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 resize-none"
+                            autoFocus
+                        />
+
+                        <div className="flex justify-end gap-3 mt-4">
+                            <button
+                                onClick={() => setMessageModalOpen(false)}
+                                className="px-4 py-2 text-gray-400 hover:text-white transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSendMessage}
+                                disabled={sendingMessage || !messageText.trim()}
+                                className="flex items-center gap-2 bg-green-600 text-white px-6 py-2 rounded-lg font-bold uppercase text-sm tracking-wider hover:bg-green-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Send size={16} />
+                                {sendingMessage ? 'Sending...' : 'Send'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

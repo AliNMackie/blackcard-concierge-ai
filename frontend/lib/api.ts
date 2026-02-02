@@ -206,3 +206,34 @@ export async function sendChatMessage(userId: string, message: string) {
     if (!res.ok) throw new Error('Failed to send chat message');
     return res.json();
 }
+
+// Trainer -> Client Direct Messaging
+export async function sendTrainerMessage(clientId: string, message: string, sendWhatsApp = false) {
+    const url = `${API_BASE}/users/clients/${clientId}/message`;
+    const authHeaders = await getAuthHeaders();
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            ...authHeaders,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message, send_whatsapp: sendWhatsApp })
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Failed to send message' }));
+        throw new Error(err.detail);
+    }
+    return res.json();
+}
+
+// Get messages for a specific client
+export async function getClientMessages(clientId: string, limit = 20) {
+    const url = `${API_BASE}/users/clients/${clientId}/messages?limit=${limit}`;
+    const headers = await getAuthHeaders();
+
+    const res = await fetch(url, { headers });
+    if (!res.ok) throw new Error('Failed to fetch messages');
+    return res.json();
+}

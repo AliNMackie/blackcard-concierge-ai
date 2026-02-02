@@ -180,6 +180,107 @@ async def update_user_role(
     return {"status": "ok", "old_role": old_role, "new_role": role}
 
 
+# --- Trainer Messaging ---
+
+class TrainerMessage(BaseModel):
+    message: str
+    send_whatsapp: bool = False  # Optionally send via WhatsApp
+
+
+@router.post("/clients/{client_id}/message")
+async def send_message_to_client(
+    client_id: str,
+    msg: TrainerMessage,
+    db: AsyncSession = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_trainer)
+):
+    """
+    Send a message from trainer to client.
+    Message is logged to event_logs and optionally sent via WhatsApp.
+    """
+    from app.models import EventLog
+    
+    # Verify client exists and belongs to this trainer
+    stmt = select(User).where(User.id == client_id)
+    result = await db.execute(stmt)
+    client = result.scalar_one_or_none()
+    
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    # Check ownership (admin can message anyone)
+    if not current_user.is_admin and client.trainer_id != current_user.uid:
+        raise HTTPException(status_code=403, detail="Not your client")
+    
+    # Log message as event
+    log_entry = EventLog(
+        user_id=client_id,
+        event_type="trainer_message",
+        payload={
+            "from_trainer": current_user.uid,
+            "trainer_email": current_user.email,
+            "message": msg.message
+        },
+        agent_decision="TRAINER_DIRECT",
+        agent_message=msg.message
+    )
+    db.add(log_entry)
+    await db.commit()
+    
+    # Optionally send via WhatsApp
+    whatsapp_sid = None
+    if msg.send_whatsapp and client.id.startswith("whatsapp:"):
+        try:
+            from app.messaging import send_whatsapp
+            whatsapp_sid = send_whatsapp(to=client.id, body=msg.message)
+            logger.info(f"Trainer message sent via WhatsApp: {whatsapp_sid}")
+        except Exception as e:
+            logger.error(f"WhatsApp send failed: {e}")
+    
+    logger.info(f"Trainer {current_user.uid} messaged client {client_id}")
+    
+    return {
+        "status": "ok",
+        "message_id": log_entry.id if hasattr(log_entry, 'id') else None,
+        "whatsapp_sid": whatsapp_sid
+    }
+
+
+@router.get("/clients/{client_id}/messages")
+async def get_client_messages(
+    client_id: str,
+    limit: int = 20,
+    db: AsyncSession = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_trainer)
+):
+    """
+    Get recent messages for a client (both trainer messages and client chats).
+    """
+    from app.models import EventLog
+    
+    # Verify access
+    stmt = select(User).where(User.id == client_id)
+    result = await db.execute(stmt)
+    client = result.scalar_one_or_none()
+    
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    if not current_user.is_admin and client.trainer_id != current_user.uid:
+        raise HTTPException(status_code=403, detail="Not your client")
+    
+    # Get chat and trainer_message events
+    stmt = select(EventLog).where(
+        (EventLog.user_id == client_id) & 
+        (EventLog.event_type.in_(["chat", "trainer_message"]))
+    ).order_by(EventLog.created_at.desc()).limit(limit)
+    
+    result = await db.execute(stmt)
+    messages = result.scalars().all()
+    
+    return messages
+
+
 async def get_trainer_client_ids(db: AsyncSession, trainer_id: str) -> List[str]:
     """Helper: Get list of client IDs for a trainer."""
     stmt = select(User.id).where(User.trainer_id == trainer_id)
