@@ -11,6 +11,7 @@ from app.database import get_db
 from app.models import User
 from app.auth import get_current_user, AuthenticatedUser, require_trainer, require_admin
 from app.config import logger
+from app.schema import UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -206,10 +207,16 @@ async def send_message_to_client(
     client = result.scalar_one_or_none()
     
     if not client:
-        raise HTTPException(status_code=404, detail="Client not found")
+        if client_id == "1":
+            client = User(id="1", role="client")
+            db.add(client)
+            await db.commit()
+            await db.refresh(client)
+        else:
+            raise HTTPException(status_code=404, detail="Client not found")
     
     # Check ownership (admin can message anyone)
-    if not current_user.is_admin and client.trainer_id != current_user.uid:
+    if not current_user.is_admin and client.trainer_id and client.trainer_id != current_user.uid:
         raise HTTPException(status_code=403, detail="Not your client")
     
     # Log message as event
@@ -279,6 +286,76 @@ async def get_client_messages(
     messages = result.scalars().all()
     
     return messages
+
+
+@router.get("/me/travel-status")
+async def get_travel_status(db: AsyncSession = Depends(get_db)):
+    """
+    Reads the travel status for User 1 (Demo Client).
+    """
+    stmt = select(User).where(User.id == "1")
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        # Auto-create User 1 if missing for MVP/Demo
+        user = User(id="1", role="client")
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        
+    return {"is_traveling": user.is_traveling}
+
+
+@router.post("/me/toggle-travel")
+async def toggle_travel(db: AsyncSession = Depends(get_db)):
+    """
+    Toggles the travel mode for User 1 (Demo Client).
+    """
+    stmt = select(User).where(User.id == "1")
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        user = User(id="1", role="client", is_traveling=True)
+        db.add(user)
+        await db.commit()
+    else:
+        user.is_traveling = not user.is_traveling
+        await db.commit()
+        
+    return {"is_traveling": user.is_traveling}
+
+
+@router.patch("/me")
+async def update_user_profile(update_data: UserUpdate, db: AsyncSession = Depends(get_db)):
+    """
+    Updates the Demo Client (User 1) profile settings, including Persona.
+    """
+    stmt = select(User).where(User.id == "1")
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        user = User(id="1", role="client")
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        
+    if update_data.is_traveling is not None:
+        user.is_traveling = update_data.is_traveling
+        
+    if update_data.coach_style is not None:
+        user.coach_style = update_data.coach_style
+        
+    await db.commit()
+    await db.refresh(user)
+    
+    return {
+        "status": "updated",
+        "coach_style": user.coach_style, 
+        "is_traveling": user.is_traveling
+    }
 
 
 async def get_trainer_client_ids(db: AsyncSession, trainer_id: str) -> List[str]:

@@ -178,6 +178,12 @@ async def handle_vision(event: VisionEvent, db: AsyncSession = Depends(get_db)):
                 agent_decision=response.suggested_action,
                 agent_message=response.message
             )
+            # Ensure User 1 exists for vision logging too
+            stmt = select(User).where(User.id == "1")
+            res = await db.execute(stmt)
+            if not res.scalar_one_or_none():
+                db.add(User(id="1", role="client"))
+
             db.add(log_entry)
             await db.commit()
 
@@ -262,90 +268,6 @@ async def handle_chat(event: ChatEvent, db: AsyncSession = Depends(get_db)):
         logger.error(f"Error processing chat event: {e}")
         raise HTTPException(status_code=500, detail="Internal processing error")
 
-@app.get("/users/me/travel-status")
-async def get_travel_status(db: AsyncSession = Depends(get_db)):
-    """
-    Reads the travel status for User 1 (Demo Client).
-    """
-    stmt = select(User).where(User.id == "1")
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    return {"is_traveling": user.is_traveling}
-
-
-@app.post("/users/me/toggle-travel")
-async def toggle_travel(db: AsyncSession = Depends(get_db)):
-    """
-    Toggles the travel mode for User 1 (Demo Client).
-    """
-    stmt = select(User).where(User.id == "1")
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    user.is_traveling = not user.is_traveling
-    await db.commit()
-    return {"is_traveling": user.is_traveling}
-
-
-
-@app.patch("/users/me")
-async def update_user_profile(update_data: UserUpdate, db: AsyncSession = Depends(get_db)):
-    """
-    Updates the Demo Client (User 1) profile settings, including Persona.
-    """
-    from app import schema # delayed import to avoid circular if any
-    
-    stmt = select(User).where(User.id == "1")
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    if update_data.is_traveling is not None:
-        user.is_traveling = update_data.is_traveling
-        
-    if update_data.coach_style is not None:
-        user.coach_style = update_data.coach_style
-        
-    await db.commit()
-    await db.refresh(user)
-    
-    return {
-        "status": "updated",
-        "coach_style": user.coach_style, 
-        "is_traveling": user.is_traveling
-    }
-
-@app.patch("/admin/users/{user_id}")
-async def admin_update_user(user_id: str, update_data: UserUpdate, db: AsyncSession = Depends(get_db), auth: str = Depends(get_api_key)):
-    """
-    God Mode: Force update a client's profile (Persona/Travel Status).
-    """
-    stmt = select(User).where(User.id == user_id)
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    if update_data.coach_style is not None:
-        user.coach_style = update_data.coach_style
-        logger.info(f"GOD MODE: Updated User {user_id} persona to {user.coach_style}")
-        
-    if update_data.is_traveling is not None:
-        user.is_traveling = update_data.is_traveling
-
-    await db.commit()
-    await db.refresh(user)
-    
     return user
 
 @app.post("/events/intervention/{client_id}")
