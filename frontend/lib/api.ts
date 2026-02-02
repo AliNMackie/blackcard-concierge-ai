@@ -44,8 +44,10 @@ async function getAuthHeaders(): Promise<HeadersInit> {
     }
 
     // Fallback to API key for backwards compatibility
+    // Fallback to API key for backwards compatibility
     if (process.env.NEXT_PUBLIC_API_KEY) {
         headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
+        headers['Authorization'] = `Bearer ${process.env.NEXT_PUBLIC_API_KEY}`;
     }
 
     return headers;

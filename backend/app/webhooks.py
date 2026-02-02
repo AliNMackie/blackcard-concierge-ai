@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.models import EventLog
+from app.models import EventLog, User
 from app.schema import ChatEvent, WearableEvent, AgentResponse
 from app.graph import app_graph
 from langchain_core.messages import HumanMessage
@@ -41,6 +42,18 @@ async def whatsapp_webhook(payload: WhatsAppPayload, db: AsyncSession = Depends(
         user_id=payload.From,
         message=payload.Body
     )
+    
+    # 0. Ensure User Exists (Auto-create)
+    # This is critical for new WhatsApp users AND E2E testing seeding
+    if db:
+        stmt = select(User).where(User.id == payload.From)
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
+        if not user:
+            user = User(id=payload.From, role="client")
+            db.add(user)
+            await db.commit()
+            logger.info(f"Auto-created new WhatsApp user: {payload.From}")
 
     # 2. Invoke Agent (Concierge)
     state = {

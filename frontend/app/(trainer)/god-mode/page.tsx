@@ -24,6 +24,7 @@ export default function GodModePage() {
     const [messageClientId, setMessageClientId] = useState<string | null>(null);
     const [messageText, setMessageText] = useState("");
     const [sendingMessage, setSendingMessage] = useState(false);
+    const [messageError, setMessageError] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
@@ -69,6 +70,7 @@ export default function GodModePage() {
     function openMessageModal(clientId: string) {
         setMessageClientId(clientId);
         setMessageText("");
+        setMessageError(null);
         setMessageModalOpen(true);
     }
 
@@ -76,14 +78,14 @@ export default function GodModePage() {
         if (!messageClientId || !messageText.trim()) return;
 
         setSendingMessage(true);
+        setMessageError(null);
         try {
             await sendTrainerMessage(messageClientId, messageText.trim());
             setMessageModalOpen(false);
             setMessageText("");
             await loadData(); // Refresh to show new message in stream
-            alert("Message sent!");
         } catch (err: any) {
-            alert(`Failed to send: ${err.message}`);
+            setMessageError(err.message || 'Failed to send message');
         }
         setSendingMessage(false);
     }
@@ -276,6 +278,12 @@ export default function GodModePage() {
 
                         <h2 className="text-xl font-bold text-white mb-2">Send Message</h2>
                         <p className="text-gray-400 text-sm mb-4">To client: <span className="text-blue-400 font-mono">{messageClientId}</span></p>
+
+                        {messageError && (
+                            <div className="bg-red-900/30 border border-red-900 text-red-400 p-3 rounded mb-4 text-xs font-mono">
+                                ERROR: {messageError}
+                            </div>
+                        )}
 
                         <textarea
                             value={messageText}

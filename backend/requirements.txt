@@ -8,6 +8,7 @@ google-cloud-secret-manager
 cloud-sql-python-connector
 sqlalchemy
 asyncpg
+aiosqlite
 httpx
 PyYAML==6.0.1
 langchain
@@ -15,7 +16,7 @@ langchain-core
 google-cloud-aiplatform
 langchain-google-vertexai
 langgraph
-numpy<2
+numpy
 pytest
 pytest-asyncio
 firebase-admin
