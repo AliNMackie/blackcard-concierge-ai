@@ -1,0 +1,10 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'europe-west2-docker.pkg.dev/blackcard-concierge-ai/elite-concierge-repo/migrate:auth-v2', '-f', 'Dockerfile.migrate', '.']
+
+images:
+  - 'europe-west2-docker.pkg.dev/blackcard-concierge-ai/elite-concierge-repo/migrate:auth-v2'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
