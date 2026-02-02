@@ -156,7 +156,7 @@ export default function PerformancePage() {
                         </div>
                     </div>
                     <div className="h-64 w-full bg-zinc-900/30 rounded-2xl p-4 border border-zinc-800/50 relative">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
                             <LineChart data={STRENGTH_DATA}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                                 <XAxis dataKey="date" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
@@ -185,7 +185,7 @@ export default function PerformancePage() {
                         <p className="text-xs text-zinc-500">Weight (kg) vs Body Fat (%)</p>
                     </div>
                     <div className="h-64 w-full bg-zinc-900/30 rounded-2xl p-4 border border-zinc-800/50 relative">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
                             <LineChart data={BODY_DATA}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                                 <XAxis dataKey="date" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
@@ -214,7 +214,7 @@ export default function PerformancePage() {
                         <p className="text-xs text-zinc-500">Race Pace Progression</p>
                     </div>
                     <div className="h-64 w-full bg-zinc-900/30 rounded-2xl p-4 border border-zinc-800/50">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
                             <LineChart data={BENCHMARK_DATA}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                                 <XAxis dataKey="date" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
@@ -245,7 +245,7 @@ export default function PerformancePage() {
                         <p className="text-xs text-zinc-500">Avg Pace (min/km) vs Time</p>
                     </div>
                     <div className="h-48 w-full bg-zinc-900/30 rounded-2xl p-4 border border-zinc-800/50">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" aspect={2}>
                             <AreaChart data={ENGINE_DATA}>
                                 <defs>
                                     <linearGradient id="colorRun" x1="0" y1="0" x2="0" y2="1">
@@ -274,7 +274,7 @@ export default function PerformancePage() {
                         <p className="text-xs text-zinc-500">Recovery Score (Line) vs Training Volume (Bar)</p>
                     </div>
                     <div className="h-48 w-full bg-zinc-900/30 rounded-2xl p-4 border border-zinc-800/50">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" aspect={2}>
                             <BarChart data={READINESS_DATA}>
                                 <XAxis dataKey="day" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
                                 <Tooltip
