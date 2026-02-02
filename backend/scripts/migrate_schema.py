@@ -44,8 +44,65 @@ async def migrate():
             print("✓ Added is_traveling column to users table")
         except Exception as e:
             print(f"  is_traveling: {e}")
+        
+        # === NEW: Authentication fields ===
+        
+        # Add email column for user authentication
+        try:
+            await conn.execute(text("""
+                ALTER TABLE users 
+                ADD COLUMN IF NOT EXISTS email VARCHAR UNIQUE;
+            """))
+            print("✓ Added email column to users table")
+        except Exception as e:
+            print(f"  email: {e}")
+        
+        # Add role column for role-based access control
+        try:
+            await conn.execute(text("""
+                ALTER TABLE users 
+                ADD COLUMN IF NOT EXISTS role VARCHAR DEFAULT 'client';
+            """))
+            print("✓ Added role column to users table")
+        except Exception as e:
+            print(f"  role: {e}")
+        
+        # Add trainer_id column for trainer-client linking
+        try:
+            await conn.execute(text("""
+                ALTER TABLE users 
+                ADD COLUMN IF NOT EXISTS trainer_id VARCHAR REFERENCES users(id);
+            """))
+            print("✓ Added trainer_id column to users table")
+        except Exception as e:
+            print(f"  trainer_id: {e}")
+        
+        # Create indexes for efficient lookups
+        try:
+            await conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+            """))
+            await conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_users_trainer ON users(trainer_id);
+            """))
+            await conn.execute(text("""
+                CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+            """))
+            print("✓ Created indexes for email, trainer_id, role")
+        except Exception as e:
+            print(f"  indexes: {e}")
+        
+        # Update existing demo user to admin role
+        try:
+            await conn.execute(text("""
+                UPDATE users SET role = 'admin' WHERE id = '1' OR id = 'demo_user';
+            """))
+            print("✓ Updated demo user to admin role")
+        except Exception as e:
+            print(f"  demo user update: {e}")
             
         print("Schema migration complete!")
 
 if __name__ == "__main__":
     asyncio.run(migrate())
+
