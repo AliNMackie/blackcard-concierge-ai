@@ -29,8 +29,11 @@ class TerraPayload(BaseModel):
 async def whatsapp_webhook(payload: WhatsAppPayload, db: AsyncSession = Depends(get_db)):
     """
     Ingests WhatsApp messages (mocked as JSON for MVP).
-    TODO: Add X-Twilio-Signature verification.
+    Processes via AI agent and sends reply via Twilio.
     """
+    from app.config import logger
+    from app.messaging import send_whatsapp
+    
     logger.info(f"Webhook (WhatsApp): From {payload.From}, Msg: {payload.Body[:20]}...")
 
     # 1. Map to Internal Event
@@ -71,8 +74,13 @@ async def whatsapp_webhook(payload: WhatsAppPayload, db: AsyncSession = Depends(
             db.add(log_entry)
             await db.commit()
 
-        # TODO: Send Outbound Reply via Twilio API
-        # client.messages.create(body=response.message, from_=..., to=payload.From)
+        # 4. Send Outbound Reply via Twilio
+        try:
+            message_sid = send_whatsapp(to=payload.From, body=response.message)
+            logger.info(f"WhatsApp reply sent, SID: {message_sid}")
+        except Exception as twilio_err:
+            logger.error(f"Failed to send WhatsApp reply: {twilio_err}")
+            # Don't fail the whole request if Twilio fails
         
         return {"status": "ok", "reply": response.message}
 

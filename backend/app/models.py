@@ -8,7 +8,10 @@ from app.database import Base
 class User(Base):
     __tablename__ = "users"
     
-    id: Mapped[str] = mapped_column(String, primary_key=True) # e.g. "auth0|123" or phone number
+    id: Mapped[str] = mapped_column(String, primary_key=True) # e.g. "auth0|123" or Firebase UID
+    email: Mapped[Optional[str]] = mapped_column(String, nullable=True, unique=True, index=True)
+    role: Mapped[str] = mapped_column(String, default="client")  # client, trainer, admin
+    trainer_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("users.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     profile_data: Mapped[Optional[dict]] = mapped_column(JSON, default={})
     is_traveling: Mapped[bool] = mapped_column(default=False)

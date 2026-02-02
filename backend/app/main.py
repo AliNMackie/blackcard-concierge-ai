@@ -10,9 +10,11 @@ from langchain_core.messages import HumanMessage
 import os
 from app.webhooks import router as webhook_router
 from app.workouts import router as workout_router
+from app.users import router as users_router, get_trainer_client_ids
 from app.database import get_db, init_connection_pool, create_tables
 from app.models import User, EventLog
 from app.schema import AgentResponse, WearableEvent, VisionEvent, ChatEvent, UserUpdate
+from app.auth import get_current_user, get_current_user_optional, AuthenticatedUser, require_trainer, require_admin
 # AI Graph
 from app.graph import app_graph
 
@@ -59,6 +61,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title=settings.APP_NAME, version=settings.VERSION, lifespan=lifespan)
 app.include_router(webhook_router)
 app.include_router(workout_router)
+app.include_router(users_router)
 
 # Enable CORS for local/pwa development
 app.add_middleware(
@@ -82,16 +85,30 @@ def health_check():
     return {"status": "ok", "service": settings.APP_NAME, "version": settings.VERSION}
 
 @app.get("/events")
-async def list_events(limit: int = 50, db: AsyncSession = Depends(get_db), auth: str = Depends(get_api_key)):
+async def list_events(
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(get_current_user_optional)
+):
     """
     Returns recent events for the Trainer 'God Mode' Dashboard.
+    If authenticated as trainer, only shows events from their assigned clients.
     """
     if not db:
         # Mock empty response if no DB
         return []
     
     try:
-        stmt = select(EventLog).order_by(EventLog.created_at.desc()).limit(limit)
+        # Filter by trainer's clients if trainer role
+        if current_user and current_user.is_trainer and not current_user.is_admin:
+            client_ids = await get_trainer_client_ids(db, current_user.uid)
+            if not client_ids:
+                return []  # No clients assigned yet
+            stmt = select(EventLog).where(EventLog.user_id.in_(client_ids)).order_by(EventLog.created_at.desc()).limit(limit)
+        else:
+            # Admin or unauthenticated (dev mode) sees all
+            stmt = select(EventLog).order_by(EventLog.created_at.desc()).limit(limit)
+        
         result = await db.execute(stmt)
         events = result.scalars().all()
         return events

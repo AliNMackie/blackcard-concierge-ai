@@ -24,6 +24,14 @@ class Settings(BaseSettings):
     # Auth
     ELITE_API_KEY: str = os.getenv("ELITE_API_KEY", "dev-secret-123")
     TERRA_API_SECRET: str = os.getenv("TERRA_API_SECRET", "terra-secret-placeholder")
+    
+    # Firebase Auth
+    FIREBASE_CREDENTIALS_JSON: str = os.getenv("FIREBASE_CREDENTIALS_JSON", "")
+    
+    # Twilio (WhatsApp)
+    TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "")
+    TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "")
+    TWILIO_WHATSAPP_NUMBER: str = os.getenv("TWILIO_WHATSAPP_NUMBER", "")
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -22,13 +22,39 @@ export function getApiUrl() {
     return API_BASE;
 }
 
+/**
+ * Get authorization headers for API requests.
+ * Uses Firebase ID token if available, falls back to API key for backwards compatibility.
+ */
+async function getAuthHeaders(): Promise<HeadersInit> {
+    const headers: HeadersInit = {};
+
+    // Try to get Firebase token first (client-side only)
+    if (typeof window !== 'undefined') {
+        try {
+            const { getIdToken } = await import('./firebase');
+            const token = await getIdToken();
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+                return headers;
+            }
+        } catch {
+            // Firebase not configured, fall through to API key
+        }
+    }
+
+    // Fallback to API key for backwards compatibility
+    if (process.env.NEXT_PUBLIC_API_KEY) {
+        headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
+    }
+
+    return headers;
+}
+
 export async function fetchEvents(limit = 50): Promise<EventLog[]> {
     try {
         const url = BACKEND_URL ? `${API_BASE}/events?limit=${limit}` : `${API_BASE}/events`;
-        const headers: HeadersInit = {};
-        if (process.env.NEXT_PUBLIC_API_KEY) {
-            headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
-        }
+        const headers = await getAuthHeaders();
 
         const res = await fetch(url, { headers, cache: 'no-store' });
         if (res.status === 403) throw new Error('AUTH_ERROR');

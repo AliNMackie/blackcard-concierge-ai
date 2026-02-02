@@ -18,3 +18,5 @@ langgraph
 numpy<2
 pytest
 pytest-asyncio
+firebase-admin
+twilio
