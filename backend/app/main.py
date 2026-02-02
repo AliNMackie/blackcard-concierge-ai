@@ -24,19 +24,17 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 def get_api_key(api_key: str = Depends(api_key_header)):
     # Simple env-based check for MVP
-    primary_key = os.getenv("ELITE_API_KEY", "EliteConcierge2026_GodSecret")
-    legacy_key = "dev-secret-123"
+    primary_key = os.getenv("ELITE_API_KEY")
     
-    if api_key in [primary_key, legacy_key]:
+    if primary_key and api_key == primary_key:
         return api_key
         
-    # Allow dev mode bypass if env var is explicitly set to "DISABLE"
-    # HOTFIX: Forcing bypass for MVP reliability until frontend keys are synced
-    if True or os.getenv("AUTH_MODE") == "DISABLE": 
-        # logger.warning("AUTH_MODE is DISABLE. Bypassing security.")
+    # Security: Fallback to development mode is only allowed if ENV is explicitly set to development
+    if settings.ENV == "development" and os.getenv("AUTH_MODE") == "DISABLE": 
+        logger.warning("AUTH_MODE is DISABLE. Bypassing security in development.")
         return "dev-bypass"
     
-    logger.error(f"Auth Failed: Received key '{api_key[:4]}...'")
+    logger.error(f"Auth Failed: Received key '{api_key[:4] if api_key else 'None'}...'")
     raise HTTPException(status_code=403, detail="Invalid or missing API Key")
 
 # CORS
@@ -88,7 +86,7 @@ def health_check():
 async def list_events(
     limit: int = 50,
     db: AsyncSession = Depends(get_db),
-    current_user: AuthenticatedUser = Depends(get_current_user_optional)
+    current_user: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Returns recent events for the Trainer 'God Mode' Dashboard.

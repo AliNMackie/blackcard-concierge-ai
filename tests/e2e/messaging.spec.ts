@@ -11,8 +11,11 @@ test.describe('Trainer-Client Messaging', () => {
         await page.goto('/god-mode');
         console.log('Initial Navigation Complete');
 
-        // Use env var for API Key, fallback for local dev
-        const apiKey = process.env.ELITE_API_KEY || 'EliteConcierge2026_GodSecret';
+        // Use env var for API Key
+        const apiKey = process.env.ELITE_API_KEY;
+        if (!apiKey) {
+            throw new Error('ELITE_API_KEY environment variable is not set');
+        }
 
         // 0. Seed User '1' via WhatsApp Webhook (Browser Fetch)
         console.log('Seeding User 1 via WhatsApp Webhook (Browser)...');

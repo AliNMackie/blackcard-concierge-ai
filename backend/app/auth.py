@@ -80,7 +80,7 @@ async def get_current_user(
     
     if credentials is None:
         # Check API Key
-        primary_key = os.getenv("ELITE_API_KEY", "EliteConcierge2026_GodSecret")
+        primary_key = os.getenv("ELITE_API_KEY")
         
         # Debug logging
         logger.info(f"Auth Check: Bearer=None, KeyProvided={'Yes' if api_key else 'No'}, KeyMatch={api_key == primary_key}")
@@ -113,7 +113,7 @@ async def get_current_user(
     token = credentials.credentials
     
     # Bypass for E2E Testing using Bearer Token
-    primary_key = os.getenv("ELITE_API_KEY", "EliteConcierge2026_GodSecret")
+    primary_key = os.getenv("ELITE_API_KEY")
     
     # Debug logging
     logger.info(f"Auth Check V5: Token len={len(token)}, Key len={len(primary_key)}")
