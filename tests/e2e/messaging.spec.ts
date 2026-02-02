@@ -11,13 +11,16 @@ test.describe('Trainer-Client Messaging', () => {
         await page.goto('/god-mode');
         console.log('Initial Navigation Complete');
 
+        // Use env var for API Key, fallback for local dev
+        const apiKey = process.env.ELITE_API_KEY || 'EliteConcierge2026_GodSecret';
+
         // 0. Seed User '1' via WhatsApp Webhook (Browser Fetch)
         console.log('Seeding User 1 via WhatsApp Webhook (Browser)...');
-        const seedUserStatus = await page.evaluate(async () => {
+        const seedUserStatus = await page.evaluate(async (key) => {
             const res = await fetch('https://elite-concierge-api-557456081985.europe-west2.run.app/webhooks/whatsapp', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer EliteConcierge2026_GodSecret',
+                    'Authorization': `Bearer ${key}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -27,23 +30,23 @@ test.describe('Trainer-Client Messaging', () => {
                 })
             });
             return res.status;
-        });
+        }, apiKey);
         console.log(`User Seeding Status: ${seedUserStatus}`);
         expect(seedUserStatus).toBe(200);
 
         // 1. Seed a chat event ensure God Mode has data (Browser Fetch)
         console.log('Seeding test event (Browser)...');
-        const seedEventStatus = await page.evaluate(async () => {
+        const seedEventStatus = await page.evaluate(async (key) => {
             const res = await fetch('https://elite-concierge-api-557456081985.europe-west2.run.app/events/chat', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer EliteConcierge2026_GodSecret',
+                    'Authorization': `Bearer ${key}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ user_id: '1', message: 'E2E Test Initialization' })
             });
             return res.status;
-        });
+        }, apiKey);
         console.log(`Event Seeding Status: ${seedEventStatus}`);
         expect(seedEventStatus).toBe(200);
 

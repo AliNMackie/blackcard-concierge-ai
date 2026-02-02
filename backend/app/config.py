@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     ENV: str = os.getenv("ENV", "development")
 
     # Vertex AI / Gemini
-    PROJECT_ID: str = os.getenv("PROJECT_ID", "blackcard-concierge-ai")
+    PROJECT_ID: str = os.getenv("PROJECT_ID", "")
     GCP_REGION: str = "europe-west2"
     GEMINI_MODEL_ID: str = "gemini-2.5-flash"
 
