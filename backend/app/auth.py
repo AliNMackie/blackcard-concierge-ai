@@ -164,15 +164,24 @@ async def get_current_user(
     
     # Auto-create user on first login
     if db_user is None:
-        db_user = User(
-            id=uid,
-            email=email,
-            role="client"  # Default to client, trainer promotes later
-        )
-        db.add(db_user)
-        await db.commit()
-        await db.refresh(db_user)
-        logger.info(f"Created new user: {uid}")
+        try:
+            db_user = User(
+                id=uid,
+                email=email,
+                role="client"  # Default to client, trainer promotes later
+            )
+            db.add(db_user)
+            await db.commit()
+            await db.refresh(db_user)
+            logger.info(f"Created new user: {uid}")
+        except Exception as e:
+            logger.error(f"Failed to create user {uid}: {e}")
+            await db.rollback()
+            # For debugging, return the error
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"User creation failed: {str(e)}"
+            )
     
     return AuthenticatedUser(
         uid=uid,

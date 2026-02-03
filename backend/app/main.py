@@ -52,31 +52,7 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
     # (Optional) close engine
-    
-@app.get("/debug/db")
-async def debug_db(db: AsyncSession = Depends(get_db)):
-    """Temporary debug endpoint to inspect DB state."""
-    from sqlalchemy import text
-    try:
-        # 1. List Tables
-        result = await db.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"))
-        tables = [row[0] for row in result.fetchall()]
-        
-        # 2. Try to select users
-        try:
-            user_result = await db.execute(text("SELECT count(*) FROM users"))
-            user_count = user_result.scalar()
-        except Exception as e:
-            user_count = f"Error: {e}"
 
-        return {
-            "status": "ok",
-            "tables": tables,
-            "user_count": user_count,
-            "connection": "verified"
-        }
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
 
 app = FastAPI(title=settings.APP_NAME, version=settings.VERSION, lifespan=lifespan)
 app.include_router(webhook_router)
