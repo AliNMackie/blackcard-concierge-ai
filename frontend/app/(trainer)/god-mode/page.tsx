@@ -134,7 +134,10 @@ export default function GodModePage() {
                         <RefreshCw size={16} /> Refresh Stream
                     </button>
                     <button
-                        onClick={signOut}
+                        onClick={async () => {
+                            await signOut();
+                            window.location.href = '/login';
+                        }}
                         className="flex items-center gap-2 bg-red-900/20 text-red-500 border border-red-900/50 px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-red-900/40 transition rounded-sm"
                     >
                         Logout

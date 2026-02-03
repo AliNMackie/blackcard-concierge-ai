@@ -71,7 +71,10 @@ export default function ClientDashboard() {
                         {loading ? 'Syncing...' : 'Refresh'}
                     </button>
                     <button
-                        onClick={signOut}
+                        onClick={async () => {
+                            await signOut();
+                            window.location.href = '/login';
+                        }}
                         className="text-xs font-bold uppercase tracking-wider text-red-500 hover:text-red-400 transition ml-4"
                     >
                         Logout
