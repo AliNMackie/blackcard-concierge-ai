@@ -2,7 +2,7 @@
 Users Router - Manages user accounts and trainer-client relationships.
 """
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
@@ -358,8 +358,61 @@ async def update_user_profile(update_data: UserUpdate, db: AsyncSession = Depend
     }
 
 
+
+@router.post("/admin/provision-trainer")
+async def provision_trainer(
+    email: str = Body(..., embed=True),
+    db: AsyncSession = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_admin)
+):
+    """
+    Admin: Provision or upgrade a user to Trainer role by Email.
+    (Useful for onboarding when UID is unknown or not typically used).
+    """
+    # 1. Check if user exists by Email
+    stmt = select(User).where(User.email == email)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        # Create placeholder user
+        # Note: UID will need to be updated when they actually sign in if using Firebase
+        # BUT for our auth system, we usually key off UID.
+        # This is tricky with Firebase.
+        # Ideally we ask them to sign up first.
+        # BUT for now, let's assume they might have signed up or we pre-seed.
+        # If we pre-seed with a random UID, it WON'T match their Firebase UID.
+        # SO: Best path is -> Update existing user OR Fail if not found.
+        # If we want to support pre-seeding, we'd need their Firebase UID.
+        
+        # ACTUALLY: Let's just create a row. If the UID mismatch happens, 
+        # auth.py logic needs to handle merging or we just tell them to sign up first.
+        
+        # Strategy: Ask for UID if available, else fail?
+        # No, user only gave email.
+        
+        # Wait, if I create a user with a placeholder UID, they can't log in 
+        # because the Firebase token will have a DIFFERENT UID.
+        
+        # CORRECT APPROACH:
+        # 1. If user exists (they signed up), upgrade them.
+        # 2. If not, we can't pre-provision without their future Firebase UID.
+        # SO: This endpoint will only work if they have already signed up (at least once).
+        
+        raise HTTPException(
+            status_code=404, 
+            detail=f"User with email {email} not found. Have they signed up yet?"
+        )
+        
+    user.role = "trainer"
+    await db.commit()
+    
+    logger.info(f"Admin {current_user.uid} promoted {email} to TRAINER")
+    return {"status": "ok", "message": f"User {email} is now a TRAINER"}
+
 async def get_trainer_client_ids(db: AsyncSession, trainer_id: str) -> List[str]:
     """Helper: Get list of client IDs for a trainer."""
     stmt = select(User.id).where(User.trainer_id == trainer_id)
     result = await db.execute(stmt)
     return [row[0] for row in result.fetchall()]
+
