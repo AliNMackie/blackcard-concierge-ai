@@ -39,4 +39,21 @@ class MetricResponse(MetricCreate):
     id: str
     user_id: str
     logged_by: str
-    timestamp: datetime
+
+class StrengthMetric(BaseModel):
+    estimated_1rm: float
+    exercise: str
+    trend: str # "up", "down", "stable"
+    history: List[Dict[str, Any]] # Date, Value
+
+class EngineMetric(BaseModel):
+    ftp: float # Functional Threshold Power or Pace
+    vo2_max: Optional[float]
+    history: List[Dict[str, Any]]
+
+class ReadinessMetric(BaseModel):
+    score: int # 0-100
+    hrv: int
+    sleep_score: int
+    history: List[Dict[str, Any]]
+

@@ -14,6 +14,27 @@ export type EventLog = {
     created_at: string;
 };
 
+export type PerformanceMetric = {
+    id: string;
+    user_id: string;
+    category: string;
+    name: string;
+    value: number;
+    unit: string;
+    notes?: string;
+    logged_by: string;
+    timestamp: string;
+};
+
+export type MetricCreate = {
+    category: string;
+    name: string;
+    value: number;
+    unit: string;
+    notes?: string;
+    timestamp?: string;
+};
+
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 // If BACKEND_URL is set, use it. Otherwise use internal BFF (/api/client).
 const API_BASE = BACKEND_URL ? `${BACKEND_URL}` : '/api/client';
@@ -237,5 +258,55 @@ export async function getClientMessages(clientId: string, limit = 20) {
 
     const res = await fetch(url, { headers });
     if (!res.ok) throw new Error('Failed to fetch messages');
+    return res.json();
+}
+
+/**
+ * Log a manual performance metric.
+ */
+export async function logPerformanceMetric(metric: MetricCreate) {
+    const url = `${API_BASE}/analytics/metrics`;
+    const authHeaders = await getAuthHeaders();
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            ...authHeaders,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(metric)
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Failed to log metric' }));
+        throw new Error(err.detail);
+    }
+    return res.json();
+}
+
+/**
+ * Fetch manual performance metrics for the current user.
+ */
+export async function fetchPerformanceMetrics(category?: string): Promise<PerformanceMetric[]> {
+    let url = `${API_BASE}/analytics/metrics`;
+    if (category) {
+        url += `?category=${category}`;
+    }
+    const authHeaders = await getAuthHeaders();
+
+    const res = await fetch(url, { headers: authHeaders });
+    if (!res.ok) throw new Error('Failed to fetch performance metrics');
+    return res.json();
+}
+
+/**
+ * Fetch aggregated analytics for charts.
+ */
+export async function fetchAnalytics(category: 'strength' | 'engine' | 'readiness') {
+    const url = `${API_BASE}/analytics/${category}`;
+    const authHeaders = await getAuthHeaders();
+
+    const res = await fetch(url, { headers: authHeaders });
+    if (!res.ok) throw new Error(`Failed to fetch ${category} analytics`);
     return res.json();
 }

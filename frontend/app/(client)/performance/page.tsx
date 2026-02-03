@@ -1,48 +1,19 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar
 } from 'recharts';
 import {
     ArrowUpRight, ArrowDownRight, Minus, Activity, Trophy, Zap, Calendar as CalendarIcon,
-    Dumbbell, MessageSquare, Menu, Users, ChevronDown
+    Dumbbell, MessageSquare, Menu, Users, ChevronDown, Loader2, Plus, X
 } from 'lucide-react';
 import Link from 'next/link';
 import { clsx } from 'clsx';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { fetchAnalytics, logPerformanceMetric } from '@/lib/api';
 
-// --- Mock Data ---
-
-const STRENGTH_DATA = [
-    { date: 'Jan', squat: 120, deadlift: 140, bench: 90 },
-    { date: 'Feb', squat: 125, deadlift: 145, bench: 92 },
-    { date: 'Mar', squat: 122, deadlift: 150, bench: 95 },
-    { date: 'Apr', squat: 130, deadlift: 155, bench: 95 },
-    { date: 'May', squat: 135, deadlift: 160, bench: 100 },
-    { date: 'Jun', squat: 140, deadlift: 165, bench: 102 },
-];
-
-const ENGINE_DATA = [
-    { date: 'W1', run: 4.10, ski: 4.05 },
-    { date: 'W2', run: 4.08, ski: 4.02 },
-    { date: 'W3', run: 4.05, ski: 4.00 },
-    { date: 'W4', run: 4.00, ski: 3.55 },
-    { date: 'W5', run: 3.58, ski: 3.52 },
-    { date: 'W6', run: 3.55, ski: 3.48 },
-];
-
-const READINESS_DATA = [
-    { day: 'M', score: 85, load: 400 },
-    { day: 'T', score: 80, load: 600 },
-    { day: 'W', score: 45, load: 800 },
-    { day: 'T', score: 60, load: 300 },
-    { day: 'F', score: 90, load: 500 },
-    { day: 'S', score: 75, load: 700 },
-    { day: 'S', score: 88, load: 0 },
-];
-
-// Mock Heatmap Data (simple array of completion status)
+// --- Mock Data (Retained for Sections Not Yet Connected) ---
 const CONSISTENCY_DATA = Array.from({ length: 28 }, (_, i) => ({
     day: i + 1,
     status: Math.random() > 0.3 ? 'complete' : Math.random() > 0.5 ? 'rest' : 'missed',
@@ -69,14 +40,127 @@ export default function PerformancePage() {
     const [timeRange, setTimeRange] = useState<'4W' | '3M' | '6M' | '12M'>('3M');
     const [activeMetric, setActiveMetric] = useState<'strength' | 'engine' | 'readiness' | 'body' | 'benchmarks'>('strength');
 
+    // Real Data State
+    const [strength, setStrength] = useState<any>(null);
+    const [engine, setEngine] = useState<any>(null);
+    const [readiness, setReadiness] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    // Manual Input State
+    const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+    const [logValue, setLogValue] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    async function loadMetrics() {
+        setLoading(true);
+        try {
+            const [s, e, r] = await Promise.all([
+                fetchAnalytics('strength').catch(e => null),
+                fetchAnalytics('engine').catch(e => null),
+                fetchAnalytics('readiness').catch(e => null)
+            ]);
+            setStrength(s);
+            setEngine(e);
+            setReadiness(r);
+        } catch (err) {
+            console.error("Failed to load analytics", err);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        loadMetrics();
+    }, []);
+
+    const handleLogSubmit = async () => {
+        if (!logValue) return;
+        setSubmitting(true);
+        try {
+            await logPerformanceMetric({
+                category: activeMetric,
+                name: activeMetric === 'strength' ? 'Squat' : activeMetric, // Defaulting for simple MVP
+                value: parseFloat(logValue),
+                unit: activeMetric === 'strength' ? 'kg' : activeMetric === 'engine' ? 'min/km' : 'score',
+                timestamp: new Date().toISOString()
+            });
+            setIsLogModalOpen(false);
+            setLogValue('');
+            // Refresh data
+            await loadMetrics();
+        } catch (err) {
+            alert("Failed to log metric");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // Formatters for display
+    const fmtStrength = strength ? `${strength.estimated_1rm}kg` : '-';
+    const fmtEngine = engine ? `${engine.ftp}` : '-'; // e.g. "4:05" or watts
+    const fmtReadiness = readiness ? `${readiness.score}/100` : '-';
+
     return (
         <div className="min-h-screen bg-black text-white font-sans pb-24 max-w-md mx-auto border-x border-gray-900">
 
             {/* Header */}
-            <header className="p-6 pb-2">
-                <h1 className="text-3xl font-light tracking-tight text-white mb-1">Performance</h1>
-                <p className="text-zinc-500 text-xs uppercase tracking-widest">Long-term Progress Analysis</p>
+            <header className="p-6 pb-2 flex justify-between items-center">
+                <div>
+                    <h1 className="text-3xl font-light tracking-tight text-white mb-1">Performance</h1>
+                    <p className="text-zinc-500 text-xs uppercase tracking-widest">Long-term Progress Analysis</p>
+                </div>
+                <button
+                    onClick={() => setIsLogModalOpen(true)}
+                    className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-700 transition"
+                >
+                    <Plus size={20} />
+                </button>
             </header>
+
+            {/* Log Modal */}
+            <AnimatePresence>
+                {isLogModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                            onClick={() => setIsLogModalOpen(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl w-full max-w-xs relative z-10 shadow-2xl"
+                        >
+                            <h3 className="text-lg font-bold mb-1 capitalize">Log {activeMetric}</h3>
+                            <p className="text-xs text-zinc-500 mb-4">Enter today's value for this metric.</p>
+
+                            <input
+                                type="number"
+                                value={logValue}
+                                onChange={(e) => setLogValue(e.target.value)}
+                                placeholder="Value..."
+                                className="w-full bg-black border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 mb-4"
+                                autoFocus
+                            />
+
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setIsLogModalOpen(false)}
+                                    className="flex-1 py-3 rounded-lg bg-zinc-800 text-sm font-medium hover:bg-zinc-700"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleLogSubmit}
+                                    disabled={submitting}
+                                    className="flex-1 py-3 rounded-lg bg-white text-black text-sm font-bold hover:bg-gray-200 disabled:opacity-50"
+                                >
+                                    {submitting ? 'Saving...' : 'Save'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Global Time Selector */}
             <div className="px-6 mb-6">
@@ -98,50 +182,59 @@ export default function PerformancePage() {
 
             {/* KPI Cards */}
             <div className="px-6 grid grid-cols-2 gap-3 mb-8">
-                <KPICard
-                    title="Strength"
-                    value="+5%"
-                    trend="up"
-                    icon={<Dumbbell size={14} />}
-                    isActive={activeMetric === 'strength'}
-                    onClick={() => setActiveMetric('strength')}
-                />
-                <KPICard
-                    title="Engine"
-                    value="-12s"
-                    trend="up"
-                    icon={<Zap size={14} />}
-                    isActive={activeMetric === 'engine'}
-                    onClick={() => setActiveMetric('engine')}
-                />
-                <KPICard
-                    title="Body Fat"
-                    value="14.2%"
-                    trend="down"
-                    icon={<Activity size={14} />}
-                    isActive={activeMetric === 'body'}
-                    onClick={() => setActiveMetric('body')}
-                />
-                <KPICard
-                    title="10K Time"
-                    value="44:00"
-                    trend="up"
-                    icon={<Zap size={14} />}
-                    isActive={activeMetric === 'benchmarks'}
-                    onClick={() => setActiveMetric('benchmarks')}
-                />
-                <KPICard
-                    title="Hyrox"
-                    value="1:04"
-                    trend="flat"
-                    icon={<Trophy size={14} />}
-                />
-                <KPICard
-                    title="Consistency"
-                    value="88%"
-                    trend="down"
-                    icon={<CalendarIcon size={14} />}
-                />
+                {loading ? (
+                    <div className="col-span-2 flex justify-center py-4"><Loader2 className="animate-spin text-zinc-600" /></div>
+                ) : (
+                    <>
+                        <KPICard
+                            title="Strength (1RM)"
+                            value={fmtStrength}
+                            trend={strength?.trend || 'flat'}
+                            icon={<Dumbbell size={14} />}
+                            isActive={activeMetric === 'strength'}
+                            onClick={() => setActiveMetric('strength')}
+                        />
+                        <KPICard
+                            title="Engine (Pace)"
+                            value={fmtEngine}
+                            trend="up" // TODO: Real trend
+                            icon={<Zap size={14} />}
+                            isActive={activeMetric === 'engine'}
+                            onClick={() => setActiveMetric('engine')}
+                        />
+                        {/* Keep Body/Benchmarks Static for now or until route implemented */}
+                        <KPICard
+                            title="Ready Score"
+                            value={fmtReadiness}
+                            trend="flat"
+                            icon={<Activity size={14} />}
+                            isActive={activeMetric === 'readiness'}
+                            onClick={() => setActiveMetric('readiness')}
+                        />
+                        <KPICard
+                            title="Body Fat"
+                            value="14.2%"
+                            trend="down"
+                            icon={<Activity size={14} />}
+                            isActive={activeMetric === 'body'}
+                            onClick={() => setActiveMetric('body')}
+                        />
+                        <KPICard
+                            title="10K Time"
+                            value="44:00"
+                            trend="up"
+                            icon={<Trophy size={14} />}
+                            isActive={activeMetric === 'benchmarks'}
+                            onClick={() => setActiveMetric('benchmarks')}
+                        />
+                        <KPICard
+                            title="Consistency"
+                            value="88%"
+                            trend="down"
+                            icon={<CalendarIcon size={14} />}
+                        />
+                    </>
+                )}
             </div>
 
             {/* Main Charts Section */}
@@ -157,7 +250,7 @@ export default function PerformancePage() {
                     </div>
                     <div className="h-64 w-full bg-zinc-900/30 rounded-2xl p-4 border border-zinc-800/50 relative">
                         <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
-                            <LineChart data={STRENGTH_DATA}>
+                            <LineChart data={strength?.history || []}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                                 <XAxis dataKey="date" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
                                 <YAxis stroke="#666" fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
@@ -165,15 +258,12 @@ export default function PerformancePage() {
                                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', fontSize: '12px' }}
                                     itemStyle={{ color: '#fff' }}
                                 />
-                                <Line type="monotone" dataKey="squat" stroke="#fbbf24" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
-                                <Line type="monotone" dataKey="deadlift" stroke="#f43f5e" strokeWidth={2} dot={false} />
-                                <Line type="monotone" dataKey="bench" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                                {/* For simple MVP of generic Strength, just plot 'value' */}
+                                <Line type="monotone" dataKey="value" stroke="#fbbf24" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
                             </LineChart>
                         </ResponsiveContainer>
                         <div className="absolute top-4 right-4 flex flex-col gap-1 text-[10px] text-zinc-400">
-                            <span className="text-amber-400">● Squat</span>
-                            <span className="text-rose-500">● Deadlift</span>
-                            <span className="text-blue-500">● Bench</span>
+                            <span className="text-amber-400">● {strength?.exercise || 'Strength'}</span>
                         </div>
                     </div>
                 </section>
@@ -246,7 +336,7 @@ export default function PerformancePage() {
                     </div>
                     <div className="h-48 w-full bg-zinc-900/30 rounded-2xl p-4 border border-zinc-800/50">
                         <ResponsiveContainer width="100%" height="100%" aspect={2}>
-                            <AreaChart data={ENGINE_DATA}>
+                            <AreaChart data={engine?.history || []}>
                                 <defs>
                                     <linearGradient id="colorRun" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -257,7 +347,7 @@ export default function PerformancePage() {
                                 <XAxis dataKey="date" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
                                 <YAxis stroke="#666" fontSize={10} tickLine={false} axisLine={false} domain={['dataMin - 0.5', 'dataMax + 0.5']} />
                                 <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', fontSize: '12px' }} />
-                                <Area type="monotone" dataKey="run" stroke="#10b981" fillOpacity={1} fill="url(#colorRun)" strokeWidth={2} />
+                                <Area type="monotone" dataKey="value" stroke="#10b981" fillOpacity={1} fill="url(#colorRun)" strokeWidth={2} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -275,14 +365,14 @@ export default function PerformancePage() {
                     </div>
                     <div className="h-48 w-full bg-zinc-900/30 rounded-2xl p-4 border border-zinc-800/50">
                         <ResponsiveContainer width="100%" height="100%" aspect={2}>
-                            <BarChart data={READINESS_DATA}>
-                                <XAxis dataKey="day" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
+                            <BarChart data={readiness?.history || []}>
+                                <XAxis dataKey="date" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
                                 <Tooltip
                                     cursor={{ fill: '#27272a' }}
                                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', fontSize: '12px' }}
                                 />
-                                <Bar dataKey="load" fill="#3f3f46" radius={[2, 2, 0, 0]} />
-                                <Line type="step" dataKey="score" stroke="#fff" strokeWidth={2} dot={{ r: 3 }} />
+                                <Bar dataKey="value" fill="#3f3f46" radius={[2, 2, 0, 0]} />
+                                {/* <Line type="step" dataKey="score" stroke="#fff" strokeWidth={2} dot={{ r: 3 }} /> */}
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

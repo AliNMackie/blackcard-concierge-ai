@@ -80,12 +80,12 @@ async def get_current_user(
     
     if credentials is None:
         # Check API Key
-        primary_key = os.getenv("ELITE_API_KEY")
+        primary_key = settings.ELITE_API_KEY
         
         # Debug logging
         logger.info(f"Auth Check: Bearer=None, KeyProvided={'Yes' if api_key else 'No'}, KeyMatch={api_key == primary_key}")
         
-        if api_key == primary_key:
+        if primary_key and api_key == primary_key:
              return AuthenticatedUser(
                 uid="demo_user",
                 email="admin@example.com",
@@ -113,11 +113,11 @@ async def get_current_user(
     token = credentials.credentials
     
     # Bypass for E2E Testing using Bearer Token
-    primary_key = os.getenv("ELITE_API_KEY")
+    primary_key = settings.ELITE_API_KEY
     
     # Debug logging
     logger.info(f"Auth Check V5: Token len={len(token)}, Key len={len(primary_key)}")
-    if token.strip() == primary_key.strip():
+    if primary_key and token.strip() == primary_key.strip():
          logger.info("Auth: Bearer token matches API Key (V5). Granting Admin access.")
          return AuthenticatedUser(
             uid="demo_user",
@@ -188,7 +188,7 @@ async def get_current_user_optional(
 ) -> Optional[AuthenticatedUser]:
     """Optional auth - returns None if no valid token."""
     try:
-        return await get_current_user(credentials, db)
+        return await get_current_user(credentials, None, db)
     except HTTPException:
         return None
 

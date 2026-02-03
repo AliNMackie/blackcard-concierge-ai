@@ -66,7 +66,10 @@ app.include_router(analytics_router)
 # Enable CORS for local/pwa development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Wildcard for MVP to ensure Netlify connectivity
+    allow_origins=[
+        "http://localhost:3000",
+        "https://blackcard-concierge.netlify.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
