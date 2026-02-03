@@ -8,6 +8,8 @@ import { Activity, Zap, CheckCircle, AlertTriangle, UserCog, RefreshCw, MessageS
 import { clsx } from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
 
+import { useRouter } from 'next/navigation';
+
 const PERSONAS = [
     { id: 'hyrox_competitor', label: 'Hyrox Athlete' },
     { id: 'empowered_mum', label: 'Empowered Mum' },
@@ -16,6 +18,7 @@ const PERSONAS = [
 ];
 
 export default function GodModePage() {
+    const router = useRouter();
     const { signOut } = useAuth();
     const [events, setEvents] = useState<EventLog[]>([]);
     const [loading, setLoading] = useState(true);
@@ -135,8 +138,13 @@ export default function GodModePage() {
                     </button>
                     <button
                         onClick={async () => {
-                            await signOut();
-                            window.location.href = '/login';
+                            try {
+                                await signOut();
+                            } catch (e) {
+                                console.error("Sign out error", e);
+                            } finally {
+                                router.push('/login');
+                            }
                         }}
                         className="flex items-center gap-2 bg-red-900/20 text-red-500 border border-red-900/50 px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-red-900/40 transition rounded-sm"
                     >

@@ -9,7 +9,10 @@ import Link from 'next/link';
 import VoiceInput from '@/components/voice/VoiceInput'; // Import Voice Component
 import { useAuth } from '@/lib/auth-context';
 
+import { useRouter } from 'next/navigation';
+
 export default function ClientDashboard() {
+    const router = useRouter();
     const { signOut } = useAuth();
     const [events, setEvents] = useState<EventLog[]>([]);
     const [loading, setLoading] = useState(false);
@@ -72,8 +75,13 @@ export default function ClientDashboard() {
                     </button>
                     <button
                         onClick={async () => {
-                            await signOut();
-                            window.location.href = '/login';
+                            try {
+                                await signOut();
+                            } catch (e) {
+                                console.error("Sign out error", e);
+                            } finally {
+                                router.push('/login');
+                            }
                         }}
                         className="text-xs font-bold uppercase tracking-wider text-red-500 hover:text-red-400 transition ml-4"
                     >
