@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { fetchEvents, EventLog, triggerIntervention, adminUpdateUser, sendTrainerMessage } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
+import Link from 'next/link';
 import { Activity, Zap, CheckCircle, AlertTriangle, UserCog, RefreshCw, MessageSquare, Send, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,6 +16,7 @@ const PERSONAS = [
 ];
 
 export default function GodModePage() {
+    const { signOut } = useAuth();
     const [events, setEvents] = useState<EventLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -118,17 +121,23 @@ export default function GodModePage() {
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <a
+                    <Link
                         href="/personas"
                         className="flex items-center gap-2 bg-zinc-800 text-white px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-zinc-700 transition rounded-sm border border-zinc-700"
                     >
                         <UserCog size={16} /> View Personas
-                    </a>
+                    </Link>
                     <button
                         onClick={loadData}
                         className="flex items-center gap-2 bg-white text-black px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-gray-200 transition rounded-sm"
                     >
                         <RefreshCw size={16} /> Refresh Stream
+                    </button>
+                    <button
+                        onClick={signOut}
+                        className="flex items-center gap-2 bg-red-900/20 text-red-500 border border-red-900/50 px-4 py-2 text-sm font-bold uppercase tracking-wider hover:bg-red-900/40 transition rounded-sm"
+                    >
+                        Logout
                     </button>
                 </div>
             </header>

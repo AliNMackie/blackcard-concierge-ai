@@ -7,8 +7,10 @@ import { Activity, Heart, Camera, MessageSquare, Plane, Users, Trophy } from 'lu
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import VoiceInput from '@/components/voice/VoiceInput'; // Import Voice Component
+import { useAuth } from '@/lib/auth-context';
 
 export default function ClientDashboard() {
+    const { signOut } = useAuth();
     const [events, setEvents] = useState<EventLog[]>([]);
     const [loading, setLoading] = useState(false);
     const [isTraveling, setIsTraveling] = useState(false);
@@ -67,6 +69,12 @@ export default function ClientDashboard() {
                         className="text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-white transition disabled:opacity-50"
                     >
                         {loading ? 'Syncing...' : 'Refresh'}
+                    </button>
+                    <button
+                        onClick={signOut}
+                        className="text-xs font-bold uppercase tracking-wider text-red-500 hover:text-red-400 transition ml-4"
+                    >
+                        Logout
                     </button>
                 </div>
                 <div>
