@@ -105,8 +105,14 @@ async def list_events(
             if not client_ids:
                 return []  # No clients assigned yet
             stmt = select(EventLog).where(EventLog.user_id.in_(client_ids)).order_by(EventLog.created_at.desc()).limit(limit)
+        
+        # Filter for single client (Self)
+        elif current_user and current_user.is_client:
+            stmt = select(EventLog).where(EventLog.user_id == current_user.uid).order_by(EventLog.created_at.desc()).limit(limit)
+            
         else:
-            # Admin or unauthenticated (dev mode) sees all
+            # Admin sees all (God Mode)
+            # OR dev mode with loose permissions
             stmt = select(EventLog).order_by(EventLog.created_at.desc()).limit(limit)
         
         result = await db.execute(stmt)
