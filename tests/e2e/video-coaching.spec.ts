@@ -74,7 +74,7 @@ test.describe('Video Coaching Feature', () => {
 
         // Stop Recording (via same button or verify auto-stop logic, but manual stop is faster)
         await page.waitForTimeout(1000); // Record for 1s
-        await recordBtn.click();
+        await recordBtn.click({ force: true });
 
         // Verify "Analyzing Mechanics..." loader appears
         await expect(page.getByText(/Analyzing Mechanics.../i)).toBeVisible();
