@@ -1,0 +1,162 @@
+﻿[dotenv@17.2.3] injecting env (2) from .env -- tip: ­ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+{
+  "config": {
+    "configFile": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\playwright.config.ts",
+    "rootDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.0",
+    "workers": 6,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "video-coaching.spec.ts",
+      "file": "video-coaching.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Video Coaching Feature",
+          "file": "video-coaching.spec.ts",
+          "line": 14,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load exercise card and activate camera form check",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 20849,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Analyzing Mechanics.../i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Analyzing Mechanics.../i)\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Analyzing Mechanics.../i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Analyzing Mechanics.../i)\u001b[22m\n\n    at C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts:80:65",
+                        "location": {
+                          "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts",
+                          "column": 65,
+                          "line": 80
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 78 |\u001b[39m\n \u001b[90m 79 |\u001b[39m         \u001b[90m// Verify \"Analyzing Mechanics...\" loader appears\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 80 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[35m/Analyzing Mechanics.../i\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 81 |\u001b[39m\n \u001b[90m 82 |\u001b[39m         \u001b[90m// Note: We are NOT asserting the backend response here fully to avoid flake on long AI calls,\u001b[39m\n \u001b[90m 83 |\u001b[39m         \u001b[90m// but verifying we reached the \"Analyzing\" state confirms the frontend <-> camera integration worked.\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts",
+                            "column": 65,
+                            "line": 80
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/Analyzing Mechanics.../i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/Analyzing Mechanics.../i)\u001b[22m\n\n\n  78 |\n  79 |         // Verify \"Analyzing Mechanics...\" loader appears\n> 80 |         await expect(page.getByText(/Analyzing Mechanics.../i)).toBeVisible();\n     |                                                                 ^\n  81 |\n  82 |         // Note: We are NOT asserting the backend response here fully to avoid flake on long AI calls,\n  83 |         // but verifying we reached the \"Analyzing\" state confirms the frontend <-> camera integration worked.\n    at C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts:80:65"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Locating Check Form button...\n"
+                        },
+                        {
+                          "text": "Button found, attempting click...\n"
+                        },
+                        {
+                          "text": "Click action completed.\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-04T21:01:40.553Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\test-results\\video-coaching-Video-Coach-a3875--activate-camera-form-check-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\test-results\\video-coaching-Video-Coach-a3875--activate-camera-form-check-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts",
+                        "column": 65,
+                        "line": 80
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "80ccc2d4b64a11a63eda-9c3a4dc2310b6a71c70c",
+              "file": "video-coaching.spec.ts",
+              "line": 15,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-02-04T21:01:39.654Z",
+    "duration": 21945.19,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

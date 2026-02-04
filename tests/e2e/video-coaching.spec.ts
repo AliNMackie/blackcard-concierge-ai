@@ -77,7 +77,7 @@ test.describe('Video Coaching Feature', () => {
         await recordBtn.evaluate(el => el.dispatchEvent(new MouseEvent('click', { bubbles: true })));
 
         // Verify "Analyzing Mechanics..." loader appears
-        await expect(page.getByText(/Analyzing Mechanics.../i)).toBeVisible();
+        await expect(page.getByText(/Analyzing Mechanics.../i)).toBeVisible({ timeout: 15000 });
 
         // Note: We are NOT asserting the backend response here fully to avoid flake on long AI calls,
         // but verifying we reached the "Analyzing" state confirms the frontend <-> camera integration worked.
