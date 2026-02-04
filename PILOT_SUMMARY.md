@@ -1,57 +1,38 @@
-# Pilot Release Summary
+# Pilot Readiness Summary: Elite Concierge AI
 
-**Status**: ✅ LIVE & SMOKE-TESTED (Locally Verified)
-**Date**: 2026-01-27
-**Release Manager**: Antigravity
+The authentication system and core features are now verified and ready for the pilot session with you (Client) and your nephew (Trainer).
 
-## 1. Local E2E Verification
-I have personally verified the full loop:
-`Webhooks -> Backend (FastAPI) -> Agent Logic -> SQLite DB -> API (GET /events)`
+## 1. Authentication Strategy
 
-### Verified Commands to Reproduce
-Run these in separate terminals:
+I have implemented a dual-layer authentication system that ensures production security while allowing for stable automated testing:
 
-**Terminal 1: Backend** (Uses local SQLite for E2E)
+*   **Production (Firebase)**: All regular users MUST log in via Firebase. The "Demo Mode" button is automatically hidden in the production environment.
+*   **E2E Testing (Bypass)**: I've implemented an "Aggressive Auth Bypass" for automated tests. This allows our E2E suite to bypass the Firebase UI securely using a secret API Key passed via query parameters. This ensures tests are never blocked by Firebase captchas or login flows.
+
+## 2. Onboarding Instructions
+
+### For You (Client Role)
+1. Navigate to the [Production App](https://blackcard-concierge.netlify.app).
+2. Use the **Sign Up** toggle to create your account with your email and password.
+3. By default, your account will have the **Client** role.
+
+### For Your Nephew (Trainer Role)
+1. Have him Navigate to the [Production App](https://blackcard-concierge.netlify.app) and **Sign Up**.
+2. Once he has created his account, send me his **Email Address**.
+3. I will run a backend command to promote his account to the **Trainer** role.
+4. He will then be able to access the [God Mode Dashboard](https://blackcard-concierge.netlify.app/god-mode) to manage your events and messages.
+
+## 3. Verified Features
+
+*   **[PASS] Messaging**: Trainers can send messages to clients, and clients can reply.
+*   **[PASS] Video Coaching**: Exercise cards detect the camera, record form checks, and trigger Gemini AI analysis.
+*   **[PASS] God Mode**: The trainer dashboard correctly displays multiple users and their event streams.
+
+## 4. Maintenance & Testing
+
+You can run the full verification suite locally at any time:
 ```powershell
-$env:DATABASE_URL="sqlite+aiosqlite:///./local_dev.db"; $env:ELITE_API_KEY="dev-secret-123"; python -m uvicorn app.main:app --host 0.0.0.0 --port 8080
+cd tests/e2e
+npx playwright test
 ```
-
-**Terminal 2: Frontend**
-```powershell
-$env:NEXT_PUBLIC_BACKEND_URL="http://localhost:8080"; $env:NEXT_PUBLIC_API_KEY="dev-secret-123"; npm run dev
-```
-
-**Terminal 3: Trigger & Test**
-```powershell
-# Send Sample Payload
-python scripts/send_test_events.py
-
-# Verify Persistence (Trainer View)
-Invoke-RestMethod -Uri "http://localhost:8080/events" -Headers @{"X-Elite-Key"="dev-secret-123"}
-```
-> **Result**: Successfully created Event IDs 1 & 2 (Wearable RED, Chat IDLE).
-
-## 2. Cloud Deployment (Golden Path)
-These commands are verified against the repo structure but require GCP Credentials.
-
-**Backend**:
-```bash
-cd infra && terraform apply
-cd .. && ./deploy_backend.sh <PROJECT_ID>
-```
-
-**Frontend**:
-*   **Vercel/Netlify**: Connect Repo.
-*   **Env Vars**:
-    *   `NEXT_PUBLIC_BACKEND_URL`: `https://elite-concierge-api-xyz.a.run.app`
-    *   `NEXT_PUBLIC_API_KEY`: `[Your Output from infra or chosen secret]`
-
-## 3. Pilot Readiness Assessment
-*   **Ready**: Yes.
-*   **Caveats**:
-    *   Auth is **API Key based**. Secure enough for a trusted pilot, but switch to Auth0/NextAuth for production.
-    *   Local DB is SQLite. Cloud DB is Postgres. This is handled gracefully by `database.py`.
-
-## 4. Next Actions
-1.  **Execute Phase 2 (Cloud)** using the commands above.
-2.  **Invite Pilot Users**: Share the Vercel URL.
+This will run against the live Netlify site and confirm everything is healthy.
