@@ -134,7 +134,7 @@ test.describe('Trainer-Client Messaging', () => {
         // Verify message appears
         console.log('Waiting for message to appear in Client View...');
         await expect(page.getByText(testMessage)).toBeVisible({ timeout: 15000 });
-        await expect(page.getByText('From Your Trainer')).toBeVisible();
+        await expect(page.getByText('From Your Trainer').first()).toBeVisible();
 
         // 4. Client replies
         const replyMessage = `Got it, thanks! ${Date.now()}`;

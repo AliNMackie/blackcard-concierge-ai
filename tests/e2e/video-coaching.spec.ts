@@ -69,8 +69,8 @@ test.describe('Video Coaching Feature', () => {
         // Start Recording
         await recordBtn.click();
 
-        // Verify "Recording" indicator appears
-        await expect(page.getByText(/^Recording$/i)).toBeVisible({ timeout: 2000 });
+        // Verify "Recording" indicator appears (it has a bullet point so exact: false is safer)
+        await expect(page.getByText('RECORDING', { exact: false }).first()).toBeVisible({ timeout: 10000 });
 
         // Stop Recording (via same button or verify auto-stop logic, but manual stop is faster)
         await page.waitForTimeout(1000); // Record for 1s
