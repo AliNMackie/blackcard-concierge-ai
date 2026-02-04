@@ -12,16 +12,32 @@ test.use({
 });
 
 test.describe('Video Coaching Feature', () => {
-    // Skip in CI: Camera mocking with fake streams doesn't work reliably in headless Chromium.
-    // This test requires real webcam hardware to validate the MediaStream API.
-    test.skip('should load exercise card and activate camera form check', async ({ page }) => {
-        // 1. Navigate to a specific workout session (mock/demo ID)
-        await page.goto('/workout/demo_session_1');
+    test('should load exercise card and activate camera form check', async ({ page, context }) => {
+        const apiKey = process.env.ELITE_API_KEY;
+        if (!apiKey) {
+            throw new Error('ELITE_API_KEY environment variable is not set');
+        }
 
-        // 2. Click the "Check Form" (or "Record Form" depending on deploy) button
-        // Using a robust regex to match either phrasing
-        const checkFormBtn = page.getByRole('button', { name: /Check Form|Record Form/i }).first();
-        await expect(checkFormBtn).toBeVisible();
+        // Set E2E Auth Mock in local storage AND Cookies for robust bypass
+        const domain = new URL(process.env.BASE_URL || 'https://blackcard-concierge.netlify.app').hostname;
+        await context.addCookies([{
+            name: 'E2E_AUTH_MOCK',
+            value: apiKey || 'true',
+            domain: domain,
+            path: '/'
+        }]);
+
+        await context.addInitScript((key) => {
+            window.localStorage.setItem('E2E_AUTH_MOCK', key || 'true');
+        }, apiKey);
+
+        // 1. Navigate to a specific workout session (mock/demo ID) with bypass
+        await page.goto(`/workout/demo_session_1?e2e-key=${apiKey}`);
+
+        // 2. Locate the exercise card and "Check Form" button
+        console.log('Locating Check Form button...');
+        const checkFormBtn = page.getByText('Check Form', { exact: false }).first();
+        await expect(checkFormBtn).toBeVisible({ timeout: 10000 });
         console.log('Button found, attempting click...');
         await checkFormBtn.click({ force: true });
         console.log('Click action completed.');

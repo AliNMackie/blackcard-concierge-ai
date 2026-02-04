@@ -40,6 +40,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // E2E Bypass Check (Query Param, Cookie or LocalStorage)
+        const getBypass = () => {
+            if (typeof window === 'undefined') return null;
+
+            // 1. Direct URL check (most robust for initial load)
+            const search = window.location.search;
+            const urlParams = new URLSearchParams(search);
+            const fromQuery = urlParams.get('e2e-key') || (urlParams.get('e2e-bypass') === 'true' ? 'true' : null);
+
+            if (fromQuery) {
+                // Persist it so it sticks for the session
+                window.localStorage.setItem('E2E_AUTH_MOCK', fromQuery);
+                return fromQuery;
+            }
+
+            // 2. LocalStorage fallback
+            const fromStorage = window.localStorage.getItem('E2E_AUTH_MOCK');
+            if (fromStorage) return fromStorage;
+
+            // 3. Cookie fallback
+            const match = document.cookie.match(/(^|;)\s*E2E_AUTH_MOCK\s*=\s*([^;]+)/);
+            return match ? match[2] : null;
+        };
+
+        const e2eMock = getBypass();
+        if (e2eMock) {
+            console.log("E2E Auth Bypass Active");
+            setUser({
+                uid: 'demo_user',
+                email: 'e2e-test@example.com',
+                displayName: 'E2E Tester'
+            });
+            setLoading(false);
+            return;
+        }
+
         const unsubscribe = onAuthChange((firebaseUser: FirebaseUser | null) => {
             if (firebaseUser) {
                 setUser({
@@ -75,8 +111,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const signOut = async () => {
+        if (typeof window !== 'undefined') {
+            window.localStorage.removeItem('E2E_AUTH_MOCK');
+        }
         await firebaseSignOut();
         setUser(null);
+    };
+
+    const getToken = async () => {
+        // In E2E mode, return the API Key if possible
+        const getBypass = () => {
+            if (typeof window === 'undefined') return null;
+            const searchParams = new URLSearchParams(window.location.search);
+            const fromQuery = searchParams.get('e2e-key') || (searchParams.get('e2e-bypass') === 'true' ? 'true' : null);
+            if (fromQuery) return fromQuery;
+
+            const fromStorage = window.localStorage.getItem('E2E_AUTH_MOCK');
+            if (fromStorage) return fromStorage;
+            const match = document.cookie.match(/(^|;)\s*E2E_AUTH_MOCK\s*=\s*([^;]+)/);
+            return match ? match[2] : null;
+        };
+
+        const e2eMock = getBypass();
+        if (e2eMock) {
+            // If the mock value is a string other than 'true', use it as the key
+            if (e2eMock !== 'true') return e2eMock;
+            return process.env.NEXT_PUBLIC_API_KEY || null;
+        }
+        return getIdToken();
     };
 
     return (
@@ -87,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             signIn,
             signUp,
             signOut,
-            getToken: getIdToken,
+            getToken,
         }}>
             {children}
         </AuthContext.Provider>

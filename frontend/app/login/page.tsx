@@ -145,15 +145,17 @@ export default function LoginPage() {
                         </button>
                     </div>
 
-                    {/* Demo Mode */}
-                    <div className="mt-6 pt-6 border-t border-gray-700">
-                        <button
-                            onClick={handleDemoMode}
-                            className="w-full py-2 text-gray-400 hover:text-white text-sm transition-colors"
-                        >
-                            Continue in Demo Mode →
-                        </button>
-                    </div>
+                    {/* Demo Mode - Only show in development */}
+                    {process.env.NODE_ENV !== 'production' && (
+                        <div className="mt-6 pt-6 border-t border-gray-700">
+                            <button
+                                onClick={handleDemoMode}
+                                className="w-full py-2 text-gray-400 hover:text-white text-sm transition-colors"
+                            >
+                                Continue in Demo Mode →
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <p className="text-center text-gray-500 text-xs mt-6">

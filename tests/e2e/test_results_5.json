@@ -1,0 +1,198 @@
+﻿[dotenv@17.2.3] injecting env (2) from .env -- tip: ÔÜÖ´©Å  specify custom .env file path with { path: '/custom/path/.env' }
+{
+  "config": {
+    "configFile": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\playwright.config.ts",
+    "rootDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.0",
+    "workers": 6,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "messaging.spec.ts",
+      "file": "messaging.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Trainer-Client Messaging",
+          "file": "messaging.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should allow trainer to message client and client to reply",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 14156,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Test message 1770227772932')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Test message 1770227772932')\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Test message 1770227772932')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Test message 1770227772932')\u001b[22m\n\n    at C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\messaging.spec.ts:120:51",
+                        "location": {
+                          "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\messaging.spec.ts",
+                          "column": 51,
+                          "line": 120
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 118 |\u001b[39m\n \u001b[90m 119 |\u001b[39m         \u001b[90m// Verify message appears\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 120 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(testMessage))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                   \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 121 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByText(\u001b[32m'From Your Trainer'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 122 |\u001b[39m\n \u001b[90m 123 |\u001b[39m         \u001b[90m// 4. Client replies\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\messaging.spec.ts",
+                            "column": 51,
+                            "line": 120
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Test message 1770227772932')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Test message 1770227772932')\u001b[22m\n\n\n  118 |\n  119 |         // Verify message appears\n> 120 |         await expect(page.getByText(testMessage)).toBeVisible({ timeout: 10000 });\n      |                                                   ^\n  121 |         await expect(page.getByText('From Your Trainer')).toBeVisible();\n  122 |\n  123 |         // 4. Client replies\n    at C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\messaging.spec.ts:120:51"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Test Started\n"
+                        },
+                        {
+                          "text": "Initial Navigation Complete\n"
+                        },
+                        {
+                          "text": "Seeding User 1 via WhatsApp Webhook (Browser)...\n"
+                        },
+                        {
+                          "text": "User Seeding Status: 200\n"
+                        },
+                        {
+                          "text": "Seeding test event (Browser)...\n"
+                        },
+                        {
+                          "text": "Event Seeding Status: 200\n"
+                        },
+                        {
+                          "text": "Reloading God Mode...\n"
+                        },
+                        {
+                          "text": "Page URL: https://blackcard-concierge.netlify.app/god-mode\n"
+                        },
+                        {
+                          "text": "God Mode Header Verified\n"
+                        },
+                        {
+                          "text": "Waiting for seeded event for User 1...\n"
+                        },
+                        {
+                          "text": "User 1 entry visible\n"
+                        },
+                        {
+                          "text": "Message button clicked\n"
+                        },
+                        {
+                          "text": "Modal visible\n"
+                        },
+                        {
+                          "text": "Sent trainer message: Test message 1770227772932\n"
+                        },
+                        {
+                          "text": "Switching to Client Messages...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-04T17:56:11.269Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\test-results\\messaging-Trainer-Client-M-621c9--client-and-client-to-reply-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\test-results\\messaging-Trainer-Client-M-621c9--client-and-client-to-reply-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\messaging.spec.ts",
+                        "column": 51,
+                        "line": 120
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "107d361b6fc8beba4b6c-6a47c8c22e20167fd229",
+              "file": "messaging.spec.ts",
+              "line": 11,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-02-04T17:56:10.252Z",
+    "duration": 15388.891000000001,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

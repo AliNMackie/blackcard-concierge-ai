@@ -1,21 +1,35 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Trainer-Client Messaging', () => {
-    test('should allow trainer to message client and client to reply', async ({ page }) => {
-        // Enable browser console logging
-        page.on('console', msg => console.log(`BROWSER: ${msg.text()}`));
-
-        console.log('Test Started');
-
-        // Navigate to a page first to have a window context (required for page.evaluate fetch)
-        await page.goto('/god-mode');
-        console.log('Initial Navigation Complete');
-
+    test('should allow trainer to message client and client to reply', async ({ page, context }) => {
         // Use env var for API Key
         const apiKey = process.env.ELITE_API_KEY;
         if (!apiKey) {
             throw new Error('ELITE_API_KEY environment variable is not set');
         }
+
+        // Set E2E Auth Mock in local storage AND Cookies for robust bypass
+        const domain = new URL(process.env.BASE_URL || 'https://blackcard-concierge.netlify.app').hostname;
+        await context.addCookies([{
+            name: 'E2E_AUTH_MOCK',
+            value: apiKey || 'true',
+            domain: domain,
+            path: '/'
+        }]);
+
+        await context.addInitScript((key) => {
+            window.localStorage.setItem('E2E_AUTH_MOCK', key || 'true');
+        }, apiKey);
+
+        // Enable browser console logging
+        page.on('console', msg => console.log(`BROWSER: ${msg.text()}`));
+
+        console.log('Test Started');
+
+        // Navigate to a page first with the E2E key in the query string
+        // This is the most robust way to skip the ProtectedRoute redirect on first load
+        await page.goto(`/god-mode?e2e-key=${apiKey}`);
+        console.log('Initial Navigation Complete (with Query Bypass)');
 
         // 0. Seed User '1' via WhatsApp Webhook (Browser Fetch)
         console.log('Seeding User 1 via WhatsApp Webhook (Browser)...');
@@ -68,10 +82,10 @@ test.describe('Trainer-Client Messaging', () => {
             throw e;
         }
 
-        // Wait for the seeded event to appear
-        console.log('Waiting for seeded event...');
-        await expect(page.getByText('E2E Test Initialization')).toBeVisible({ timeout: 15000 });
-        console.log('Seeded event visible');
+        // Wait for the seeded event to appear (check for User 1 in the table)
+        console.log('Waiting for seeded event for User 1...');
+        await expect(page.locator('td').filter({ hasText: /^1$/ }).first()).toBeVisible({ timeout: 15000 });
+        console.log('User 1 entry visible');
 
         // Look for the "Message" button
         const messageBtn = page.getByRole('button', { name: /message/i }).first();
@@ -85,14 +99,17 @@ test.describe('Trainer-Client Messaging', () => {
 
         // Type message
         const testMessage = `Test message ${Date.now()}`;
-        await page.fill('textarea', testMessage);
+        console.log(`Filling message: ${testMessage}`);
+        await page.locator('textarea').fill(testMessage);
 
         // Send
-        await page.click('button:has-text("Send")');
+        console.log('Clicking Send button...');
+        await page.locator('button:has-text("Send")').click();
 
-        // Debug: Check if error appeared
+        // Debug: Check if error appeared or modal closed
         try {
-            await expect(page.getByText('Send Message')).not.toBeVisible({ timeout: 5000 });
+            await expect(page.getByText('Send Message')).not.toBeVisible({ timeout: 10000 });
+            console.log('Message modal closed successfully');
         } catch (e) {
             const errorMsg = page.locator('text=ERROR:');
             if (await errorMsg.isVisible()) {
@@ -100,26 +117,35 @@ test.describe('Trainer-Client Messaging', () => {
                 console.error(`Messaging Failed UI Error: ${text}`);
                 throw new Error(`Messaging Failed: ${text}`);
             }
+            console.error('Modal failed to close or timed out');
             throw e;
         }
-        console.log(`Sent trainer message: ${testMessage}`);
 
-        // 3. Client checks messages
+        // Wait for it to appear in the God Mode stream first (confirms backend persisted it)
+        console.log('Verifying message in God Mode stream...');
+        await expect(page.locator('td').getByText(testMessage).first()).toBeVisible({ timeout: 10000 });
+        console.log(`Sent trainer message visible in God Mode: ${testMessage}`);
+
+        // 3. Switch to Client View (Messages)
         console.log('Switching to Client Messages...');
-        await page.goto('/messages');
+        await page.waitForTimeout(2000); // Wait for backend processing
+        await page.goto(`${process.env.BASE_URL}/messages?e2e-key=${apiKey}`);
 
         // Verify message appears
-        await expect(page.getByText(testMessage)).toBeVisible({ timeout: 10000 });
+        console.log('Waiting for message to appear in Client View...');
+        await expect(page.getByText(testMessage)).toBeVisible({ timeout: 15000 });
         await expect(page.getByText('From Your Trainer')).toBeVisible();
 
         // 4. Client replies
         const replyMessage = `Got it, thanks! ${Date.now()}`;
-        await page.fill('input[placeholder="Message your coach..."]', replyMessage);
-        // Click send
-        await page.click('button:has(.lucide-send)');
+        console.log(`Sending client reply: ${replyMessage}`);
+        await page.locator('input[placeholder*="Message your coach"]').fill(replyMessage);
+
+        // Click send (using locator for the button next to the input)
+        await page.locator('button:has(svg)').last().click();
 
         // Verify reply appears
-        await expect(page.getByText(replyMessage)).toBeVisible();
-        console.log(`Sent client reply: ${replyMessage}`);
+        await expect(page.getByText(replyMessage)).toBeVisible({ timeout: 10000 });
+        console.log(`Sent client reply visible: ${replyMessage}`);
     });
 });

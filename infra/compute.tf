@@ -36,8 +36,13 @@ resource "google_cloud_run_v2_service" "api" {
       
       # In a real app we'd mount the secret as volume or env var from secret ref
       env {
-         name = "DB_SECRET_ID"
-         value = google_secret_manager_secret.db_pass_secret.secret_id
+        name = "DB_PASS"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.db_pass_secret.secret_id
+            version = "latest"
+          }
+        }
       }
       
       env {

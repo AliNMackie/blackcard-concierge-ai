@@ -112,13 +112,17 @@ async def get_current_user(
     
     token = credentials.credentials
     
-    # Bypass for E2E Testing using Bearer Token
+    # Bypass for E2E Testing / Internal Service calls
     primary_key = settings.ELITE_API_KEY
     
-    # Debug logging
-    logger.info(f"Auth Check V5: Token len={len(token)}, Key len={len(primary_key)}")
-    if primary_key and token.strip() == primary_key.strip():
-         logger.info("Auth: Bearer token matches API Key (V5). Granting Admin access.")
+    # Check if this is an E2E bypass attempt
+    is_e2e_bypass = primary_key and token.strip() == primary_key.strip()
+    
+    if is_e2e_bypass:
+         # In production, we might want to log this specially or restrict it
+         if settings.ENV == "production":
+             logger.warning(f"Auth Bypass (API Key) used in PRODUCTION mode. Path: {pathname if 'pathname' in locals() else 'unknown'}")
+         
          return AuthenticatedUser(
             uid="demo_user",
             email="admin@example.com",

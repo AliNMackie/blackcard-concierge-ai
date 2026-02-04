@@ -1,0 +1,152 @@
+﻿[dotenv@17.2.3] injecting env (2) from .env -- tip: ­ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+{
+  "config": {
+    "configFile": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\playwright.config.ts",
+    "rootDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.0",
+    "workers": 6,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "video-coaching.spec.ts",
+      "file": "video-coaching.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Video Coaching Feature",
+          "file": "video-coaching.spec.ts",
+          "line": 14,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load exercise card and activate camera form check",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 6495,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: /Check Form|Record Form/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: /Check Form|Record Form/i }).first()\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: /Check Form|Record Form/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: /Check Form|Record Form/i }).first()\u001b[22m\n\n    at C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts:32:36",
+                        "location": {
+                          "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts",
+                          "column": 36,
+                          "line": 32
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 30 |\u001b[39m         \u001b[90m// Using a robust regex to match either phrasing\u001b[39m\n \u001b[90m 31 |\u001b[39m         \u001b[36mconst\u001b[39m checkFormBtn \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/Check Form|Record Form/i\u001b[39m })\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 32 |\u001b[39m         \u001b[36mawait\u001b[39m expect(checkFormBtn)\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 33 |\u001b[39m         console\u001b[33m.\u001b[39mlog(\u001b[32m'Button found, attempting click...'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 34 |\u001b[39m         \u001b[36mawait\u001b[39m checkFormBtn\u001b[33m.\u001b[39mclick({ force\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m         console\u001b[33m.\u001b[39mlog(\u001b[32m'Click action completed.'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts",
+                            "column": 36,
+                            "line": 32
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: /Check Form|Record Form/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: /Check Form|Record Form/i }).first()\u001b[22m\n\n\n  30 |         // Using a robust regex to match either phrasing\n  31 |         const checkFormBtn = page.getByRole('button', { name: /Check Form|Record Form/i }).first();\n> 32 |         await expect(checkFormBtn).toBeVisible();\n     |                                    ^\n  33 |         console.log('Button found, attempting click...');\n  34 |         await checkFormBtn.click({ force: true });\n  35 |         console.log('Click action completed.');\n    at C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts:32:36"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-04T18:00:13.330Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\test-results\\video-coaching-Video-Coach-a3875--activate-camera-form-check-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\test-results\\video-coaching-Video-Coach-a3875--activate-camera-form-check-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\video-coaching.spec.ts",
+                        "column": 36,
+                        "line": 32
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "80ccc2d4b64a11a63eda-9c3a4dc2310b6a71c70c",
+              "file": "video-coaching.spec.ts",
+              "line": 15,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-02-04T18:00:12.370Z",
+    "duration": 7667.579,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

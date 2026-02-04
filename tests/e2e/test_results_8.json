@@ -1,0 +1,184 @@
+﻿[dotenv@17.2.3] injecting env (2) from .env -- tip: ­ƒôí add observability to secrets: https://dotenvx.com/ops
+{
+  "config": {
+    "configFile": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\playwright.config.ts",
+    "rootDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/Alastair Mackie/.gemini/antigravity/scratch/elite_concierge_ai/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.0",
+    "workers": 6,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "messaging.spec.ts",
+      "file": "messaging.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Trainer-Client Messaging",
+          "file": "messaging.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should allow trainer to message client and client to reply",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30214,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\messaging.spec.ts",
+                            "column": 59,
+                            "line": 119
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /send/i })\u001b[22m\n\n\n  117 |             throw e;\n  118 |         }\n> 119 |         await page.getByRole('button', { name: /send/i }).click();\n      |                                                           ^\n  120 |\n  121 |         // Wait for it to appear in the God Mode stream first (confirms backend persisted it)\n  122 |         console.log('Verifying message in God Mode stream...');\n    at C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\messaging.spec.ts:119:59"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Test Started\n"
+                        },
+                        {
+                          "text": "Initial Navigation Complete (with Query Bypass)\n"
+                        },
+                        {
+                          "text": "Seeding User 1 via WhatsApp Webhook (Browser)...\n"
+                        },
+                        {
+                          "text": "User Seeding Status: 200\n"
+                        },
+                        {
+                          "text": "Seeding test event (Browser)...\n"
+                        },
+                        {
+                          "text": "Event Seeding Status: 200\n"
+                        },
+                        {
+                          "text": "Reloading God Mode...\n"
+                        },
+                        {
+                          "text": "Page URL: https://blackcard-concierge.netlify.app/god-mode?e2e-key=EliteConcierge2026_GodSecret\n"
+                        },
+                        {
+                          "text": "God Mode Header Verified\n"
+                        },
+                        {
+                          "text": "Waiting for seeded event for User 1...\n"
+                        },
+                        {
+                          "text": "User 1 entry visible\n"
+                        },
+                        {
+                          "text": "Message button clicked\n"
+                        },
+                        {
+                          "text": "Modal visible\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-04T18:32:03.292Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\test-results\\messaging-Trainer-Client-M-621c9--client-and-client-to-reply-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\tests\\e2e\\test-results\\messaging-Trainer-Client-M-621c9--client-and-client-to-reply-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "107d361b6fc8beba4b6c-6a47c8c22e20167fd229",
+              "file": "messaging.spec.ts",
+              "line": 4,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-02-04T18:32:02.374Z",
+    "duration": 31387.524,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}
