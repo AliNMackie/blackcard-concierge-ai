@@ -375,34 +375,28 @@ async def provision_trainer(
     user = result.scalar_one_or_none()
     
     if not user:
-        # Create placeholder user
-        # Note: UID will need to be updated when they actually sign in if using Firebase
-        # BUT for our auth system, we usually key off UID.
-        # This is tricky with Firebase.
-        # Ideally we ask them to sign up first.
-        # BUT for now, let's assume they might have signed up or we pre-seed.
-        # If we pre-seed with a random UID, it WON'T match their Firebase UID.
-        # SO: Best path is -> Update existing user OR Fail if not found.
-        # If we want to support pre-seeding, we'd need their Firebase UID.
-        
-        # ACTUALLY: Let's just create a row. If the UID mismatch happens, 
-        # auth.py logic needs to handle merging or we just tell them to sign up first.
-        
-        # Strategy: Ask for UID if available, else fail?
-        # No, user only gave email.
-        
-        # Wait, if I create a user with a placeholder UID, they can't log in 
-        # because the Firebase token will have a DIFFERENT UID.
-        
-        # CORRECT APPROACH:
-        # 1. If user exists (they signed up), upgrade them.
-        # 2. If not, we can't pre-provision without their future Firebase UID.
-        # SO: This endpoint will only work if they have already signed up (at least once).
-        
-        raise HTTPException(
-            status_code=404, 
-            detail=f"User with email {email} not found. Have they signed up yet?"
-        )
+        # User not in our DB yet — check if they exist in Firebase Auth
+        try:
+            from firebase_admin import auth as fb_auth
+            from app.auth import get_firebase_app
+            get_firebase_app()  # Ensure initialized
+            fb_user = fb_auth.get_user_by_email(email)
+            
+            # Found in Firebase! Create DB record with their real UID
+            user = User(id=fb_user.uid, email=email, role="trainer")
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+            
+            logger.info(f"Admin {current_user.uid} created + promoted {email} (UID: {fb_user.uid}) to TRAINER")
+            return {"status": "ok", "message": f"User {email} created and promoted to TRAINER"}
+            
+        except Exception as e:
+            logger.warning(f"Firebase lookup failed for {email}: {e}")
+            raise HTTPException(
+                status_code=404, 
+                detail=f"User with email {email} not found in DB or Firebase. Have they signed up yet?"
+            )
         
     user.role = "trainer"
     await db.commit()
