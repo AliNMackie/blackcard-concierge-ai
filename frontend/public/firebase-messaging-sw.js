@@ -10,8 +10,8 @@ firebase.initializeApp({
     authDomain: "blackcard-concierge-ai.firebaseapp.com",
     projectId: "blackcard-concierge-ai",
     storageBucket: "blackcard-concierge-ai.appspot.com",
-    messagingSenderId: "557456081985",
-    appId: "PASTE_YOUR_APP_ID_HERE", // Example: 1:557456081985:web:abcdef123456
+    messagingSenderId: "54133106168",
+    appId: "1:54133106168:web:4ff07ea4da5e3fea50a20d",
 });
 
 const messaging = firebase.messaging();
