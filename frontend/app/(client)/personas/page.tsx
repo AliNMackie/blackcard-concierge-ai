@@ -164,13 +164,6 @@ export default function Personas() {
                     </motion.div>
                 ))}
             </div>
-            {/* Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/90 backdrop-blur pb-6 pt-4 flex justify-around text-gray-400 max-w-7xl mx-auto z-50 md:hidden">
-                <Link href="/dashboard"><Activity size={24} className="hover:text-black transition" /></Link>
-                <Link href="/personas"><div className="text-black relative"><Users size={24} /><div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full"></div></div></Link>
-                <Link href="/performance"><Trophy size={24} className="hover:text-black transition" /></Link>
-                <Link href="/messages"><MessageSquare size={24} className="hover:text-black transition" /></Link>
-            </div>
         </div>
     );
 }

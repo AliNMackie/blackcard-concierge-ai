@@ -186,14 +186,6 @@ export default function MessagesPage() {
                     </button>
                 </div>
             </div>
-
-            {/* Navigation */}
-            <div className="fixed bottom-0 left-0 right-0 border-t border-gray-900 bg-black/90 backdrop-blur pb-6 pt-4 flex justify-around text-gray-500 max-w-md mx-auto z-50">
-                <Link href="/dashboard"><Activity size={24} className="hover:text-white transition" /></Link>
-                <Link href="/personas"><Users size={24} className="hover:text-white transition" /></Link>
-                <Link href="/performance"><Trophy size={24} className="hover:text-white transition" /></Link>
-                <Link href="/messages"><div className="text-white relative"><MessageSquare size={24} /><div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full"></div></div></Link>
-            </div>
         </div>
     );
 }
