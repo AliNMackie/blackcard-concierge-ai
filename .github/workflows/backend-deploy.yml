@@ -64,7 +64,7 @@ jobs:
       - name: Start Test Database
         working-directory: ./backend
         run: |
-          docker-compose -f docker-compose.test.yml up -d
+          docker compose -f docker-compose.test.yml up -d
           echo "Waiting for Database to initialize..."
           sleep 10
           docker ps
