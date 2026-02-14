@@ -46,19 +46,40 @@ In GCP Console:
 3. Check interval: 5 minutes
 4. Alert: Email notification to your inbox
 
+### 4. Update Netlify Environment Variables
+To fix the "Missing appId" error and restore auth:
+1. Go to **Netlify → Site configuration → Environment variables**
+2. Ensure the following are set:
+   - `NEXT_PUBLIC_FIREBASE_API_KEY`
+   - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+   - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+   - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+   - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+   - `NEXT_PUBLIC_FIREBASE_APP_ID` (This is the one likely missing causing the 401s)
+
 ---
 
-## 🟡 First Client Onboarding
+## 🟡 First Client & Trainer Onboarding
 
-### Account Setup
-1. Client signs up at `https://blackcard-concierge.netlify.app/login`
-2. Firebase creates their auth account automatically
-3. First chat message creates their user record in the DB
+### Trainer Setup (Nephew)
+1. Nephew signs up at `https://blackcard-concierge.netlify.app/login` using "Sign Up".
+2. **Promote him**: Once he has an account, the admin must run the following command (or ask me to do it) to give him dashboard access:
+   ```bash
+   curl -X POST https://elite-concierge-api-<hash>.europe-west2.run.app/users/admin/provision-trainer \
+     -H "Content-Type: application/json" \
+     -H "X-Elite-Key: YOUR_NEW_API_KEY" \
+     -d '{"email": "nephew@email.com"}'
+   ```
+
+### Account Setup (Client)
+1. Client signs up at login page.
+2. Firebase creates their auth account automatically.
+3. First chat message creates their user record in the DB.
 
 ### Trainer Configuration
-1. Log into God Mode: `/god-mode` (requires the new API key)
-2. Assign the trainer to the client via the trainer dashboard
-3. Set the client's `coach_style` (e.g., `hyrox_competitor`, `wellness`, `strength`)
+1. Log into God Mode: `/god-mode` (Trainer Dashboard).
+2. Assign the trainer to the client via the dropdown menu.
+3. Set the client's `coach_style`.
 
 ### Verify It Works
 Run through the UAT guide: [uat_guide.md](file:///C:/Users/Alastair%20Mackie/.gemini/antigravity/brain/a944cdba-5edb-483a-a23c-100881b00daa/uat_guide.md)

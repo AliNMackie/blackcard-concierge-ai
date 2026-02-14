@@ -156,7 +156,7 @@ export type PerformanceMetricInput = {
 export async function logPerformanceMetric(data: PerformanceMetricInput): Promise<void> {
     try {
         const headers = await getAuthHeaders();
-        await fetch(`${API_BASE}/analytics/log`, {
+        await fetch(`${API_BASE}/analytics/metrics`, {
             method: 'POST',
             headers,
             body: JSON.stringify(data),
