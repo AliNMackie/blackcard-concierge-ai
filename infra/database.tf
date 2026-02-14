@@ -6,6 +6,16 @@ resource "google_sql_database_instance" "master" {
   settings {
     tier = "db-f1-micro" # Start small for MVP
     
+    backup_configuration {
+      enabled                        = true
+      start_time                     = "03:00"  # 3 AM UTC
+      point_in_time_recovery_enabled = true
+      transaction_log_retention_days = 7
+      backup_retention_settings {
+        retained_backups = 4
+      }
+    }
+
     ip_configuration {
       ipv4_enabled    = true
       # authorized_networks = [] # Add CI IP if needed, or use Proxy
