@@ -161,9 +161,9 @@ export default function Home() {
               <span>Elite Concierge AI © 2026</span>
             </div>
             <div className="flex gap-6 text-sm text-zinc-500">
-              <a href="#" className="hover:text-white transition">Privacy</a>
-              <a href="#" className="hover:text-white transition">Terms</a>
-              <a href="#" className="hover:text-white transition">Support</a>
+              <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
+              <Link href="/terms" className="hover:text-white transition">Terms</Link>
+              <Link href="/login" className="hover:text-white transition">Sign In</Link>
             </div>
           </div>
         </footer>
