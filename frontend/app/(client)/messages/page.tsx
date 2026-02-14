@@ -46,15 +46,32 @@ export default function MessagesPage() {
     async function handleSend() {
         if (!inputMessage.trim() || sending) return;
 
+        const text = inputMessage.trim();
+        setInputMessage("");
         setSending(true);
+
+        // Optimistic: Immediately show the user's message
+        const optimisticId = -Date.now();
+        const optimisticMsg: EventLog = {
+            id: optimisticId,
+            user_id: "1",
+            event_type: "chat",
+            payload: { message: text, role: "user" },
+            agent_decision: "",
+            agent_message: "",
+            created_at: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, optimisticMsg]);
+
         try {
-            // Send to backend - using "1" as demo user ID
-            await sendChatMessage("1", inputMessage.trim());
-            setInputMessage("");
-            // Refresh messages to show new message and AI response
+            await sendChatMessage("1", text);
+            // Refresh to get server-confirmed message + AI response
             await loadMessages();
         } catch (err) {
             console.error("Failed to send:", err);
+            // Rollback the optimistic message
+            setMessages(prev => prev.filter(m => m.id !== optimisticId));
+            setInputMessage(text); // Restore the input
             alert("Failed to send message. Please try again.");
         }
         setSending(false);
@@ -126,10 +143,10 @@ export default function MessagesPage() {
                                 className={`flex flex-col ${fromUser ? "items-end" : "items-start"}`}
                             >
                                 <div className={`max-w-[85%] p-4 rounded-2xl text-sm ${fromUser
-                                        ? "bg-zinc-800 text-white rounded-tr-none"
-                                        : isTrainer
-                                            ? "bg-green-900/30 border border-green-800 text-green-100 rounded-tl-none"
-                                            : "bg-zinc-100 text-black rounded-tl-none font-medium"
+                                    ? "bg-zinc-800 text-white rounded-tr-none"
+                                    : isTrainer
+                                        ? "bg-green-900/30 border border-green-800 text-green-100 rounded-tl-none"
+                                        : "bg-zinc-100 text-black rounded-tl-none font-medium"
                                     }`}>
                                     {isTrainer && (
                                         <p className="text-[10px] text-green-400 uppercase font-bold mb-1 tracking-widest">
