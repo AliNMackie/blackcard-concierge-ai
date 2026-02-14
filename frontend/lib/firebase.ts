@@ -124,3 +124,6 @@ export function getCurrentUser(): FirebaseUser | null {
 }
 
 export type { FirebaseUser };
+
+// Re-export the app instance for modules like firebase-messaging
+export { app };

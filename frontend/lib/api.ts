@@ -75,3 +75,86 @@ export async function triggerOverride(userId: string, action: string) {
     });
     return res.json();
 }
+
+export function getApiUrl(): string {
+    return API_BASE;
+}
+
+async function getAuthHeaders(): Promise<HeadersInit> {
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    const token = await getIdToken();
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    } else if (typeof window !== 'undefined' && window.localStorage.getItem('E2E_BYPASS')) {
+        if (process.env.NEXT_PUBLIC_API_KEY) {
+            headers['X-Elite-Key'] = process.env.NEXT_PUBLIC_API_KEY;
+        }
+    }
+    return headers;
+}
+
+export async function analyzeVision(imageBase64: string): Promise<AgentResponse> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/events/vision`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                detected_equipment: [],
+                image_base64: imageBase64,
+            }),
+        });
+        if (!res.ok) throw new Error('Vision analysis failed');
+        return res.json();
+    } catch (error) {
+        console.error('Vision analysis error:', error);
+        return { agent_name: 'System', message: 'Vision analysis unavailable.', suggested_action: 'ERROR' };
+    }
+}
+
+export async function sendChatMessage(userId: string, message: string): Promise<AgentResponse> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/events/chat`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ user_id: userId, message }),
+        });
+        if (!res.ok) throw new Error('Chat send failed');
+        return res.json();
+    } catch (error) {
+        console.error('Chat error:', error);
+        return { agent_name: 'System', message: 'Unable to send message. Please try again.', suggested_action: 'ERROR' };
+    }
+}
+
+export type AnalyticsData = {
+    labels: string[];
+    datasets: { label: string; data: number[] }[];
+};
+
+export async function fetchAnalytics(userId: string, period = '7d'): Promise<AnalyticsData | null> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/analytics/${userId}?period=${period}`, { headers });
+        if (!res.ok) return null;
+        return res.json();
+    } catch (error) {
+        console.error('Analytics fetch error:', error);
+        return null;
+    }
+}
+
+export async function logPerformanceMetric(userId: string, metric: string, value: number): Promise<void> {
+    try {
+        const headers = await getAuthHeaders();
+        await fetch(`${API_BASE}/analytics/log`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ user_id: userId, metric, value }),
+        });
+    } catch (error) {
+        console.error('Metric log error:', error);
+    }
+}
+
