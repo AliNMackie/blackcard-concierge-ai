@@ -1,6 +1,9 @@
 import os
 from google.cloud import secretmanager
-from app.config import logger
+import logging
+# from app.config import logger (Circular Import Fix)
+
+logger = logging.getLogger("elite-concierge")
 
 def get_secret(secret_id: str, version_id: str = "latest", project_id: str = None) -> str:
     """

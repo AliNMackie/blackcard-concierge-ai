@@ -3,6 +3,13 @@ import logging
 from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Logging Configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("elite-concierge")
+
 class Settings(BaseSettings):
     # App Info
     APP_NAME: str = "Elite Concierge AI"
@@ -70,10 +77,3 @@ class Settings(BaseSettings):
 
 # Singleton
 settings = Settings()
-
-# Logging Configuration
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
-logger = logging.getLogger("elite-concierge")
