@@ -362,12 +362,13 @@ async def update_user_profile(update_data: UserUpdate, db: AsyncSession = Depend
 @router.post("/admin/provision-trainer")
 async def provision_trainer(
     email: str = Body(..., embed=True),
+    uid: Optional[str] = Body(None, embed=True),
     db: AsyncSession = Depends(get_db),
     current_user: AuthenticatedUser = Depends(require_admin)
 ):
     """
     Admin: Provision or upgrade a user to Trainer role by Email.
-    (Useful for onboarding when UID is unknown or not typically used).
+    Optionally accepts a uid if known (from Firebase Console).
     """
     # 1. Check if user exists by Email
     stmt = select(User).where(User.email == email)
@@ -375,28 +376,33 @@ async def provision_trainer(
     user = result.scalar_one_or_none()
     
     if not user:
-        # User not in our DB yet — check if they exist in Firebase Auth
-        try:
-            from firebase_admin import auth as fb_auth
-            from app.auth import get_firebase_app
-            get_firebase_app()  # Ensure initialized
-            fb_user = fb_auth.get_user_by_email(email)
-            
-            # Found in Firebase! Create DB record with their real UID
-            user = User(id=fb_user.uid, email=email, role="trainer")
-            db.add(user)
-            await db.commit()
-            await db.refresh(user)
-            
-            logger.info(f"Admin {current_user.uid} created + promoted {email} (UID: {fb_user.uid}) to TRAINER")
-            return {"status": "ok", "message": f"User {email} created and promoted to TRAINER"}
-            
-        except Exception as e:
-            logger.warning(f"Firebase lookup failed for {email}: {e}")
+        # User not in our DB yet — try Firebase lookup or use provided UID
+        resolved_uid = uid  # Use provided UID if available
+        
+        if not resolved_uid:
+            try:
+                from firebase_admin import auth as fb_auth
+                from app.auth import get_firebase_app
+                get_firebase_app()
+                fb_user = fb_auth.get_user_by_email(email)
+                resolved_uid = fb_user.uid
+            except Exception as e:
+                logger.warning(f"Firebase lookup failed for {email}: {e}")
+        
+        if not resolved_uid:
             raise HTTPException(
                 status_code=404, 
-                detail=f"User with email {email} not found in DB or Firebase. Have they signed up yet?"
+                detail=f"User {email} not found. Provide their Firebase UID or have them sign up first."
             )
+        
+        # Create DB record with their real UID
+        user = User(id=resolved_uid, email=email, role="trainer")
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        
+        logger.info(f"Admin {current_user.uid} created + promoted {email} (UID: {resolved_uid}) to TRAINER")
+        return {"status": "ok", "message": f"User {email} created and promoted to TRAINER"}
         
     user.role = "trainer"
     await db.commit()
