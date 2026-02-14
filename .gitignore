@@ -38,6 +38,8 @@ Thumbs.db
 *.key
 .env
 .env.local
+secret.txt
+tests/e2e/.env
 
 # Build artifacts
 *.exe
