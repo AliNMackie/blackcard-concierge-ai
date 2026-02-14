@@ -93,7 +93,7 @@ async function getAuthHeaders(): Promise<HeadersInit> {
     return headers;
 }
 
-export async function analyzeVision(imageBase64: string): Promise<AgentResponse> {
+export async function analyzeVision(imageBase64: string, _liveMode?: boolean): Promise<AgentResponse> {
     try {
         const headers = await getAuthHeaders();
         const res = await fetch(`${API_BASE}/events/vision`, {

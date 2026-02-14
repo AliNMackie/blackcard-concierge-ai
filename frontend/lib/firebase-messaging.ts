@@ -1,11 +1,13 @@
 import { getMessaging, getToken } from 'firebase/messaging';
-import { app } from './firebase'; // Import initialized app
+import { getFirebaseApp } from './firebase';
 
 export const requestNotificationPermission = async () => {
     try {
+        const firebaseApp = getFirebaseApp();
+        if (!firebaseApp) return null;
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            const messaging = getMessaging(app);
+            const messaging = getMessaging(firebaseApp);
             const token = await getToken(messaging, {
                 vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
             });
