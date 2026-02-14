@@ -133,10 +133,10 @@ export type AnalyticsData = {
     datasets: { label: string; data: number[] }[];
 };
 
-export async function fetchAnalytics(userId: string, period = '7d'): Promise<AnalyticsData | null> {
+export async function fetchAnalytics(category: string, period = '7d'): Promise<AnalyticsData | null> {
     try {
         const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE}/analytics/${userId}?period=${period}`, { headers });
+        const res = await fetch(`${API_BASE}/analytics/${category}?period=${period}`, { headers });
         if (!res.ok) return null;
         return res.json();
     } catch (error) {
@@ -145,13 +145,21 @@ export async function fetchAnalytics(userId: string, period = '7d'): Promise<Ana
     }
 }
 
-export async function logPerformanceMetric(userId: string, metric: string, value: number): Promise<void> {
+export type PerformanceMetricInput = {
+    category: string;
+    name: string;
+    value: number;
+    unit: string;
+    timestamp: string;
+};
+
+export async function logPerformanceMetric(data: PerformanceMetricInput): Promise<void> {
     try {
         const headers = await getAuthHeaders();
         await fetch(`${API_BASE}/analytics/log`, {
             method: 'POST',
             headers,
-            body: JSON.stringify({ user_id: userId, metric, value }),
+            body: JSON.stringify(data),
         });
     } catch (error) {
         console.error('Metric log error:', error);
