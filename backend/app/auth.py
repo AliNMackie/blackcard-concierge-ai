@@ -21,6 +21,11 @@ from app.database import get_db
 from app.models import User
 
 # Initialize Firebase Admin SDK
+# IMPORTANT: The backend runs on GCP project "blackcard-concierge-ai" (557456081985)
+# but Firebase Auth is on project "blackcard-concierge" (54133106168).
+# We must explicitly tell the Admin SDK which project to verify tokens against.
+FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "blackcard-concierge")
+
 _firebase_app = None
 
 def get_firebase_app():
@@ -33,11 +38,16 @@ def get_firebase_app():
                 import json
                 cred_dict = json.loads(settings.FIREBASE_CREDENTIALS_JSON)
                 cred = credentials.Certificate(cred_dict)
-                _firebase_app = firebase_admin.initialize_app(cred)
+                _firebase_app = firebase_admin.initialize_app(cred, {
+                    'projectId': FIREBASE_PROJECT_ID
+                })
             else:
                 # Use Application Default Credentials (works in Cloud Run)
-                _firebase_app = firebase_admin.initialize_app()
-            logger.info("Firebase Admin SDK initialized")
+                # Explicitly set the project ID to the Firebase project
+                _firebase_app = firebase_admin.initialize_app(options={
+                    'projectId': FIREBASE_PROJECT_ID
+                })
+            logger.info(f"Firebase Admin SDK initialized for project: {FIREBASE_PROJECT_ID}")
         except Exception as e:
             logger.warning(f"Firebase initialization skipped: {e}")
     return _firebase_app
