@@ -31,7 +31,7 @@ resource "google_cloud_run_v2_service" "api" {
       
       env {
         name  = "DB_INSTANCE_CONNECTION_NAME"
-        value = google_sql_database_instance.postgres.connection_name
+        value = google_sql_database_instance.master.connection_name
       }
       
       # In a real app we'd mount the secret as volume or env var from secret ref
@@ -39,7 +39,7 @@ resource "google_cloud_run_v2_service" "api" {
         name = "DB_PASS"
         value_source {
           secret_key_ref {
-            secret  = google_secret_manager_secret.db_pass_secret.secret_id
+            secret  = google_secret_manager_secret.db_pass.secret_id
             version = "latest"
           }
         }

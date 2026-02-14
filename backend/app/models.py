@@ -72,3 +72,17 @@ class PerformanceMetric(Base):
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     logged_by: Mapped[str] = mapped_column(String) # uid of person who logged it
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+from pgvector.sqlalchemy import Vector
+
+class DocumentChunk(Base):
+    __tablename__ = "document_chunks"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    content: Mapped[str] = mapped_column(Text)
+    embedding: Mapped[Vector] = mapped_column(Vector(768)) # Vertex AI 004 dim
+    source: Mapped[str] = mapped_column(String)
+    tags: Mapped[list] = mapped_column(JSON, default=[]) # Strings
+    metadata_json: Mapped[dict] = mapped_column(JSON, default={})
+    
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

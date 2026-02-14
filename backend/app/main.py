@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, Security, Request, status
 from fastapi.security import APIKeyHeader
 from app.config import settings, logger
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, text
 from contextlib import asynccontextmanager
 from datetime import datetime
 import time
@@ -81,8 +81,18 @@ async def log_requests(request: Request, call_next):
     return response
 
 @app.get("/health")
-def health_check():
-    return {"status": "ok", "service": settings.APP_NAME, "version": settings.VERSION}
+async def health_check(db: AsyncSession = Depends(get_db)):
+    try:
+        # DB Smoke Test: Simple query
+        result = await db.execute(text("SELECT 1"))
+        if result.scalar() != 1:
+            raise Exception("DB returned unexpected value")
+            
+        return {"status": "ok", "db": "connected", "service": settings.APP_NAME, "version": settings.VERSION}
+    except Exception as e:
+        logger.error(f"Health Check Failed: {e}")
+        # Return 503 Service Unavailable if DB is down
+        raise HTTPException(status_code=503, detail="Database Unavailable")
 
 @app.get("/events")
 async def list_events(
@@ -152,6 +162,15 @@ async def handle_wearable(event: WearableEvent, db: AsyncSession = Depends(get_d
             )
             db.add(log_entry)
             await db.commit()
+            
+            # Phase 3: Push Notification for RED Alerts
+            if "RED" in response.suggested_action or "ALERT" in response.suggested_action:
+                from app.notifications import send_topic_notification
+                send_topic_notification(
+                    topic="user_1", # Hardcoded for Demo
+                    title="⚠️ Biometric Alert",
+                    body=f"Action Required: {response.message}"
+                )
             
         return response
     except Exception as e:
@@ -315,6 +334,26 @@ async def trigger_intervention(client_id: str, db: AsyncSession = Depends(get_db
     except Exception as e:
         logger.error(f"Intervention Trigger Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/notifications/subscribe")
+async def subscribe_notifications(payload: dict, current_user: AuthenticatedUser = Depends(get_current_user)):
+    """
+    Subscribes the user's device token to their personal topic (user_{uid}).
+    payload: { "token": "fcm_token_..." }
+    """
+    token = payload.get("token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Token required")
+    
+    from app.notifications import subscribe_to_topic
+    topic = f"user_{current_user.uid}"
+    
+    result = subscribe_to_topic(token, topic)
+    if not result or result.failure_count > 0:
+         logger.warning(f"Subscription failed for {current_user.uid}")
+         # We typically don't fail the request, just log
+    
+    return {"status": "subscribed", "topic": topic}
 
 
 if __name__ == "__main__":

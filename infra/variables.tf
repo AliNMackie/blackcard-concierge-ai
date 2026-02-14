@@ -20,3 +20,9 @@ variable "db_tier" {
   type        = string
   default     = "db-f1-micro" # MVP friendly
 }
+
+variable "db_password" {
+  description = "The password for the database user."
+  type        = string
+  sensitive   = true
+}

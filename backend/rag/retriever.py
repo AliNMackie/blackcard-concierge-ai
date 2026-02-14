@@ -1,61 +1,86 @@
-import os
+import logging
 from typing import List, Optional
+from sqlalchemy import select, text
+from sqlalchemy.ext.asyncio import AsyncSession
+from langchain_google_vertexai import VertexAIEmbeddings
 
-class InMemoryRetriever:
-    """
-    Simulates a Vector Database Retriever.
-    Reads markdown files from `rag/samples` into memory.
-    """
+import app.database
+from app.models import DocumentChunk
+from app.config import settings, logger
+
+class Retriever:
     def __init__(self):
-        self.documents = {}
-        # Pre-load samples
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        samples_dir = os.path.join(base_path, "samples")
-        
-        if os.path.exists(samples_dir):
-            for filename in os.listdir(samples_dir):
-                if filename.endswith(".md"):
-                    with open(os.path.join(samples_dir, filename), "r") as f:
-                        self.documents[filename] = f.read()
+        self.embeddings_model = None
+        self._init_embeddings()
 
-    def retrieve_protocol(self, query: str, tags: Optional[List[str]] = None) -> str:
+    def _init_embeddings(self):
+        try:
+            if settings.is_production():
+                self.embeddings_model = VertexAIEmbeddings(model_name="text-embedding-004")
+            else:
+                try: 
+                    # Try to init mock if available, or just set None
+                    self.embeddings_model = None
+                    logger.info("Retriever: Using MOCK embeddings (Dev Mode)")
+                except:
+                    pass
+        except Exception as e:
+            logger.error(f"Retriever: Failed to init Vertex AI: {e}")
+
+    async def get_embedding(self, text: str) -> List[float]:
+        if self.embeddings_model:
+            return self.embeddings_model.embed_query(text)
+        else:
+            # Mock vector
+            return [0.1] * 768
+
+    async def retrieve_protocol(self, query: str, tags: List[str] = [], k: int = 3) -> str:
         """
-        Retrieves relevant protocols based on query semantic overlap or strict tag matching.
-        
-        FUTURE INTEGRATION:
-        -------------------
-        This function will eventually connect to Cloud SQL (pgvector).
-        Sql:
-            SELECT content, 1 - (embedding <=> :query_embedding) as similarity
-            FROM documents
-            WHERE similarity > 0.7
-            ORDER BY similarity DESC
+        Retrieves relevant context strings.
         """
-        results = []
-        tags = tags or []
-        query_terms = query.lower().split()
-        
-        for name, content in self.documents.items():
-            content_lower = content.lower()
+        try:
+            # 1. Embed Query
+            query_vector = await self.get_embedding(query)
             
-            # Simple keyword matching heuristic
-            score = 0
-            if any(t in content_lower for t in tags):
-                score += 5
-            
-            matches = sum(1 for w in query_terms if w in content_lower)
-            score += matches
-            
-            if score > 0:
-                results.append((score, f"Source: {name}\n\n{content}"))
+            # 2. DB Search
+            if not app.database.AsyncSessionLocal:
+                return "Error: Database not initialized."
+
+            async with app.database.AsyncSessionLocal() as session:
+                stmt = select(DocumentChunk)
                 
-        # Sort by score descending
-        results.sort(key=lambda x: x[0], reverse=True)
-        
-        if results:
-            return "\n\n---\n\n".join([r[1] for r in results[:2]])
-            
-        return "No specific Legendary protocols found for this context."
+                # Hybrid Filter: Tags
+                # Note: pgvector + complex filters can be tricky. 
+                # For MVP, we filter strictly if tags provided, OR just boost?
+                # Let's filter strictly if tags are present
+                if tags:
+                    # JSONB/Array containment? 
+                    # Our model 'tags' is JSON, so we can use JSON operators if database supports it.
+                    # Or simple ILIKE for MVP if tags are stored as text string? 
+                    # Model has `tags = mapped_column(JSON)`. 
+                    # Let's Skip complex tag filtering for step 1, focus on semantic.
+                    pass
+                
+                # Semantic Search
+                # Check pgvector syntax: order_by(DocumentChunk.embedding.cosine_distance(query_vector))
+                stmt = stmt.order_by(DocumentChunk.embedding.cosine_distance(query_vector)).limit(k)
+                
+                result = await session.execute(stmt)
+                chunks = result.scalars().all()
+                
+                if not chunks:
+                    return ""
+                
+                # Format
+                context_parts = []
+                for c in chunks:
+                    context_parts.append(f"Source: {c.source}\nContent: {c.content}")
+                
+                return "\n\n".join(context_parts)
+                
+        except Exception as e:
+            logger.error(f"Retrieval Error: {e}")
+            return ""
 
-# Singleton instance
-retriever = InMemoryRetriever()
+# Global Instance
+retriever = Retriever()

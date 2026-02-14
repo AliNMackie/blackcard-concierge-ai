@@ -1,13 +1,9 @@
 [build]
-  base = "frontend"
+  base = ".gemini/antigravity/scratch/elite_concierge_ai/frontend"
   command = "npm install && npm run build"
-  publish = ".next"
+  publish = ".gemini/antigravity/scratch/elite_concierge_ai/frontend/.next"
 
-[build.environment]
-  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_FIREBASE_PROJECT_ID,NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,NEXT_PUBLIC_FIREBASE_API_KEY"
-  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

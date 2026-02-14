@@ -48,6 +48,7 @@ async def create_tables():
     if async_engine:
         async with async_engine.begin() as conn:
             # 1. Standard SQLAlchemy create
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
             await conn.run_sync(Base.metadata.create_all)
             
             # 2. Manual migration: Add 'is_traveling' if missing

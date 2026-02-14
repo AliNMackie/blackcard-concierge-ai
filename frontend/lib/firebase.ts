@@ -27,7 +27,7 @@ const firebaseConfig = {
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 
-function getFirebaseApp(): FirebaseApp | null {
+export function getFirebaseApp(): FirebaseApp | null {
     if (!firebaseConfig.apiKey) {
         console.warn('Firebase not configured - running in demo mode');
         return null;

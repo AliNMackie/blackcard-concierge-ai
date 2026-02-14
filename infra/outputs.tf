@@ -5,7 +5,7 @@ output "cloud_run_url" {
 
 output "db_instance_connection_name" {
   description = "The connection name of the Cloud SQL instance to be used in connection strings"
-  value       = google_sql_database_instance.postgres.connection_name
+  value       = google_sql_database_instance.master.connection_name
 }
 
 output "backend_sa_email" {

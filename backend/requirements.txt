@@ -21,3 +21,6 @@ pytest
 pytest-asyncio
 firebase-admin
 twilio
+testcontainers
+psycopg2-binary
+pgvector

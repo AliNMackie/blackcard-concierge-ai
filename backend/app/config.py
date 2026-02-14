@@ -44,6 +44,20 @@ class Settings(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        if self.is_production():
+            # Load Secrets from GCP
+            from app.secrets import get_secret
+            
+            # DB Password
+            if not self.DB_PASS:
+                self.DB_PASS = get_secret("DB_PASS")
+            
+            # Elite API Key
+            if not self.ELITE_API_KEY or self.ELITE_API_KEY == "dev-secret-123":
+                 secret_key = get_secret("ELITE_API_KEY")
+                 if secret_key:
+                     self.ELITE_API_KEY = secret_key
+
         if not self.DATABASE_URL and self.DB_PASS and self.DB_INSTANCE_CONNECTION_NAME:
             # Construct AsyncPG URL for Cloud SQL
             # postgresql+asyncpg://user:pass@/dbname?host=/cloudsql/instance
