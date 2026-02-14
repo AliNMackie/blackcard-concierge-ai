@@ -19,11 +19,12 @@ import {
 // Firebase configuration - uses environment variables
 const firebaseConfig = {
     apiKey: "AIzaSyBS0qNsIazriomreqsG1OV2dnxpCdzVhSs",
-    authDomain: "blackcard-concierge-ai.firebaseapp.com",
-    projectId: "blackcard-concierge-ai",
-    storageBucket: "blackcard-concierge-ai.appspot.com",
+    authDomain: "blackcard-concierge.firebaseapp.com",
+    projectId: "blackcard-concierge",
+    storageBucket: "blackcard-concierge.firebasestorage.app",
     messagingSenderId: "54133106168",
     appId: "1:54133106168:web:4ff07ea4da5e3fea50a20d",
+    measurementId: "G-NE0XMP548L"
 };
 
 // Lazy initialization
@@ -37,6 +38,7 @@ export function getFirebaseApp(): FirebaseApp | null {
     }
 
     if (!app && getApps().length === 0) {
+        console.log("Initializing Firebase with hardcoded config. AppID:", firebaseConfig.appId);
         app = initializeApp(firebaseConfig);
     } else if (!app) {
         app = getApps()[0];

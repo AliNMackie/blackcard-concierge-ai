@@ -7,9 +7,9 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-comp
 // if they are static across all environments.
 firebase.initializeApp({
     apiKey: "AIzaSyBS0qNsIazriomreqsG1OV2dnxpCdzVhSs",
-    authDomain: "blackcard-concierge-ai.firebaseapp.com",
-    projectId: "blackcard-concierge-ai",
-    storageBucket: "blackcard-concierge-ai.appspot.com",
+    authDomain: "blackcard-concierge.firebaseapp.com",
+    projectId: "blackcard-concierge",
+    storageBucket: "blackcard-concierge.firebasestorage.app",
     messagingSenderId: "54133106168",
     appId: "1:54133106168:web:4ff07ea4da5e3fea50a20d",
 });

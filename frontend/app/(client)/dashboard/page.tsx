@@ -20,7 +20,10 @@ export default function ClientDashboard() {
                     // Send to Backend
                     try {
                         const idToken = await getIdToken();
-                        await fetch('/api/notifications/subscribe', { // Proxy to Backend
+                        const { getApiUrl } = await import('@/lib/api');
+                        const API_BASE = getApiUrl();
+
+                        await fetch(`${API_BASE}/notifications/subscribe`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
