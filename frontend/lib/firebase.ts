@@ -18,12 +18,12 @@ import {
 
 // Firebase configuration - uses environment variables
 const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    apiKey: "AIzaSyBS0qNsIazriomreqsG1OV2dnxpCdzVhSs",
+    authDomain: "blackcard-concierge-ai.firebaseapp.com",
+    projectId: "blackcard-concierge-ai",
+    storageBucket: "blackcard-concierge-ai.appspot.com",
+    messagingSenderId: "54133106168",
+    appId: "1:54133106168:web:4ff07ea4da5e3fea50a20d",
 };
 
 // Lazy initialization
