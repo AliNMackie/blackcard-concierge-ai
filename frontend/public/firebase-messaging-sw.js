@@ -6,12 +6,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 // Note: These will be populated by the browser environment or should be hardcoded
 // if they are static across all environments.
 firebase.initializeApp({
-    apiKey: true, // Placeholder, messaging only needs senderId/projectId
+    apiKey: "AIzaSyBS0qNsIazriomreqsG1OV2dnxpCdzVhSs",
     authDomain: "blackcard-concierge-ai.firebaseapp.com",
     projectId: "blackcard-concierge-ai",
     storageBucket: "blackcard-concierge-ai.appspot.com",
     messagingSenderId: "557456081985",
-    appId: "", // Optional for messaging
+    appId: "PASTE_YOUR_APP_ID_HERE", // Example: 1:557456081985:web:abcdef123456
 });
 
 const messaging = firebase.messaging();
