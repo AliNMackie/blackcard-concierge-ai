@@ -37,6 +37,10 @@ def get_api_key(api_key: str = Depends(api_key_header)):
     
     logger.error(f"Auth Failed: Received key '{api_key[:4] if api_key else 'None'}...'")
     raise HTTPException(status_code=403, detail="Invalid or missing API Key")
+from app.api.routes.webhook import router as webhook_router
+from app.api.routes.workouts import router as workout_router
+from app.api.routes.users import router as users_router
+from app.api.routes.coach import router as coach_router
 
 # CORS
 from fastapi.middleware.cors import CORSMiddleware
@@ -58,6 +62,8 @@ app = FastAPI(title=settings.APP_NAME, version=settings.VERSION, lifespan=lifesp
 app.include_router(webhook_router)
 app.include_router(workout_router)
 app.include_router(users_router)
+app.include_router(coach_router)
+
 app.include_router(analytics_router)
 
 # Enable CORS for local/pwa development
