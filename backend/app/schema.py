@@ -26,6 +26,8 @@ class AgentResponse(BaseModel):
 class UserUpdate(BaseModel):
     coach_style: Optional[str] = None
     is_traveling: Optional[bool] = None
+    equipment_constraint: Optional[str] = None
+
 
 class MetricCreate(BaseModel):
     category: str # "strength", "engine", "body"

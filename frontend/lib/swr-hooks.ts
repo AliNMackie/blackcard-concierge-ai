@@ -1,6 +1,26 @@
 import useSWR from 'swr';
-import { fetchEvents, EventLog, fetchTodayInsight, DailyInsight } from './api';
+import { fetchEvents, EventLog, fetchTodayInsight, DailyInsight, fetchUserProfile } from './api';
 import { useAuth } from './auth-context';
+
+export function useUser() {
+    const { user, loading } = useAuth();
+
+    const { data, error, isLoading, mutate } = useSWR(
+        user && !loading ? '/api/users/me' : null,
+        fetchUserProfile,
+        {
+            revalidateOnFocus: true,
+            revalidateOnReconnect: true,
+        }
+    );
+
+    return {
+        user: data,
+        isLoading: isLoading || loading,
+        isError: error,
+        mutate,
+    };
+}
 
 export function useEvents(refreshInterval = 5000) {
     const { user, loading } = useAuth();

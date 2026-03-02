@@ -113,10 +113,21 @@ async def generate_coach_adaptation(
     
     history_str = "\n".join(history_summaries) if history_summaries else "No relevant history found."
     
-    # 2. Construct Prompt
+    # 2. Get User State (Travel)
+    from app.models import User
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    travel_constraint = ""
+    if user and user.is_traveling:
+        travel_constraint = f"\nCRITICAL CONSTRAINT: The user is currently TRAVELING. You MUST restrict all exercise selection to: {user.equipment_constraint}. Preserve muscle group targets but adapt for limited equipment."
+
+    # 3. Construct Prompt
     prompt = f"""
     You are an elite, world-class Personal Trainer AI.
     Your task is to adapt the user's current workout plan based on their immediate feedback and past history.
+    {travel_constraint}
     
     USER FEEDBACK: "{user_feedback}"
     
@@ -130,6 +141,7 @@ async def generate_coach_adaptation(
     Provide a 'coaching_cue' (2 sentences max) that is motivating and incorporates insight from history/feedback.
     Provide the 'adapted_plan' which is the updated iteration of the current workout plan.
     """
+
     
     coaching_engine._ensure_init()
     

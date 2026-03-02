@@ -5,7 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from vertexai.generative_models import GenerativeModel, GenerationConfig
 
-from app.models import DailyBiometrics, DailyInsight
+from app.models import User, DailyBiometrics, DailyInsight
+
 from app.services.rag_service import retrieve_relevant_history, coaching_engine
 from app.config import settings
 
@@ -50,10 +51,20 @@ async def generate_morning_briefing(
     history_summaries = await retrieve_relevant_history(user_id, current_context, db)
     history_str = "\n".join(history_summaries) if history_summaries else "No relevant history found."
 
-    # 2. Construct Prompt
+    # 2. Get User State (Travel)
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    travel_constraint = ""
+    if user and user.is_traveling:
+        travel_constraint = f"\nTRAVEL MODE ACTIVE: The client is traveling and MUST restrict exercise selection to: {user.equipment_constraint}. Preserve metabolic intent but adapt movements to available kit."
+
+    # 3. Construct Prompt
     prompt = f"""
     You are the 'Blackcard Concierge' for a ultra-high-net-worth individual. 
     Your tone is world-class, proactive, sophisticated, and direct.
+    {travel_constraint}
     
     CLIENT BIOMETRICS TODAY:
     - Sleep Score: {biometrics.sleep_score}/100
@@ -63,11 +74,12 @@ async def generate_morning_briefing(
     {history_str}
     
     Your mission is to provide a 'Morning Briefing' that anticipates friction.
-    If the recovery is RED or AMBER, be protective of their longevity. Suggest exact modifications (e.g. 'swap the heavy squats for mobility and a 2km zone 2 recovery walk').
+    If the recovery is RED or AMBER, be protective of their longevity. Suggest exact modifications.
     If the recovery is GREEN, suggest where they can push for an extra 2-5% 'edge'.
     
     Adhere strictly to the premium persona and the JSON output schema.
     """
+
 
     coaching_engine._ensure_init()
     

@@ -16,8 +16,6 @@ from app.schema import UserUpdate
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-# --- Schemas ---
-
 class UserResponse(BaseModel):
     id: str
     email: Optional[str]
@@ -25,6 +23,9 @@ class UserResponse(BaseModel):
     trainer_id: Optional[str]
     coach_style: str
     is_traveling: bool
+    equipment_constraint: str
+
+
 
     class Config:
         from_attributes = True
@@ -385,6 +386,33 @@ async def toggle_travel(db: AsyncSession = Depends(get_db)):
     return {"is_traveling": user.is_traveling}
 
 
+@router.patch("/travel-status", response_model=UserResponse)
+
+async def update_travel_status(
+    is_traveling: bool = Body(..., embed=True),
+    equipment_constraint: str = Body("Full Gym", embed=True),
+    db: AsyncSession = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(get_current_user)
+):
+    """
+    Updates the travel status and equipment constraints for the current user.
+    """
+    stmt = select(User).where(User.id == current_user.uid)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        user = User(id=current_user.uid, role="client")
+        db.add(user)
+    
+    user.is_traveling = is_traveling
+    user.equipment_constraint = equipment_constraint
+    
+    await db.commit()
+    await db.refresh(user)
+    
+    return user
+
 @router.patch("/me")
 async def update_user_profile(update_data: UserUpdate, db: AsyncSession = Depends(get_db)):
     """
@@ -403,6 +431,9 @@ async def update_user_profile(update_data: UserUpdate, db: AsyncSession = Depend
     if update_data.is_traveling is not None:
         user.is_traveling = update_data.is_traveling
         
+    if update_data.equipment_constraint is not None:
+        user.equipment_constraint = update_data.equipment_constraint
+        
     if update_data.coach_style is not None:
         user.coach_style = update_data.coach_style
         
@@ -412,7 +443,8 @@ async def update_user_profile(update_data: UserUpdate, db: AsyncSession = Depend
     return {
         "status": "updated",
         "coach_style": user.coach_style, 
-        "is_traveling": user.is_traveling
+        "is_traveling": user.is_traveling,
+        "equipment_constraint": user.equipment_constraint
     }
 
 

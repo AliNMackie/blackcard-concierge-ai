@@ -1,18 +1,42 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { fetchEvents, EventLog } from '@/lib/api';
-import { useEvents, useTodayInsight } from '@/lib/swr-hooks';
+import { fetchEvents, EventLog, updateTravelStatus, adaptWorkout } from '@/lib/api';
+import { useEvents, useTodayInsight, useUser } from '@/lib/swr-hooks';
 import { Activity, Heart, Camera, MessageSquare, Zap } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { requestNotificationPermission } from '@/lib/firebase-messaging';
 import { getIdToken } from '@/lib/firebase';
 import { ConciergeCard } from '@/components/dashboard/ConciergeCard';
+import { TravelModeToggle } from '@/components/dashboard/TravelModeToggle';
 
 export default function ClientDashboard() {
     const { events, isLoading: eventsLoading } = useEvents(5000);
+    const { user: userData, mutate: mutateUser } = useUser();
     const { insight, isLoading: insightLoading, mutate: mutateInsight } = useTodayInsight();
     const [dismissed, setDismissed] = useState(false);
+
+    const handleTravelToggle = async (isTraveling: boolean, constraint: string) => {
+        try {
+            // 1. Update Backend State
+            await updateTravelStatus(isTraveling, constraint);
+            await mutateUser(); // Refresh user data locally
+
+            // 2. Trigger Instant Rewrite if traveling is turned ON
+            if (isTraveling) {
+                console.log("Travel Mode activated. Triggering instant protocol rewrite...");
+                await adaptWorkout({
+                    context: `Environment changed: ${constraint}`,
+                    trigger: "travel_mode_toggle"
+                });
+                // Revalidate insight to show the travel-aware briefing
+                mutateInsight();
+            }
+        } catch (error) {
+            console.error("Travel toggle failed:", error);
+        }
+    };
+
 
 
     // Notification Registration
@@ -54,17 +78,26 @@ export default function ClientDashboard() {
                     <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500 mb-1">Elite Concierge</h2>
                     <h1 className="text-4xl font-light tracking-tight text-white">Hello, Alastair.</h1>
                 </div>
-                {/* Live Indicator */}
-                {!eventsLoading && (
-                    <div className="flex items-center gap-1.5 mb-2">
 
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                        </span>
-                        <span className="text-[10px] uppercase font-bold text-green-500 tracking-wider">Live</span>
-                    </div>
-                )}
+                <div className="flex flex-col items-end gap-3 mb-2">
+                    <TravelModeToggle
+                        isTraveling={userData?.is_traveling || false}
+                        currentConstraint={userData?.equipment_constraint || "Full Gym"}
+                        onToggle={handleTravelToggle}
+                    />
+
+                    {/* Live Indicator */}
+                    {!eventsLoading && (
+                        <div className="flex items-center gap-1.5">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                            <span className="text-[10px] uppercase font-bold text-green-500 tracking-wider">Live</span>
+                        </div>
+                    )}
+                </div>
+
             </div>
 
             {/* Concierge Insight */}
@@ -108,7 +141,8 @@ export default function ClientDashboard() {
             <div className="px-6 space-y-4">
                 <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4">Recent Activity</h3>
 
-                {events.map((evt) => (
+                {events.map((evt: EventLog) => (
+
                     <div key={evt.id} className="flex gap-4 items-start py-3 border-b border-gray-900/50">
                         <div className="mt-1">
                             {evt.event_type === 'wearable' && <Heart className="text-red-500" size={20} />}

@@ -206,10 +206,13 @@ export async function updateUserProfile(payload: UserProfilePayload): Promise<an
 }
 
 export type CoachAdaptPayload = {
-    current_workout_plan: any;
-    user_feedback: string;
+    current_workout_plan?: any;
+    user_feedback?: string;
+    context?: string;
+    trigger?: string;
     user_id?: string;
 };
+
 
 export type CoachAdaptResponse = {
     coaching_cue: string;
@@ -233,6 +236,35 @@ export async function adaptWorkout(payload: CoachAdaptPayload): Promise<CoachAda
         throw error;
     }
 }
+
+export async function updateTravelStatus(isTraveling: boolean, constraint: string): Promise<any> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/users/travel-status`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({ is_traveling: isTraveling, equipment_constraint: constraint }),
+        });
+        if (!res.ok) throw new Error('Failed to update travel status');
+        return res.json();
+    } catch (error) {
+        console.error('Update travel status error:', error);
+        throw error;
+    }
+}
+
+export async function fetchUserProfile(): Promise<any> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/users/me`, { headers });
+        if (!res.ok) throw new Error('Failed to fetch user profile');
+        return res.json();
+    } catch (error) {
+        console.error('Fetch profile error:', error);
+        return null;
+    }
+}
+
 
 export async function fetchTodayInsight(): Promise<DailyInsight | null> {
     try {
