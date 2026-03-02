@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { CheckCircle, PlayCircle, Camera, X, Zap, Loader2, Video } from "lucide-react";
 import { clsx } from "clsx";
 import Webcam from "react-webcam";
-import { analyzeVision } from "@/lib/api";
+import { analyzeVision, logPerformanceMetric } from "@/lib/api";
 
 export type Exercise = {
     id: string;
@@ -26,6 +26,7 @@ export default function ExerciseCard({ exercise, onComplete, isActive }: Exercis
     const [reps, setReps] = useState(exercise.reps);
     const [weight, setWeight] = useState(exercise.weight);
     const [completedSets, setCompletedSets] = useState<number[]>([]);
+    const [isSaving, setIsSaving] = useState(false);
 
     // Camera / AI State
     const [showCamera, setShowCamera] = useState(false);
@@ -45,15 +46,31 @@ export default function ExerciseCard({ exercise, onComplete, isActive }: Exercis
         setFeedback(null);
     }, [exercise.id]);
 
-    const handleLogSet = () => {
-        if (completedSets.includes(currentSet)) return;
-        const newCompleted = [...completedSets, currentSet];
-        setCompletedSets(newCompleted);
+    const handleLogSet = async () => {
+        if (completedSets.includes(currentSet) || isSaving) return;
 
-        if (newCompleted.length === exercise.sets) {
-            onComplete();
-        } else {
-            setCurrentSet(prev => prev + 1);
+        setIsSaving(true);
+        try {
+            await logPerformanceMetric({
+                category: "strength",
+                name: exercise.name,
+                value: weight,
+                unit: "kg",
+                timestamp: new Date().toISOString()
+            });
+
+            const newCompleted = [...completedSets, currentSet];
+            setCompletedSets(newCompleted);
+
+            if (newCompleted.length === exercise.sets) {
+                onComplete();
+            } else {
+                setCurrentSet(prev => prev + 1);
+            }
+        } catch (error) {
+            console.error("Failed to log set:", error);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -168,8 +185,22 @@ export default function ExerciseCard({ exercise, onComplete, isActive }: Exercis
             </div>
 
             {/* Log Button */}
-            <button onClick={handleLogSet} className={clsx("w-full py-6 rounded-xl font-bold uppercase tracking-widest text-lg transition-all active:scale-95 shadow-lg", "bg-white text-black hover:bg-gray-200")}>
-                Log Set {currentSet}
+            <button
+                onClick={handleLogSet}
+                disabled={isSaving}
+                className={clsx(
+                    "w-full py-6 rounded-xl font-bold uppercase tracking-widest text-lg transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2",
+                    isSaving ? "bg-gray-800 text-gray-500 cursor-not-allowed" : "bg-white text-black hover:bg-gray-200"
+                )}
+            >
+                {isSaving ? (
+                    <>
+                        <Loader2 className="animate-spin" size={20} />
+                        Saving...
+                    </>
+                ) : (
+                    <>Log Set {currentSet}</>
+                )}
             </button>
 
             {/* Set Indicators */}
@@ -210,7 +241,7 @@ export default function ExerciseCard({ exercise, onComplete, isActive }: Exercis
                     </div>
 
                     {!analyzing && (
-                        <div className="p-12 pb-24 flex justify-center bg-black">
+                        <div className="p-12 pb-24 pb-safe flex justify-center bg-black">
                             <button
                                 onClick={startRecording}
                                 disabled={recording}

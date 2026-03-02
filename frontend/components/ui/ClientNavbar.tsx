@@ -17,7 +17,7 @@ export default function ClientNavbar() {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-900 bg-black/95 backdrop-blur-lg pb-8 pt-4 flex justify-around text-gray-500 max-w-md mx-auto z-50 px-2 shadow-2xl">
+        <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-900 bg-black/95 backdrop-blur-lg pb-8 pb-safe pt-4 flex justify-around text-gray-500 max-w-md mx-auto z-50 px-2 shadow-2xl">
             {navItems.map((item) => {
                 const isActive = pathname.startsWith(item.href);
                 const Icon = item.icon;

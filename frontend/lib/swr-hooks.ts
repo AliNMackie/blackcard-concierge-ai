@@ -1,22 +1,29 @@
 import useSWR from 'swr';
 import { fetchEvents, EventLog } from './api';
-
-// SWR Fetcher wrapper
-const fetcher = async () => {
-    return await fetchEvents();
-};
+import { useAuth } from './auth-context';
 
 export function useEvents(refreshInterval = 5000) {
-    const { data, error, isLoading, mutate } = useSWR<EventLog[]>('/api/events', fetcher, {
-        refreshInterval: refreshInterval,
-        revalidateOnFocus: true,
-        revalidateOnReconnect: true,
-        keepPreviousData: true, // Show stale data while fetching
-    });
+    const { user, loading } = useAuth();
+
+    // SWR Fetcher wrapper
+    const fetcher = async () => {
+        return await fetchEvents();
+    };
+
+    const { data, error, isLoading, mutate } = useSWR<EventLog[]>(
+        user && !loading ? '/api/events' : null,
+        fetcher,
+        {
+            refreshInterval: refreshInterval,
+            revalidateOnFocus: true,
+            revalidateOnReconnect: true,
+            keepPreviousData: true, // Show stale data while fetching
+        }
+    );
 
     return {
         events: data || [],
-        isLoading,
+        isLoading: isLoading || loading,
         isError: error,
         mutate,
     };
