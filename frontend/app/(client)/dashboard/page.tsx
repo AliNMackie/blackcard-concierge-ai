@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchEvents, EventLog } from '@/lib/api';
-import { useEvents } from '@/lib/swr-hooks';
+import { useEvents, useTodayInsight } from '@/lib/swr-hooks';
 import { Activity, Heart, Camera, MessageSquare, Zap } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { requestNotificationPermission } from '@/lib/firebase-messaging';
 import { getIdToken } from '@/lib/firebase';
+import { ConciergeCard } from '@/components/dashboard/ConciergeCard';
 
 export default function ClientDashboard() {
-    const { events, isLoading } = useEvents(5000); // Poll every 5s
+    const { events, isLoading: eventsLoading } = useEvents(5000);
+    const { insight, isLoading: insightLoading, mutate: mutateInsight } = useTodayInsight();
+    const [dismissed, setDismissed] = useState(false);
+
 
     // Notification Registration
     useEffect(() => {
@@ -51,8 +55,9 @@ export default function ClientDashboard() {
                     <h1 className="text-4xl font-light tracking-tight text-white">Hello, Alastair.</h1>
                 </div>
                 {/* Live Indicator */}
-                {!isLoading && (
+                {!eventsLoading && (
                     <div className="flex items-center gap-1.5 mb-2">
+
                         <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -62,17 +67,42 @@ export default function ClientDashboard() {
                 )}
             </div>
 
+            {/* Concierge Insight */}
+            <div className="px-6 mb-4">
+                {!dismissed && (
+                    <ConciergeCard
+                        insight={insight}
+                        isLoading={insightLoading}
+                        onDismiss={() => setDismissed(true)}
+                        onAccept={async () => {
+                            // Logic to 'Accept' the override
+                            // In a full implementation, this might hit an endpoint to update the session.
+                            // For Phase 1, we simulate success and dismiss.
+                            console.log("Protocol Accepted:", insight?.suggested_plan_override);
+                            setDismissed(true);
+                            // Optimistic mutation: hide it for today
+                            mutateInsight(null, false);
+                        }}
+                    />
+                )}
+            </div>
+
             {/* Main Status Card */}
             <div className="px-6 mb-8">
                 <div className="bg-gradient-to-br from-gray-900 to-black border border-gray-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
                     <div className="relative z-10">
                         <div className="text-gray-400 text-xs uppercase tracking-wider mb-2">Readiness Status</div>
-                        <div className="text-3xl font-medium text-white mb-1">Optimal</div>
-                        <div className="text-sm text-gray-500">Recovery score trending upward.</div>
+                        <div className="text-3xl font-medium text-white mb-1">
+                            {insight?.suggested_plan_override?.intensity === 'low' ? 'Recovery' : 'Optimal'}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            {insight?.insight_headline || 'Recovery score trending upward.'}
+                        </div>
                     </div>
                 </div>
             </div>
+
 
             {/* Activity Feed */}
             <div className="px-6 space-y-4">

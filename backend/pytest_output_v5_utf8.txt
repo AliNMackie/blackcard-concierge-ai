@@ -1,0 +1,197 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Alastair Mackie\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend
+configfile: pytest.ini
+plugins: anyio-4.11.0, langsmith-0.4.42, asyncio-1.3.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+tests/test_proactive.py::test_simulate_morning_briefing_flow FAILED      [100%]
+
+================================== FAILURES ===================================
+_____________________ test_simulate_morning_briefing_flow _____________________
+
+client = <httpx.AsyncClient object at 0x0000017AF4271FD0>
+test_db = <sqlalchemy.orm.session.AsyncSession object at 0x0000017AF4270EC0>
+
+    @pytest.mark.asyncio
+    async def test_simulate_morning_briefing_flow(client, test_db):
+        # 1. Setup Mock User
+        user = User(id="test_user_proactive", role="client")
+        test_db.add(user)
+        await test_db.commit()
+    
+        # 2. Mock Auth (Simplified for test)
+        # We'll need a way to bypass get_current_user or mock it.
+        # For this test, we can override it.
+        from app.auth import get_current_user
+        async def override_get_current_user():
+            return type('AuthUser', (), {'uid': 'test_user_proactive', 'email': 'test@example.com', 'is_trainer': False, 'is_client': True, 'is_admin': False})
+    
+        app.dependency_overrides[get_current_user] = override_get_current_user
+    
+        # 3. Trigger Simulation
+        payload = {
+            "sleep_score": 42,
+            "recovery_status": "RED"
+        }
+    
+        response = await client.post("/api/v1/concierge/simulate-morning", json=payload)
+    
+        assert response.status_code == 200
+        data = response.json()
+    
+        assert "insight_headline" in data
+        assert "actionable_advice" in data
+        assert "suggested_plan_override" in data
+    
+        # Check DB persistence
+        from sqlalchemy import select
+        stmt = select(DailyInsight).where(DailyInsight.user_id == "test_user_proactive")
+        result = await test_db.execute(stmt)
+        insight = result.scalar_one_or_none()
+    
+        assert insight is not None
+        assert insight.insight_headline == data["insight_headline"]
+    
+        # 4. Test GET /today
+        get_response = await client.get("/api/v1/concierge/today")
+>       assert get_response.status_code == 200
+E       assert 500 == 200
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+tests\test_proactive.py:82: AssertionError
+---------------------------- Captured stderr call -----------------------------
+2026-03-02 23:39:52,170 [ERROR] elite-concierge: Error retrieving history for user test_user_proactive: (sqlite3.OperationalError) near ">": syntax error
+[SQL: SELECT session_analysis.id, session_analysis.session_id, session_analysis.user_id, session_analysis.content, session_analysis.embedding 
+FROM session_analysis 
+WHERE session_analysis.user_id = ? ORDER BY session_analysis.embedding <=> ?
+ LIMIT ? OFFSET ?]
+[parameters: ('test_user_proactive', '[0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.100000 ... (15063 characters truncated) ... 49011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612]', 3, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-03-02 23:39:52,170 [INFO] elite-concierge: Coaching Engine initialized with model: gemini-3.1-pro
+2026-03-02 23:39:54,053 [ERROR] grpc._plugin_wrapping: AuthMetadataPluginCallback "<google.auth.transport.grpc.AuthMetadataPlugin object at 0x0000017AF43BF770>" raised exception!
+Traceback (most recent call last):
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\grpc\_plugin_wrapping.py", line 106, in __call__
+    self._metadata_plugin(
+    ~~~~~~~~~~~~~~~~~~~~~^
+        context, _AuthMetadataPluginCallback(callback_state, callback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\auth\transport\grpc.py", line 95, in __call__
+    callback(self._get_authorization_headers(context), None)
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\auth\transport\grpc.py", line 81, in _get_authorization_headers
+    self._credentials.before_request(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._request, context.method_name, context.service_url, headers
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\auth\credentials.py", line 228, in before_request
+    self._blocking_refresh(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\auth\credentials.py", line 191, in _blocking_refresh
+    self.refresh(request)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\oauth2\credentials.py", line 409, in refresh
+    ) = reauth.refresh_grant(
+        ~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+    ...<6 lines>...
+        enable_reauth_refresh=self._enable_reauth_refresh,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\oauth2\reauth.py", line 349, in refresh_grant
+    raise exceptions.RefreshError(
+        "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+    )
+google.auth.exceptions.RefreshError: Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate.
+2026-03-02 23:39:54,062 [ERROR] elite-concierge: Concierge Synthesis Error: 503 Getting metadata from plugin failed with error: Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate.
+2026-03-02 23:39:54,074 [INFO] elite-concierge: Path: /api/v1/concierge/simulate-morning Method: POST Status: 200 Duration: 1.9188s
+2026-03-02 23:39:54,075 [INFO] httpx: HTTP Request: POST http://test/api/v1/concierge/simulate-morning "HTTP/1.1 200 OK"
+2026-03-02 23:39:54,078 [INFO] elite-concierge: Path: /api/v1/concierge/today Method: GET Status: 500 Duration: 0.0006s
+2026-03-02 23:39:54,079 [INFO] httpx: HTTP Request: GET http://test/api/v1/concierge/today "HTTP/1.1 500 Internal Server Error"
+------------------------------ Captured log call ------------------------------
+ERROR    elite-concierge:rag_service.py:94 Error retrieving history for user test_user_proactive: (sqlite3.OperationalError) near ">": syntax error
+[SQL: SELECT session_analysis.id, session_analysis.session_id, session_analysis.user_id, session_analysis.content, session_analysis.embedding 
+FROM session_analysis 
+WHERE session_analysis.user_id = ? ORDER BY session_analysis.embedding <=> ?
+ LIMIT ? OFFSET ?]
+[parameters: ('test_user_proactive', '[0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.100000 ... (15063 characters truncated) ... 49011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612,0.10000000149011612]', 3, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+INFO     elite-concierge:rag_service.py:38 Coaching Engine initialized with model: gemini-3.1-pro
+ERROR    grpc._plugin_wrapping:_plugin_wrapping.py:110 AuthMetadataPluginCallback "<google.auth.transport.grpc.AuthMetadataPlugin object at 0x0000017AF43BF770>" raised exception!
+Traceback (most recent call last):
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\grpc\_plugin_wrapping.py", line 106, in __call__
+    self._metadata_plugin(
+    ~~~~~~~~~~~~~~~~~~~~~^
+        context, _AuthMetadataPluginCallback(callback_state, callback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\auth\transport\grpc.py", line 95, in __call__
+    callback(self._get_authorization_headers(context), None)
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\auth\transport\grpc.py", line 81, in _get_authorization_headers
+    self._credentials.before_request(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._request, context.method_name, context.service_url, headers
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\auth\credentials.py", line 228, in before_request
+    self._blocking_refresh(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\auth\credentials.py", line 191, in _blocking_refresh
+    self.refresh(request)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\oauth2\credentials.py", line 409, in refresh
+    ) = reauth.refresh_grant(
+        ~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+    ...<6 lines>...
+        enable_reauth_refresh=self._enable_reauth_refresh,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\google\oauth2\reauth.py", line 349, in refresh_grant
+    raise exceptions.RefreshError(
+        "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+    )
+google.auth.exceptions.RefreshError: Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate.
+ERROR    elite-concierge:concierge.py:101 Concierge Synthesis Error: 503 Getting metadata from plugin failed with error: Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate.
+INFO     elite-concierge:main.py:92 Path: /api/v1/concierge/simulate-morning Method: POST Status: 200 Duration: 1.9188s
+INFO     httpx:_client.py:1740 HTTP Request: POST http://test/api/v1/concierge/simulate-morning "HTTP/1.1 200 OK"
+INFO     elite-concierge:main.py:92 Path: /api/v1/concierge/today Method: GET Status: 500 Duration: 0.0006s
+INFO     httpx:_client.py:1740 HTTP Request: GET http://test/api/v1/concierge/today "HTTP/1.1 500 Internal Server Error"
+============================== warnings summary ===============================
+app\users.py:21
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\users.py:21: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(BaseModel):
+
+tests/test_proactive.py::test_simulate_morning_briefing_flow
+  C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\sqlalchemy\sql\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+
+tests/test_proactive.py::test_simulate_morning_briefing_flow
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\api\routes\proactive.py:38: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    date=datetime.utcnow()
+
+tests/test_proactive.py::test_simulate_morning_briefing_flow
+  C:\Users\Alastair Mackie\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\vertexai\generative_models\_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+    warning_logs.show_deprecation_warning()
+
+tests/test_proactive.py::test_simulate_morning_briefing_flow
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\api\routes\proactive.py:54: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    date=datetime.utcnow(),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_proactive.py::test_simulate_morning_briefing_flow - assert ...
+======================== 1 failed, 5 warnings in 6.51s ========================

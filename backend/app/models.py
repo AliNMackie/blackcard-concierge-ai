@@ -17,6 +17,10 @@ class User(Base):
     profile_data: Mapped[Optional[dict]] = mapped_column(JSON, default={})
     is_traveling: Mapped[bool] = mapped_column(default=False)
     coach_style: Mapped[str] = mapped_column(String, default="hyrox_competitor")
+    
+    # Billing & Usage
+    tier: Mapped[str] = mapped_column(String, default="free") # free, premium, elite
+    ai_usage_count: Mapped[int] = mapped_column(Integer, default=0)
 
     sessions: Mapped[list["WorkoutSession"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
@@ -133,3 +137,24 @@ class DocumentChunk(Base):
     metadata_json: Mapped[dict] = mapped_column(JSON, default={})
     
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class DailyBiometrics(Base):
+    __tablename__ = "daily_biometrics"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), index=True)
+    date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    sleep_score: Mapped[int] = mapped_column(Integer)
+    recovery_status: Mapped[str] = mapped_column(String) # RED, AMBER, GREEN
+
+class DailyInsight(Base):
+    __tablename__ = "daily_insights"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), index=True)
+    date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    
+    insight_headline: Mapped[str] = mapped_column(String)
+    actionable_advice: Mapped[str] = mapped_column(Text)
+    suggested_plan_override: Mapped[dict] = mapped_column(JSON, default={})
+

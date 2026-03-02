@@ -14,6 +14,17 @@ export type EventLog = {
     created_at: string;
 };
 
+export type DailyInsight = {
+
+    id: string;
+    user_id: string;
+    date: string;
+    insight_headline: string;
+    actionable_advice: string;
+    suggested_plan_override: any;
+};
+
+
 import { getIdToken } from './firebase';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -166,3 +177,72 @@ export async function logPerformanceMetric(data: PerformanceMetricInput): Promis
     }
 }
 
+export type UserProfilePayload = {
+    height?: string;
+    weight?: string;
+    age?: number;
+    gender?: string;
+    primary_goal?: string;
+    injuries?: string;
+    days_per_week?: number;
+};
+
+export async function updateUserProfile(payload: UserProfilePayload): Promise<any> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/users/profile`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+            throw new Error('Failed to update profile');
+        }
+        return res.json();
+    } catch (error) {
+        console.error('Profile update error:', error);
+        throw error;
+    }
+}
+
+export type CoachAdaptPayload = {
+    current_workout_plan: any;
+    user_feedback: string;
+    user_id?: string;
+};
+
+export type CoachAdaptResponse = {
+    coaching_cue: string;
+    adapted_plan: any;
+};
+
+export async function adaptWorkout(payload: CoachAdaptPayload): Promise<CoachAdaptResponse> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/coach/adapt`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+            throw new Error('Coach adaptation failed');
+        }
+        return res.json();
+    } catch (error) {
+        console.error('Coach adapt error:', error);
+        throw error;
+    }
+}
+
+export async function fetchTodayInsight(): Promise<DailyInsight | null> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/concierge/today`, { headers });
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error('Failed to fetch daily insight');
+        return res.json();
+    } catch (error) {
+        console.error('Fetch today insight error:', error);
+        return null;
+    }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ExerciseCard, { Exercise } from "@/components/workout/ExerciseCard";
 import { Timer, CheckCircle, ArrowLeft } from "lucide-react";
@@ -20,18 +20,35 @@ const MOCK_SESSION = {
 export default function WorkoutSessionPage() {
     const params = useParams();
     const router = useRouter();
+
+    const [sessionExercises, setSessionExercises] = useState<Exercise[]>(MOCK_SESSION.exercises);
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
     const [isResting, setIsResting] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
 
-    const currentExercise = MOCK_SESSION.exercises[currentExerciseIndex];
+    useEffect(() => {
+        const cached = localStorage.getItem(`workout_${params.id}`);
+        if (cached) {
+            try {
+                setSessionExercises(JSON.parse(cached));
+            } catch (e) {
+                console.error("Failed to parse cached workout state");
+            }
+        }
+    }, [params.id]);
+
+    useEffect(() => {
+        localStorage.setItem(`workout_${params.id}`, JSON.stringify(sessionExercises));
+    }, [sessionExercises, params.id]);
+
+    const currentExercise = sessionExercises[currentExerciseIndex];
 
     const handleExerciseComplete = () => {
         setIsResting(true);
         // In a real app, we'd start a timer here
         setTimeout(() => {
             setIsResting(false);
-            if (currentExerciseIndex < MOCK_SESSION.exercises.length - 1) {
+            if (currentExerciseIndex < sessionExercises.length - 1) {
                 setCurrentExerciseIndex(prev => prev + 1);
             } else {
                 setIsComplete(true);
@@ -41,7 +58,7 @@ export default function WorkoutSessionPage() {
 
     const handleSkipRest = () => {
         setIsResting(false);
-        if (currentExerciseIndex < MOCK_SESSION.exercises.length - 1) {
+        if (currentExerciseIndex < sessionExercises.length - 1) {
             setCurrentExerciseIndex(prev => prev + 1);
         } else {
             setIsComplete(true);
@@ -83,7 +100,7 @@ export default function WorkoutSessionPage() {
 
                 {/* Progress Bar */}
                 <div className="flex gap-1 mb-8">
-                    {MOCK_SESSION.exercises.map((ex, idx) => (
+                    {sessionExercises.map((ex, idx) => (
                         <div
                             key={ex.id}
                             className={clsx(
@@ -100,6 +117,12 @@ export default function WorkoutSessionPage() {
                     exercise={currentExercise}
                     isActive={!isResting}
                     onComplete={handleExerciseComplete}
+                    onExerciseAdapted={(adaptedPlan) => {
+                        console.log("Adapted Plan received:", adaptedPlan);
+                        const newExercises = [...sessionExercises];
+                        newExercises[currentExerciseIndex] = { ...currentExercise, ...adaptedPlan };
+                        setSessionExercises(newExercises);
+                    }}
                 />
 
                 {/* Rest Timer Overlay */}

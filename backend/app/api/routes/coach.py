@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.services.rag_service import generate_coach_adaptation
+from app.core.subscription import verify_premium_tier
+from app.models import User
 
 router = APIRouter(prefix="/api/v1/coach", tags=["Coach"])
 
@@ -20,7 +22,8 @@ class CoachAdaptResponse(BaseModel):
 @router.post("/adapt", response_model=CoachAdaptResponse)
 async def adapt_workout(
     payload: CoachAdaptRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(verify_premium_tier)
 ):
     """
     RAG-powered endpoint that fetches relevant workout history and uses Gemini 
@@ -28,11 +31,14 @@ async def adapt_workout(
     """
     try:
         adaptation = await generate_coach_adaptation(
-            user_id=payload.user_id,
+            user_id=current_user.id,
             current_workout_plan=payload.current_workout_plan,
             user_feedback=payload.user_feedback,
             db=db
         )
+        
+        current_user.ai_usage_count += 1
+        await db.commit()
         
         return CoachAdaptResponse(
             coaching_cue=adaptation.get("coaching_cue", "Keep pushing!"),

@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { fetchEvents, EventLog } from './api';
+import { fetchEvents, EventLog, fetchTodayInsight, DailyInsight } from './api';
 import { useAuth } from './auth-context';
 
 export function useEvents(refreshInterval = 5000) {
@@ -37,4 +37,25 @@ export function useUnreadCount() {
     // Taking last 5 as "unread" for demo visual
     // In real app, we'd track last_read_timestamp
     return events.length > 0 ? 3 : 0;
+}
+
+export function useTodayInsight() {
+    const { user, loading } = useAuth();
+
+    const { data, error, isLoading, mutate } = useSWR<DailyInsight | null>(
+        user && !loading ? '/api/concierge/today' : null,
+        fetchTodayInsight,
+        {
+            revalidateOnFocus: true,
+            revalidateOnReconnect: true,
+            shouldRetryOnError: false
+        }
+    );
+
+    return {
+        insight: data || null,
+        isLoading: isLoading || loading,
+        isError: error,
+        mutate,
+    };
 }

@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { CheckCircle, PlayCircle, Camera, X, Zap, Loader2, Video } from "lucide-react";
 import { clsx } from "clsx";
 import Webcam from "react-webcam";
-import { analyzeVision, logPerformanceMetric } from "@/lib/api";
+import { analyzeVision, logPerformanceMetric, adaptWorkout } from "@/lib/api";
+import CoachActionPanel from "./CoachActionPanel";
 
 export type Exercise = {
     id: string;
@@ -19,9 +20,10 @@ type ExerciseCardProps = {
     exercise: Exercise;
     onComplete: () => void;
     isActive: boolean;
+    onExerciseAdapted?: (adaptedPlan: any) => void;
 };
 
-export default function ExerciseCard({ exercise, onComplete, isActive }: ExerciseCardProps) {
+export default function ExerciseCard({ exercise, onComplete, isActive, onExerciseAdapted }: ExerciseCardProps) {
     const [currentSet, setCurrentSet] = useState(1);
     const [reps, setReps] = useState(exercise.reps);
     const [weight, setWeight] = useState(exercise.weight);
@@ -34,6 +36,10 @@ export default function ExerciseCard({ exercise, onComplete, isActive }: Exercis
     const [analyzing, setAnalyzing] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
 
+    // AI Coach State
+    const [isCoachAnalyzing, setIsCoachAnalyzing] = useState(false);
+    const [coachNote, setCoachNote] = useState<string | null>(null);
+
     const webcamRef = useRef<Webcam>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
@@ -44,7 +50,28 @@ export default function ExerciseCard({ exercise, onComplete, isActive }: Exercis
         setWeight(exercise.weight);
         setCompletedSets([]);
         setFeedback(null);
+        setCoachNote(null);
     }, [exercise.id]);
+
+    const handleCoachAction = async (userFeedback: string) => {
+        setIsCoachAnalyzing(true);
+        setCoachNote(null);
+        try {
+            const result = await adaptWorkout({
+                current_workout_plan: exercise,
+                user_feedback: userFeedback
+            });
+            setCoachNote(result.coaching_cue);
+            if (onExerciseAdapted && result.adapted_plan) {
+                onExerciseAdapted(result.adapted_plan);
+            }
+        } catch (error) {
+            console.error(error);
+            setCoachNote("Unable to reach the Coach right now.");
+        } finally {
+            setIsCoachAnalyzing(false);
+        }
+    };
 
     const handleLogSet = async () => {
         if (completedSets.includes(currentSet) || isSaving) return;
@@ -131,6 +158,16 @@ export default function ExerciseCard({ exercise, onComplete, isActive }: Exercis
         <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
 
             {/* Header */}
+            {coachNote && (
+                <div className="mb-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Zap size={16} className="text-amber-500" />
+                        <h3 className="text-amber-500 font-bold uppercase tracking-widest textxs">Coach's Note</h3>
+                    </div>
+                    <p className="text-white text-sm italic">"{coachNote}"</p>
+                </div>
+            )}
+
             <div className="mb-4 flex justify-between items-start">
                 <div>
                     <h2 className="text-3xl font-bold uppercase tracking-tighter text-white">{exercise.name}</h2>
@@ -209,6 +246,9 @@ export default function ExerciseCard({ exercise, onComplete, isActive }: Exercis
                     <div key={i} className={clsx("w-2 h-2 rounded-full", completedSets.includes(i + 1) ? "bg-white" : "bg-gray-800")} />
                 ))}
             </div>
+
+            {/* Coach Action Panel */}
+            <CoachActionPanel onAction={handleCoachAction} isAnalyzing={isCoachAnalyzing} />
 
             {/* CAMERA OVERLAY */}
             {showCamera && (

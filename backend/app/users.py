@@ -2,7 +2,7 @@
 Users Router - Manages user accounts and trainer-client relationships.
 """
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Body, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
@@ -40,6 +40,16 @@ class UserCreate(BaseModel):
     coach_style: str = "hyrox_competitor"
 
 
+class UserProfilePayload(BaseModel):
+    height: Optional[str] = None
+    weight: Optional[str] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    primary_goal: Optional[str] = None
+    injuries: Optional[str] = None
+    days_per_week: Optional[int] = None
+
+
 # --- Endpoints ---
 
 @router.get("/me", response_model=UserResponse)
@@ -59,6 +69,54 @@ async def get_current_user_profile(
         coach_style="hyrox_competitor",
         is_traveling=False
     )
+
+async def generate_baseline_context_task(user_id: str, profile_text: str):
+    from app.database import async_session
+    from app.models import DocumentChunk
+    from rag.retriever import retriever
+    try:
+        query_vector = await retriever.get_embedding(profile_text)
+        async with async_session() as session:
+            doc = DocumentChunk(
+                content=profile_text,
+                embedding=query_vector,
+                source="user_profile",
+                tags=["baseline", user_id],
+                metadata_json={"user_id": user_id}
+            )
+            session.add(doc)
+            await session.commit()
+    except Exception as e:
+        logger.error(f"Error generating baseline context: {e}")
+
+@router.post("/profile")
+async def update_user_profile_data(
+    payload: UserProfilePayload,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(get_current_user)
+):
+    stmt = select(User).where(User.id == current_user.uid)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        user = User(id=current_user.uid, role="client")
+        db.add(user)
+    
+    profile_data = payload.model_dump(exclude_unset=True) if hasattr(payload, 'model_dump') else payload.dict(exclude_unset=True)
+    user.profile_data = profile_data
+    
+    profile_text = (f"Baseline User context: Goal: {payload.primary_goal}. "
+                    f"Physiology: Height {payload.height}, Weight {payload.weight}, Age {payload.age}, Gender {payload.gender}. "
+                    f"Constraints: Injuries - {payload.injuries}. Days/Week: {payload.days_per_week}.")
+    
+    background_tasks.add_task(generate_baseline_context_task, current_user.uid, profile_text)
+    
+    await db.commit()
+    await db.refresh(user)
+    
+    return {"status": "ok", "profile_data": user.profile_data}
 
 
 @router.get("/clients", response_model=List[UserResponse])

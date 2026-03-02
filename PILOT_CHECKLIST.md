@@ -47,28 +47,35 @@ In GCP Console:
 4. Alert: Email notification to your inbox
 
 ### 4. Update Netlify Environment Variables
-To fix the "Missing appId" error and restore auth:
+You're missing three critical variables in Netlify. You **must** add these to fix the "Missing appId" error and restore auth:
+
 1. Go to **Netlify → Site configuration → Environment variables**
-2. Ensure the following are set:
+2. **ADD** these missing keys:
+   - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+   - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+   - `NEXT_PUBLIC_FIREBASE_APP_ID` (Critical: this fixes the 401/Installation error)
+
+3. **Verify** these are also there (you listed them as already present):
    - `NEXT_PUBLIC_FIREBASE_API_KEY`
    - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
    - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
-   - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
-   - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
-   - `NEXT_PUBLIC_FIREBASE_APP_ID` (This is the one likely missing causing the 401s)
+   - `NEXT_PUBLIC_BACKEND_URL`
+   - `NEXT_PUBLIC_API_KEY` (Your new rotated key)
+
+**Note**: After adding these, Netlify will trigger a new build. Auth will work once that build finishes.
 
 ---
 
 ## 🟡 First Client & Trainer Onboarding
 
-### Trainer Setup (Nephew)
-1. Nephew signs up at `https://blackcard-concierge.netlify.app/login` using "Sign Up".
-2. **Promote him**: Once he has an account, the admin must run the following command (or ask me to do it) to give him dashboard access:
+### Trainer Setup (Cian)
+1. Cian signs up at `https://blackcard-concierge.netlify.app/login` using "Sign Up".
+2. **Promote him**: Once he has an account, you can promote him by running this command in your terminal:
    ```bash
-   curl -X POST https://elite-concierge-api-<hash>.europe-west2.run.app/users/admin/provision-trainer \
+   curl -X POST https://elite-concierge-api-557456081985.europe-west2.run.app/users/admin/provision-trainer \
      -H "Content-Type: application/json" \
-     -H "X-Elite-Key: YOUR_NEW_API_KEY" \
-     -d '{"email": "nephew@email.com"}'
+     -H "Authorization: Bearer YOUR_NEW_API_KEY" \
+     -d '{"email": "Cd1fit23@gmail.com"}'
    ```
 
 ### Account Setup (Client)

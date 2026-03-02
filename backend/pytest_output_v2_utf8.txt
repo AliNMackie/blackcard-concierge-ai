@@ -1,0 +1,35 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\Alastair Mackie\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend
+configfile: pytest.ini
+plugins: anyio-4.11.0, langsmith-0.4.42, asyncio-0.23.5
+asyncio: mode=Mode.AUTO
+collecting ... collected 1 item
+
+tests/test_proactive.py::test_simulate_morning_briefing_flow ERROR       [100%]
+
+=================================== ERRORS ====================================
+____________ ERROR at setup of test_simulate_morning_briefing_flow ____________
+
+request = <SubRequest 'test_db' for <Coroutine test_simulate_morning_briefing_flow>>
+kwargs = {'event_loop': <ProactorEventLoop running=False closed=False debug=False>}
+
+    @functools.wraps(fixture)
+    def _asyncgen_fixture_wrapper(request: SubRequest, **kwargs: Any):
+        func = _perhaps_rebind_fixture_func(
+>           fixture, request.instance, fixturedef.unittest
+                                       ^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: 'FixtureDef' object has no attribute 'unittest'
+
+..\..\..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\pytest_asyncio\plugin.py:321: AttributeError
+============================== warnings summary ===============================
+app\users.py:21
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\users.py:21: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(BaseModel):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR tests/test_proactive.py::test_simulate_morning_briefing_flow - Attribut...
+========================= 1 warning, 1 error in 4.95s =========================

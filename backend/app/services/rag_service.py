@@ -77,12 +77,16 @@ async def retrieve_relevant_history(user_id: str, current_context: str, db: Asyn
         query_vector = await retriever.get_embedding(current_context)
         
         # Query SessionAnalysis table using cosine similarity
-        stmt = (
-            select(SessionAnalysis)
-            .filter(SessionAnalysis.user_id == user_id)
-            .order_by(SessionAnalysis.embedding.cosine_distance(query_vector))
-            .limit(3)
-        )
+        bind = db.bind
+        
+        stmt = select(SessionAnalysis).filter(SessionAnalysis.user_id == user_id)
+        
+        # pgvector operators ONLY work on PostgreSQL
+        if db.bind.engine.name == 'postgresql':
+            stmt = stmt.order_by(SessionAnalysis.embedding.cosine_distance(query_vector))
+        
+        stmt = stmt.limit(3)
+
         
         result = await db.execute(stmt)
         sessions = result.scalars().all()

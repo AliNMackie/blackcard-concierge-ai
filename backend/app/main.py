@@ -8,10 +8,9 @@ from datetime import datetime
 import time
 from langchain_core.messages import HumanMessage
 import os
-from app.webhooks import router as webhook_router
-from app.workouts import router as workout_router
-from app.users import router as users_router, get_trainer_client_ids
+from app.users import get_trainer_client_ids
 from app.analytics import router as analytics_router
+
 from app.database import get_db, init_connection_pool, create_tables
 from app.models import User, EventLog
 from app.schema import AgentResponse, WearableEvent, VisionEvent, ChatEvent, UserUpdate
@@ -37,10 +36,14 @@ def get_api_key(api_key: str = Depends(api_key_header)):
     
     logger.error(f"Auth Failed: Received key '{api_key[:4] if api_key else 'None'}...'")
     raise HTTPException(status_code=403, detail="Invalid or missing API Key")
-from app.api.routes.webhook import router as webhook_router
-from app.api.routes.workouts import router as workout_router
-from app.api.routes.users import router as users_router
 from app.api.routes.coach import router as coach_router
+from app.api.routes.proactive import router as proactive_router
+from app.webhooks import router as webhook_router
+from app.workouts import router as workout_router
+from app.users import router as users_router
+
+
+
 
 # CORS
 from fastapi.middleware.cors import CORSMiddleware
@@ -59,10 +62,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title=settings.APP_NAME, version=settings.VERSION, lifespan=lifespan)
-app.include_router(webhook_router)
-app.include_router(workout_router)
-app.include_router(users_router)
-app.include_router(coach_router)
+app.include_router(webhook_router, prefix="/api/v1")
+app.include_router(workout_router, prefix="/api/v1")
+app.include_router(users_router, prefix="/api/v1")
+app.include_router(coach_router, prefix="/api/v1")
+app.include_router(proactive_router, prefix="/api/v1")
+
+
 
 app.include_router(analytics_router)
 
