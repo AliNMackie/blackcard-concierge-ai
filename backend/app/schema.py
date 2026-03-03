@@ -59,3 +59,28 @@ class ReadinessMetric(BaseModel):
     sleep_score: int
     history: List[Dict[str, Any]]
 
+
+# ---------------------------------------------------------------------------
+# Sentry Graph Output Schemas (Pydantic V2)
+# ---------------------------------------------------------------------------
+class SessionMutation(BaseModel):
+    """Gemini structured output: the exact workout session changes."""
+    headline: str
+    advice: str
+    original_exercises_replaced: List[str] = []
+    replacement_exercises: List[str] = []
+    intensity_cap_percent: int = 100
+    volume_reduction_percent: int = 0
+    session_type_override: str = "standard"
+
+
+class SentryResult(BaseModel):
+    """Full result envelope from the Biometric Sentry graph."""
+    user_id: str
+    recovery_status: str  # RED / AMBER / GREEN
+    intervention_triggered: bool
+    session_mutation: Optional[SessionMutation] = None
+    notification_payload: Optional[Dict[str, Any]] = None
+    actions_taken: List[str] = []
+
+

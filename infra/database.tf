@@ -31,12 +31,12 @@ resource "google_sql_database_instance" "master" {
 }
 
 resource "google_sql_database" "database" {
-  name     = "elite_concierge"
+  name     = "elite_concierge_v1"
   instance = google_sql_database_instance.master.name
 }
 
 resource "google_sql_user" "users" {
-  name     = "elite_api"
+  name     = "elite_api_v1"
   instance = google_sql_database_instance.master.name
   password = var.db_password # Variable needs to be defined
 }

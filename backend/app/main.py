@@ -38,6 +38,11 @@ def get_api_key(api_key: str = Depends(api_key_header)):
     raise HTTPException(status_code=403, detail="Invalid or missing API Key")
 from app.api.routes.coach import router as coach_router
 from app.api.routes.proactive import router as proactive_router
+from app.api.routes.sentry import router as sentry_router
+from app.api.routes.spatial import router as spatial_router
+from app.api.routes.vision_mapper import router as vision_router
+from app.api.routes.agent_swarm import router as swarm_router
+from app.api.routes.biomechanics import router as biomechanics_router
 from app.webhooks import router as webhook_router
 from app.workouts import router as workout_router
 from app.users import router as users_router
@@ -51,10 +56,13 @@ from fastapi.middleware.cors import CORSMiddleware
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    # Startup
-    await init_connection_pool()
-    await create_tables() # Auto-create tables for MVP
-    logger.info("Startup complete: DB connected and tables verified.")
+    try:
+        await init_connection_pool()
+        await create_tables() # Auto-create tables for MVP
+        logger.info("Startup complete: DB connected and tables verified.")
+    except Exception as e:
+        logger.error(f"Startup Warning: Database initialization failed: {e}")
+        logger.warning("Application starting without a database connection. Some features may fail.")
         
     yield
     # Shutdown
@@ -67,6 +75,11 @@ app.include_router(workout_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(coach_router, prefix="/api/v1")
 app.include_router(proactive_router, prefix="/api/v1")
+app.include_router(sentry_router, prefix="/api/v1")
+app.include_router(spatial_router, prefix="/api/v1")
+app.include_router(vision_router, prefix="/api/v1")
+app.include_router(swarm_router, prefix="/api/v1")
+app.include_router(biomechanics_router, prefix="/api/v1")
 
 
 
@@ -307,7 +320,6 @@ async def handle_chat(event: ChatEvent, db: AsyncSession = Depends(get_db)):
         logger.error(f"Error processing chat event: {e}")
         raise HTTPException(status_code=500, detail="Internal processing error")
 
-    return user
 
 @app.post("/events/intervention/{client_id}")
 async def trigger_intervention(client_id: str, db: AsyncSession = Depends(get_db)):

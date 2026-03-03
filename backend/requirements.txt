@@ -25,3 +25,6 @@ testcontainers
 psycopg2-binary
 pgvector
 alembic
+websockets
+uvloop
+langchain-google-genai

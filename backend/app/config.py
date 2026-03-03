@@ -57,7 +57,7 @@ class Settings(BaseSettings):
             
             # DB Password
             if not self.DB_PASS:
-                self.DB_PASS = get_secret("DB_PASS")
+                self.DB_PASS = get_secret("elite-concierge-db-pass")
             
             # Elite API Key
             if not self.ELITE_API_KEY or self.ELITE_API_KEY == "dev-secret-123":

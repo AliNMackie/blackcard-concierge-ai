@@ -46,32 +46,32 @@ resource "google_project_iam_member" "sa_metric_writer" {
 
 # Workload Identity Federation
 
-resource "google_iam_workload_identity_pool" "github_pool" {
-  workload_identity_pool_id = "github-actions-pool"
-  display_name              = "GitHub Actions Pool"
-  project                   = var.project_id
-}
-
-resource "google_iam_workload_identity_pool_provider" "github_provider" {
-  workload_identity_pool_id          = google_iam_workload_identity_pool.github_pool.workload_identity_pool_id
-  workload_identity_pool_provider_id = "github-provider"
-  display_name                       = "GitHub Actions Provider"
-  project                            = var.project_id
-  
-  attribute_mapping = {
-    "google.subject" = "assertion.sub"
-    "attribute.repository" = "assertion.repository"
-  }
-  
-  oidc {
-    issuer_uri = "https://token.actions.githubusercontent.com"
-  }
-}
-
-# Bind to SA
-# constraints/iam.allowedPolicyMembers must be Allow All (which it is now)
-resource "google_service_account_iam_member" "wif_binding" {
-  service_account_id = google_service_account.backend_sa.name
-  role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_pool.name}/attribute.repository/AliNMackie/blackcard-concierge-ai"
-}
+# resource "google_iam_workload_identity_pool" "github_pool" {
+#   workload_identity_pool_id = "github-actions-pool"
+#   display_name              = "GitHub Actions Pool"
+#   project                   = var.project_id
+# }
+# 
+# resource "google_iam_workload_identity_pool_provider" "github_provider" {
+#   workload_identity_pool_id          = google_iam_workload_identity_pool.github_pool.workload_identity_pool_id
+#   workload_identity_pool_provider_id = "github-provider"
+#   display_name                       = "GitHub Actions Provider"
+#   project                            = var.project_id
+#   
+#   attribute_mapping = {
+#     "google.subject" = "assertion.sub"
+#     "attribute.repository" = "assertion.repository"
+#   }
+#   
+#   oidc {
+#     issuer_uri = "https://token.actions.githubusercontent.com"
+#   }
+# }
+# 
+# # Bind to SA
+# # constraints/iam.allowedPolicyMembers must be Allow All (which it is now)
+# # resource "google_service_account_iam_member" "wif_binding" {
+# #   service_account_id = google_service_account.backend_sa.name
+# #   role               = "roles/iam.workloadIdentityUser"
+# #   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_pool.name}/attribute.repository/AliNMackie/blackcard-concierge-ai"
+# # }

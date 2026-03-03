@@ -1,0 +1,1128 @@
+{
+  "version": 4,
+  "terraform_version": "1.13.5",
+  "serial": 99,
+  "lineage": "96555922-02f1-284b-2d84-3a695d8a91ad",
+  "outputs": {
+    "artifact_registry_repo": {
+      "value": "europe-west2-docker.pkg.dev/blackcard-concierge-ai/elite-concierge-repo",
+      "type": "string"
+    },
+    "backend_sa_email": {
+      "value": "elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+      "type": "string"
+    },
+    "cloud_run_url": {
+      "value": "https://elite-concierge-api-ooquqhlvxa-nw.a.run.app",
+      "type": "string"
+    },
+    "db_instance_connection_name": {
+      "value": "blackcard-concierge-ai:europe-west2:elite-concierge-db-prod",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "google_artifact_registry_repository",
+      "name": "repo",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "cleanup_policies": [],
+            "cleanup_policy_dry_run": false,
+            "create_time": "2026-01-27T16:28:03.352469Z",
+            "description": "Docker repository for Elite Concierge services",
+            "docker_config": [],
+            "effective_labels": {
+              "goog-terraform-provisioned": "true"
+            },
+            "format": "DOCKER",
+            "id": "projects/blackcard-concierge-ai/locations/europe-west2/repositories/elite-concierge-repo",
+            "kms_key_name": "",
+            "labels": {},
+            "location": "europe-west2",
+            "maven_config": [],
+            "mode": "STANDARD_REPOSITORY",
+            "name": "elite-concierge-repo",
+            "project": "blackcard-concierge-ai",
+            "registry_uri": "europe-west2-docker.pkg.dev/blackcard-concierge-ai/elite-concierge-repo",
+            "remote_repository_config": [],
+            "repository_id": "elite-concierge-repo",
+            "terraform_labels": {
+              "goog-terraform-provisioned": "true"
+            },
+            "timeouts": null,
+            "update_time": "2026-03-03T00:07:26.685882Z",
+            "virtual_repository_config": [],
+            "vulnerability_scanning_config": [
+              {
+                "enablement_config": "",
+                "enablement_state": "SCANNING_DISABLED",
+                "enablement_state_reason": "API containerscanning.googleapis.com is not enabled."
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "google_project_service.apis"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_cloud_run_v2_service",
+      "name": "api",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "annotations": {},
+            "binary_authorization": [],
+            "build_config": [
+              {
+                "base_image": "",
+                "enable_automatic_updates": false,
+                "environment_variables": {},
+                "function_target": "",
+                "image_uri": "europe-west2-docker.pkg.dev/blackcard-concierge-ai/cloud-run-source-deploy/elite-concierge-api",
+                "name": "projects/557456081985/locations/europe-west2/builds/50193fe9-f324-4bb1-9ec6-abdcab7c755b",
+                "service_account": "",
+                "source_location": "gs://run-sources-blackcard-concierge-ai-europe-west2/services/elite-concierge-api/1771104362.061653-5ff4fabc188b455ca9fee4bfedb27bcd.zip#1771104362035808",
+                "worker_pool": ""
+              }
+            ],
+            "client": "gcloud",
+            "client_version": "557.0.0",
+            "conditions": [
+              {
+                "execution_reason": "",
+                "last_transition_time": "2026-03-03T00:08:26.594054Z",
+                "message": "",
+                "reason": "",
+                "revision_reason": "",
+                "severity": "",
+                "state": "CONDITION_SUCCEEDED",
+                "type": "RoutesReady"
+              },
+              {
+                "execution_reason": "",
+                "last_transition_time": "2026-03-03T00:07:46.027646Z",
+                "message": "",
+                "reason": "",
+                "revision_reason": "",
+                "severity": "",
+                "state": "CONDITION_SUCCEEDED",
+                "type": "ConfigurationsReady"
+              }
+            ],
+            "create_time": "2026-01-27T16:53:11.265125Z",
+            "creator": "alastair@iapetusai.com",
+            "custom_audiences": [],
+            "default_uri_disabled": false,
+            "delete_time": "",
+            "deletion_protection": true,
+            "description": "",
+            "effective_annotations": {},
+            "effective_labels": {
+              "commit-sha": "1d607cc1b81c607b2258228026b042855aa8339d",
+              "goog-terraform-provisioned": "true",
+              "managed-by": "github-actions"
+            },
+            "etag": "\"CMLMmM0GEND20ZYD/cHJvamVjdHMvYmxhY2tjYXJkLWNvbmNpZXJnZS1haS9sb2NhdGlvbnMvZXVyb3BlLXdlc3QyL3NlcnZpY2VzL2VsaXRlLWNvbmNpZXJnZS1hcGk\"",
+            "expire_time": "",
+            "generation": "136",
+            "id": "projects/blackcard-concierge-ai/locations/europe-west2/services/elite-concierge-api",
+            "ingress": "INGRESS_TRAFFIC_ALL",
+            "invoker_iam_disabled": false,
+            "labels": {},
+            "last_modifier": "elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "latest_created_revision": "projects/blackcard-concierge-ai/locations/europe-west2/services/elite-concierge-api/revisions/elite-concierge-api-00136-m4k",
+            "latest_ready_revision": "projects/blackcard-concierge-ai/locations/europe-west2/services/elite-concierge-api/revisions/elite-concierge-api-00136-m4k",
+            "launch_stage": "GA",
+            "location": "europe-west2",
+            "multi_region_settings": [],
+            "name": "elite-concierge-api",
+            "observed_generation": "136",
+            "project": "blackcard-concierge-ai",
+            "reconciling": false,
+            "scaling": [
+              {
+                "manual_instance_count": 0,
+                "max_instance_count": 20,
+                "min_instance_count": 0,
+                "scaling_mode": ""
+              }
+            ],
+            "template": [
+              {
+                "annotations": {},
+                "containers": [
+                  {
+                    "args": [],
+                    "base_image_uri": "",
+                    "build_info": [],
+                    "command": [],
+                    "depends_on": [],
+                    "env": [
+                      {
+                        "name": "DB_INSTANCE_CONNECTION_NAME",
+                        "value": "blackcard-concierge-ai:europe-west2:elite-concierge-db-prod",
+                        "value_source": []
+                      },
+                      {
+                        "name": "DB_PASS",
+                        "value": "",
+                        "value_source": [
+                          {
+                            "secret_key_ref": [
+                              {
+                                "secret": "elite-concierge-db-pass",
+                                "version": "latest"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "ELITE_API_KEY",
+                        "value": "",
+                        "value_source": [
+                          {
+                            "secret_key_ref": [
+                              {
+                                "secret": "ELITE_API_KEY",
+                                "version": "latest"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "ENV",
+                        "value": "production",
+                        "value_source": []
+                      },
+                      {
+                        "name": "GCP_REGION",
+                        "value": "europe-west2",
+                        "value_source": []
+                      },
+                      {
+                        "name": "GEMINI_MODEL_ID",
+                        "value": "gemini-2.5-flash",
+                        "value_source": []
+                      },
+                      {
+                        "name": "KEY_ROTATED_AT",
+                        "value": "2026-02-14",
+                        "value_source": []
+                      },
+                      {
+                        "name": "PROJECT_ID",
+                        "value": "blackcard-concierge-ai",
+                        "value_source": []
+                      }
+                    ],
+                    "image": "europe-west2-docker.pkg.dev/blackcard-concierge-ai/elite-concierge-repo/backend:1d607cc1b81c607b2258228026b042855aa8339d",
+                    "liveness_probe": [],
+                    "name": "",
+                    "ports": [
+                      {
+                        "container_port": 8080,
+                        "name": "http1"
+                      }
+                    ],
+                    "resources": [
+                      {
+                        "cpu_idle": true,
+                        "limits": {
+                          "cpu": "1000m",
+                          "memory": "512Mi"
+                        },
+                        "startup_cpu_boost": false
+                      }
+                    ],
+                    "startup_probe": [
+                      {
+                        "failure_threshold": 1,
+                        "grpc": [],
+                        "http_get": [],
+                        "initial_delay_seconds": 0,
+                        "period_seconds": 240,
+                        "tcp_socket": [
+                          {
+                            "port": 8080
+                          }
+                        ],
+                        "timeout_seconds": 240
+                      }
+                    ],
+                    "volume_mounts": [
+                      {
+                        "mount_path": "/cloudsql",
+                        "name": "cloudsql",
+                        "sub_path": ""
+                      }
+                    ],
+                    "working_dir": ""
+                  }
+                ],
+                "encryption_key": "",
+                "execution_environment": "",
+                "gpu_zonal_redundancy_disabled": false,
+                "health_check_disabled": false,
+                "labels": {
+                  "commit-sha": "1d607cc1b81c607b2258228026b042855aa8339d",
+                  "goog-terraform-provisioned": "true",
+                  "managed-by": "github-actions"
+                },
+                "max_instance_request_concurrency": 80,
+                "node_selector": [],
+                "revision": "",
+                "scaling": [
+                  {
+                    "max_instance_count": 20,
+                    "min_instance_count": 0
+                  }
+                ],
+                "service_account": "elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+                "session_affinity": false,
+                "timeout": "300s",
+                "volumes": [
+                  {
+                    "cloud_sql_instance": [
+                      {
+                        "instances": [
+                          "blackcard-concierge-ai:europe-west2:elite-concierge-db-ff9b3a7b",
+                          "blackcard-concierge-ai:europe-west2:elite-concierge-db-prod"
+                        ]
+                      }
+                    ],
+                    "empty_dir": [],
+                    "gcs": [],
+                    "name": "cloudsql",
+                    "nfs": [],
+                    "secret": []
+                  }
+                ],
+                "vpc_access": [
+                  {
+                    "connector": "",
+                    "egress": "PRIVATE_RANGES_ONLY",
+                    "network_interfaces": [
+                      {
+                        "network": "default",
+                        "subnetwork": "",
+                        "tags": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "terminal_condition": [
+              {
+                "execution_reason": "",
+                "last_transition_time": "2026-03-03T00:08:26.632045Z",
+                "message": "",
+                "reason": "",
+                "revision_reason": "",
+                "severity": "",
+                "state": "CONDITION_SUCCEEDED",
+                "type": "Ready"
+              }
+            ],
+            "terraform_labels": {
+              "goog-terraform-provisioned": "true"
+            },
+            "timeouts": null,
+            "traffic": [
+              {
+                "percent": 100,
+                "revision": "",
+                "tag": "",
+                "type": "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+              }
+            ],
+            "traffic_statuses": [
+              {
+                "percent": 100,
+                "revision": "",
+                "tag": "",
+                "type": "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST",
+                "uri": ""
+              }
+            ],
+            "uid": "cfac0be9-b900-49bf-a506-050e4b469631",
+            "update_time": "2026-03-03T00:07:30.852786Z",
+            "uri": "https://elite-concierge-api-ooquqhlvxa-nw.a.run.app",
+            "urls": [
+              "https://elite-concierge-api-557456081985.europe-west2.run.app",
+              "https://elite-concierge-api-ooquqhlvxa-nw.a.run.app"
+            ]
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "google_project_service.apis",
+            "google_secret_manager_secret.db_pass",
+            "google_secret_manager_secret.db_pass_secret",
+            "google_service_account.backend_sa",
+            "google_sql_database_instance.master",
+            "google_sql_database_instance.postgres",
+            "random_id.db_suffix"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_iam_workload_identity_pool",
+      "name": "github_pool",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "description": "",
+            "disabled": false,
+            "display_name": "GitHub Actions Pool",
+            "id": "projects/blackcard-concierge-ai/locations/global/workloadIdentityPools/github-actions-pool",
+            "name": "projects/557456081985/locations/global/workloadIdentityPools/github-actions-pool",
+            "project": "blackcard-concierge-ai",
+            "state": "ACTIVE",
+            "timeouts": null,
+            "workload_identity_pool_id": "github-actions-pool"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_iam_workload_identity_pool_provider",
+      "name": "github_provider",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "attribute_condition": "",
+            "attribute_mapping": {
+              "attribute.repository": "assertion.repository",
+              "google.subject": "assertion.sub"
+            },
+            "aws": [],
+            "description": "",
+            "disabled": false,
+            "display_name": "GitHub Actions Provider",
+            "id": "projects/blackcard-concierge-ai/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider",
+            "name": "projects/557456081985/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider",
+            "oidc": [
+              {
+                "allowed_audiences": [],
+                "issuer_uri": "https://token.actions.githubusercontent.com",
+                "jwks_json": ""
+              }
+            ],
+            "project": "blackcard-concierge-ai",
+            "saml": [],
+            "state": "ACTIVE",
+            "timeouts": null,
+            "workload_identity_pool_id": "github-actions-pool",
+            "workload_identity_pool_provider_id": "github-provider",
+            "x509": []
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "google_iam_workload_identity_pool.github_pool"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_project_iam_member",
+      "name": "sa_ai_user",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "condition": [],
+            "etag": "BwZJegT6gs0=",
+            "id": "blackcard-concierge-ai/roles/aiplatform.user/serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "member": "serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "project": "blackcard-concierge-ai",
+            "role": "roles/aiplatform.user"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "google_service_account.backend_sa"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_project_iam_member",
+      "name": "sa_log_writer",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "condition": [],
+            "etag": "BwZJegT6gs0=",
+            "id": "blackcard-concierge-ai/roles/logging.logWriter/serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "member": "serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "project": "blackcard-concierge-ai",
+            "role": "roles/logging.logWriter"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "google_service_account.backend_sa"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_project_iam_member",
+      "name": "sa_metric_writer",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "condition": [],
+            "etag": "BwZJegT6gs0=",
+            "id": "blackcard-concierge-ai/roles/monitoring.metricWriter/serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "member": "serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "project": "blackcard-concierge-ai",
+            "role": "roles/monitoring.metricWriter"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "google_service_account.backend_sa"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_project_iam_member",
+      "name": "sa_sql_client",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "condition": [],
+            "etag": "BwZJegT6gs0=",
+            "id": "blackcard-concierge-ai/roles/cloudsql.client/serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "member": "serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "project": "blackcard-concierge-ai",
+            "role": "roles/cloudsql.client"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "google_service_account.backend_sa"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_project_iam_member",
+      "name": "sa_storage_viewer",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "condition": [],
+            "etag": "BwZJegT6gs0=",
+            "id": "blackcard-concierge-ai/roles/storage.objectViewer/serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "member": "serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "project": "blackcard-concierge-ai",
+            "role": "roles/storage.objectViewer"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "google_service_account.backend_sa"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_project_service",
+      "name": "apis",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "index_key": "aiplatform.googleapis.com",
+          "schema_version": 0,
+          "attributes": {
+            "disable_dependent_services": null,
+            "disable_on_destroy": false,
+            "id": "blackcard-concierge-ai/aiplatform.googleapis.com",
+            "project": "blackcard-concierge-ai",
+            "service": "aiplatform.googleapis.com",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInJlYWQiOjYwMDAwMDAwMDAwMCwidXBkYXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        },
+        {
+          "index_key": "artifactregistry.googleapis.com",
+          "schema_version": 0,
+          "attributes": {
+            "disable_dependent_services": null,
+            "disable_on_destroy": false,
+            "id": "blackcard-concierge-ai/artifactregistry.googleapis.com",
+            "project": "blackcard-concierge-ai",
+            "service": "artifactregistry.googleapis.com",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInJlYWQiOjYwMDAwMDAwMDAwMCwidXBkYXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        },
+        {
+          "index_key": "cloudbuild.googleapis.com",
+          "schema_version": 0,
+          "attributes": {
+            "disable_dependent_services": null,
+            "disable_on_destroy": false,
+            "id": "blackcard-concierge-ai/cloudbuild.googleapis.com",
+            "project": "blackcard-concierge-ai",
+            "service": "cloudbuild.googleapis.com",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInJlYWQiOjYwMDAwMDAwMDAwMCwidXBkYXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        },
+        {
+          "index_key": "orgpolicy.googleapis.com",
+          "schema_version": 0,
+          "attributes": {
+            "disable_dependent_services": null,
+            "disable_on_destroy": false,
+            "id": "blackcard-concierge-ai/orgpolicy.googleapis.com",
+            "project": "blackcard-concierge-ai",
+            "service": "orgpolicy.googleapis.com",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInJlYWQiOjYwMDAwMDAwMDAwMCwidXBkYXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        },
+        {
+          "index_key": "run.googleapis.com",
+          "schema_version": 0,
+          "attributes": {
+            "disable_dependent_services": null,
+            "disable_on_destroy": false,
+            "id": "blackcard-concierge-ai/run.googleapis.com",
+            "project": "blackcard-concierge-ai",
+            "service": "run.googleapis.com",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInJlYWQiOjYwMDAwMDAwMDAwMCwidXBkYXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        },
+        {
+          "index_key": "secretmanager.googleapis.com",
+          "schema_version": 0,
+          "attributes": {
+            "disable_dependent_services": null,
+            "disable_on_destroy": false,
+            "id": "blackcard-concierge-ai/secretmanager.googleapis.com",
+            "project": "blackcard-concierge-ai",
+            "service": "secretmanager.googleapis.com",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInJlYWQiOjYwMDAwMDAwMDAwMCwidXBkYXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        },
+        {
+          "index_key": "sqladmin.googleapis.com",
+          "schema_version": 0,
+          "attributes": {
+            "disable_dependent_services": null,
+            "disable_on_destroy": false,
+            "id": "blackcard-concierge-ai/sqladmin.googleapis.com",
+            "project": "blackcard-concierge-ai",
+            "service": "sqladmin.googleapis.com",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInJlYWQiOjYwMDAwMDAwMDAwMCwidXBkYXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_secret_manager_secret",
+      "name": "api_key",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "annotations": {},
+            "create_time": "2026-02-02T21:14:52.623501Z",
+            "deletion_protection": false,
+            "effective_annotations": {},
+            "effective_labels": {},
+            "expire_time": "",
+            "id": "projects/blackcard-concierge-ai/secrets/ELITE_API_KEY",
+            "labels": {},
+            "name": "projects/557456081985/secrets/ELITE_API_KEY",
+            "project": "blackcard-concierge-ai",
+            "replication": [
+              {
+                "auto": [
+                  {
+                    "customer_managed_encryption": []
+                  }
+                ],
+                "user_managed": []
+              }
+            ],
+            "rotation": [],
+            "secret_id": "ELITE_API_KEY",
+            "tags": null,
+            "terraform_labels": {},
+            "timeouts": null,
+            "topics": [],
+            "ttl": null,
+            "version_aliases": {},
+            "version_destroy_ttl": ""
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMCJ9"
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_secret_manager_secret",
+      "name": "db_pass",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "annotations": {},
+            "create_time": "2026-03-03T12:33:33.522259Z",
+            "deletion_protection": false,
+            "effective_annotations": {},
+            "effective_labels": {
+              "goog-terraform-provisioned": "true"
+            },
+            "expire_time": "",
+            "id": "projects/blackcard-concierge-ai/secrets/elite-concierge-db-pass",
+            "labels": {},
+            "name": "projects/557456081985/secrets/elite-concierge-db-pass",
+            "project": "blackcard-concierge-ai",
+            "replication": [
+              {
+                "auto": [
+                  {
+                    "customer_managed_encryption": []
+                  }
+                ],
+                "user_managed": []
+              }
+            ],
+            "rotation": [],
+            "secret_id": "elite-concierge-db-pass",
+            "tags": null,
+            "terraform_labels": {
+              "goog-terraform-provisioned": "true"
+            },
+            "timeouts": null,
+            "topics": [],
+            "ttl": null,
+            "version_aliases": {},
+            "version_destroy_ttl": ""
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_secret_manager_secret_iam_member",
+      "name": "api_key_access",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "condition": [],
+            "etag": "BwZMHkXygC0=",
+            "id": "projects/blackcard-concierge-ai/secrets/ELITE_API_KEY/roles/secretmanager.secretAccessor/serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "member": "serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "project": "blackcard-concierge-ai",
+            "role": "roles/secretmanager.secretAccessor",
+            "secret_id": "projects/blackcard-concierge-ai/secrets/ELITE_API_KEY"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "google_secret_manager_secret.api_key",
+            "google_service_account.backend_sa"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_secret_manager_secret_iam_member",
+      "name": "db_pass_access",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "condition": [],
+            "etag": "BwZMHemCmec=",
+            "id": "projects/blackcard-concierge-ai/secrets/elite-concierge-db-pass/roles/secretmanager.secretAccessor/serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "member": "serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "project": "blackcard-concierge-ai",
+            "role": "roles/secretmanager.secretAccessor",
+            "secret_id": "projects/blackcard-concierge-ai/secrets/elite-concierge-db-pass"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "google_secret_manager_secret.db_pass",
+            "google_service_account.backend_sa"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_secret_manager_secret_version",
+      "name": "db_pass_val",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "create_time": "2026-03-03T12:33:35.997805Z",
+            "deletion_policy": "DELETE",
+            "destroy_time": "",
+            "enabled": true,
+            "id": "projects/557456081985/secrets/elite-concierge-db-pass/versions/1",
+            "is_secret_data_base64": false,
+            "name": "projects/557456081985/secrets/elite-concierge-db-pass/versions/1",
+            "project": null,
+            "secret": "projects/blackcard-concierge-ai/secrets/elite-concierge-db-pass",
+            "secret_data": "super_secure_db_pass_123!",
+            "secret_data_wo": null,
+            "secret_data_wo_version": 0,
+            "timeouts": null,
+            "version": "1"
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "secret_data"
+              }
+            ]
+          ],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "google_secret_manager_secret.db_pass"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_service_account",
+      "name": "backend_sa",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "account_id": "elite-concierge-backend-sa",
+            "create_ignore_already_exists": null,
+            "description": "",
+            "disabled": false,
+            "display_name": "Elite Concierge Backend Service Account",
+            "email": "elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "id": "projects/blackcard-concierge-ai/serviceAccounts/elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "member": "serviceAccount:elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "name": "projects/blackcard-concierge-ai/serviceAccounts/elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com",
+            "project": "blackcard-concierge-ai",
+            "timeouts": null,
+            "unique_id": "105723555503567146451"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDB9fQ=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_service_account_iam_member",
+      "name": "wif_binding",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "condition": [],
+            "etag": "BwZJYh7A/aU=",
+            "id": "projects/blackcard-concierge-ai/serviceAccounts/elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com/roles/iam.workloadIdentityUser/principalSet://iam.googleapis.com/projects/557456081985/locations/global/workloadIdentityPools/github-actions-pool/attribute.repository/AliNMackie/blackcard-concierge-ai",
+            "member": "principalSet://iam.googleapis.com/projects/557456081985/locations/global/workloadIdentityPools/github-actions-pool/attribute.repository/AliNMackie/blackcard-concierge-ai",
+            "role": "roles/iam.workloadIdentityUser",
+            "service_account_id": "projects/blackcard-concierge-ai/serviceAccounts/elite-concierge-backend-sa@blackcard-concierge-ai.iam.gserviceaccount.com"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA==",
+          "dependencies": [
+            "google_iam_workload_identity_pool.github_pool",
+            "google_service_account.backend_sa"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "google_sql_database_instance",
+      "name": "master",
+      "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "available_maintenance_versions": [
+              "POSTGRES_15_16.R20260108.01_14"
+            ],
+            "backupdr_backup": null,
+            "clone": [],
+            "connection_name": "blackcard-concierge-ai:europe-west2:elite-concierge-db-prod",
+            "database_version": "POSTGRES_15",
+            "deletion_protection": true,
+            "dns_name": "",
+            "dns_names": [],
+            "encryption_key_name": null,
+            "final_backup_description": null,
+            "first_ip_address": "34.142.13.0",
+            "id": "elite-concierge-db-prod",
+            "instance_type": "CLOUD_SQL_INSTANCE",
+            "ip_address": [
+              {
+                "ip_address": "34.142.13.0",
+                "time_to_retire": "",
+                "type": "PRIMARY"
+              },
+              {
+                "ip_address": "34.147.152.181",
+                "time_to_retire": "",
+                "type": "OUTGOING"
+              }
+            ],
+            "maintenance_version": "POSTGRES_15_15.R20260108.01_01",
+            "master_instance_name": "",
+            "name": "elite-concierge-db-prod",
+            "node_count": 0,
+            "point_in_time_restore_context": [],
+            "private_ip_address": "",
+            "project": "blackcard-concierge-ai",
+            "psc_service_attachment_link": "",
+            "public_ip_address": "34.142.13.0",
+            "region": "europe-west2",
+            "replica_configuration": [],
+            "replica_names": [],
+            "replication_cluster": [
+              {
+                "dr_replica": false,
+                "failover_dr_replica_name": "",
+                "psa_write_endpoint": ""
+              }
+            ],
+            "restore_backup_context": [],
+            "root_password": null,
+            "root_password_wo": null,
+            "root_password_wo_version": null,
+            "self_link": "https://sqladmin.googleapis.com/sql/v1beta4/projects/blackcard-concierge-ai/instances/elite-concierge-db-prod",
+            "server_ca_cert": [
+              {
+                "cert": "-----BEGIN CERTIFICATE-----\nMIIDfzCCAmegAwIBAgIBADANBgkqhkiG9w0BAQsFADB3MS0wKwYDVQQuEyQ5Mzkx\nNTc5MS05YjU1LTRlNDEtOTc3OC0wM2FlYWYwY2RmNzQxIzAhBgNVBAMTGkdvb2ds\nZSBDbG91ZCBTUUwgU2VydmVyIENBMRQwEgYDVQQKEwtHb29nbGUsIEluYzELMAkG\nA1UEBhMCVVMwHhcNMjYwMjAzMTA1MDAwWhcNMzYwMjAxMTA1MTAwWjB3MS0wKwYD\nVQQuEyQ5MzkxNTc5MS05YjU1LTRlNDEtOTc3OC0wM2FlYWYwY2RmNzQxIzAhBgNV\nBAMTGkdvb2dsZSBDbG91ZCBTUUwgU2VydmVyIENBMRQwEgYDVQQKEwtHb29nbGUs\nIEluYzELMAkGA1UEBhMCVVMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIB\nAQDb9nksBPwV5MALWoBRlBRmLCD5EHH4wflMlQA6EMX/gSZAqdMZk1QrzPjUUGXN\nDFtxTX1Qtops6azTe93rsemVaBE7Ni1xMNqlzzSGwuW9L3vZFhZaHNK6a7M7/TGH\nCgHkIyXv57fYuqi5VXZwoa7j/j4n5KHkV608E+uoxRJANdZx7C92H+Rm5YrU3n+l\n79Sq9SH//SdIlA+dHOnu+jNkPjn3osFi1yhRGlNEm6YyRbzOyw3sBYStaGorRubg\ng4P7uqVajUcDEYHgPWSXQnXezooZG24gqudDlOjenWjS5GMHghRSFidyd/fQOMEv\nWfU3Wq1kXCRPF4Z9ekfD0iwZAgMBAAGjFjAUMBIGA1UdEwEB/wQIMAYBAf8CAQAw\nDQYJKoZIhvcNAQELBQADggEBACYoyxyNdVycJB8uzfw9m8Kq3ZT7QvIN3gQAo2wC\ngxa1Cu020UtDv98KDRfDAWyhwbJp1WMrv0zjESBuJBJjHwmyVIDUPMgKCx83r0ey\nO9YQJrMy0P+7X9aZi60rtN6N71cpc8xm35NmsF1We9bX+uqIcaRkQsJSNjYIc3nK\nXCXcuMF7T2tT8F4rs7FcrkgXMIuzfaLQlNaBuZgnytWkXEBCt8nGpWc303w6VUyN\njAgwjfM4TfW+GlJAPLOtcqs2/c+4AK8TMD3ohGqhgH+5A9nf4hsNguAoP6Q3hhAl\nu+2phKbjqW6U5LD9Al/5JKPl899d5dgAoWerkL24+L0lQlw=\n-----END CERTIFICATE-----",
+                "common_name": "C=US,O=Google\\, Inc,CN=Google Cloud SQL Server CA,dnQualifier=93915791-9b55-4e41-9778-03aeaf0cdf74",
+                "create_time": "2026-02-03T10:50:00.475Z",
+                "expiration_time": "2036-02-01T10:51:00.475Z",
+                "sha1_fingerprint": "fc153b7fa9e5503ad6da006978273db295c9428a"
+              }
+            ],
+            "service_account_email_address": "p557456081985-s7i1sj@gcp-sa-cloud-sql.iam.gserviceaccount.com",
+            "settings": [
+              {
+                "activation_policy": "ALWAYS",
+                "active_directory_config": [],
+                "advanced_machine_features": [],
+                "availability_type": "ZONAL",
+                "backup_configuration": [
+                  {
+                    "backup_retention_settings": [
+                      {
+                        "retained_backups": 4,
+                        "retention_unit": "COUNT"
+                      }
+                    ],
+                    "backup_tier": "STANDARD",
+                    "binary_log_enabled": false,
+                    "enabled": true,
+                    "location": "",
+                    "point_in_time_recovery_enabled": true,
+                    "start_time": "03:00",
+                    "transaction_log_retention_days": 7
+                  }
+                ],
+                "collation": "",
+                "connection_pool_config": [],
+                "connector_enforcement": "NOT_REQUIRED",
+                "data_cache_config": [
+                  {
+                    "data_cache_enabled": false
+                  }
+                ],
+                "database_flags": [
+                  {
+                    "name": "cloudsql.iam_authentication",
+                    "value": "on"
+                  }
+                ],
+                "deletion_protection_enabled": false,
+                "deny_maintenance_period": [],
+                "disk_autoresize": true,
+                "disk_autoresize_limit": 0,
+                "disk_size": 10,
+                "disk_type": "PD_SSD",
+                "edition": "ENTERPRISE",
+                "effective_availability_type": "ZONAL",
+                "enable_dataplex_integration": false,
+                "enable_google_ml_integration": false,
+                "final_backup_config": [],
+                "insights_config": [
+                  {
+                    "query_insights_enabled": false,
+                    "query_plans_per_minute": 0,
+                    "query_string_length": 0,
+                    "record_application_tags": false,
+                    "record_client_address": false
+                  }
+                ],
+                "ip_configuration": [
+                  {
+                    "allocated_ip_range": "",
+                    "authorized_networks": [],
+                    "custom_subject_alternative_names": [],
+                    "enable_private_path_for_google_cloud_services": false,
+                    "ipv4_enabled": true,
+                    "private_network": "",
+                    "psc_config": [],
+                    "server_ca_mode": "GOOGLE_MANAGED_INTERNAL_CA",
+                    "server_ca_pool": "",
+                    "ssl_mode": "ALLOW_UNENCRYPTED_AND_ENCRYPTED"
+                  }
+                ],
+                "location_preference": [
+                  {
+                    "follow_gae_application": "",
+                    "secondary_zone": "",
+                    "zone": "europe-west2-c"
+                  }
+                ],
+                "maintenance_window": [],
+                "password_validation_policy": [],
+                "pricing_plan": "PER_USE",
+                "read_pool_auto_scale_config": [
+                  {
+                    "disable_scale_in": false,
+                    "enabled": false,
+                    "max_node_count": 0,
+                    "min_node_count": 0,
+                    "scale_in_cooldown_seconds": 0,
+                    "scale_out_cooldown_seconds": 0,
+                    "target_metrics": []
+                  }
+                ],
+                "retain_backups_on_delete": false,
+                "sql_server_audit_config": [],
+                "tier": "db-f1-micro",
+                "time_zone": "",
+                "user_labels": {},
+                "version": 32
+              }
+            ],
+            "timeouts": null
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "root_password"
+              }
+            ],
+            [
+              {
+                "type": "get_attr",
+                "value": "server_ca_cert"
+              }
+            ]
+          ],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo1NDAwMDAwMDAwMDAwLCJkZWxldGUiOjU0MDAwMDAwMDAwMDAsInVwZGF0ZSI6NTQwMDAwMDAwMDAwMH19"
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}

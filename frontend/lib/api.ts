@@ -325,3 +325,43 @@ export async function fetchTodayInsight(): Promise<DailyInsight | null> {
         return null;
     }
 }
+
+
+// ---------------------------------------------------------------------------
+// Sentry Graph — Autonomous biometric intervention
+// ---------------------------------------------------------------------------
+export type SessionMutation = {
+    headline: string;
+    advice: string;
+    original_exercises_replaced: string[];
+    replacement_exercises: string[];
+    intensity_cap_percent: number;
+    volume_reduction_percent: number;
+    session_type_override: string;
+};
+
+export type SentryResult = {
+    user_id: string;
+    recovery_status: 'RED' | 'AMBER' | 'GREEN';
+    intervention_triggered: boolean;
+    session_mutation: SessionMutation | null;
+    notification_payload: Record<string, unknown> | null;
+    actions_taken: string[];
+};
+
+/** Manually trigger the Biometric Sentry for the current user. */
+export async function triggerSentry(): Promise<SentryResult | null> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/sentry/run`, {
+            method: 'POST',
+            headers,
+        });
+        if (!res.ok) throw new Error('Sentry trigger failed');
+        return res.json();
+    } catch (error) {
+        console.error('Sentry trigger error:', error);
+        return null;
+    }
+}
+

@@ -7,7 +7,7 @@ resource "google_artifact_registry_repository" "repo" {
   format        = "DOCKER"
   project       = var.project_id
   
-  depends_on = [google_project_service.apis]
+
 }
 
 # Cloud Run v2 Service
@@ -20,10 +20,20 @@ resource "google_cloud_run_v2_service" "api" {
   template {
     service_account = google_service_account.backend_sa.email
 
+    # Resource tuning for Gemini Swarm & Biomechanics analysis
+    max_instance_request_concurrency = 80
+    session_affinity                = true # Required for stable WebSockets
+
     containers {
-      # Placeholder image for infra initialization
       image = "us-docker.pkg.dev/cloudrun/container/hello" 
       
+      resources {
+        limits = {
+          cpu    = "2"
+          memory = "4Gi"
+        }
+      }
+
       env {
         name  = "PROJECT_ID"
         value = var.project_id
@@ -46,6 +56,16 @@ resource "google_cloud_run_v2_service" "api" {
       }
       
       env {
+        name  = "DB_USER"
+        value = google_sql_user.users.name
+      }
+
+      env {
+        name  = "DB_NAME"
+        value = google_sql_database.database.name
+      }
+
+      env {
         name  = "ENV"
         value = "production"
       }
@@ -60,7 +80,7 @@ resource "google_cloud_run_v2_service" "api" {
     ]
   }
 
-  depends_on = [google_project_service.apis]
+
 }
 
 # Allow unauthenticated invocations for the MVP API (Publicly accessible PWA/Webhook)

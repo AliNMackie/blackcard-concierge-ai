@@ -1,0 +1,58 @@
+/*
+  use-biomechanics.ts — Level 5 Ambient Intelligence Data Hook
+  Interacts with the /api/v1/biomechanics/audit endpoint to 
+  perform multi-frame kinetic analysis using Gemini 3.1 Pro.
+*/
+'use client';
+
+import { useState } from 'react';
+import { api } from '@/lib/api'; // Assuming a standard axios/fetch wrapper exists in lib/api
+
+interface AuditResponse {
+    user_id: string;
+    movement_type: string;
+    intervention_cue: string;
+    svg_overlay: string;
+    drift_score: number;
+}
+
+export const useBiomechanics = () => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [auditResult, setAuditResult] = useState<AuditResponse | null>(null);
+
+    const runBiomechanicalAudit = async (movementType: str, framesB64: string[]) => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            // In a real app, 'api' would be an axios instance configured with 
+            // the base URL and Firebase auth headers.
+            const response = await api.post<AuditResponse>('/api/v1/biomechanics/audit', {
+                movement_type: movementType,
+                frames_b64: framesB64,
+                fps: 30
+            });
+
+            setAuditResult(response.data);
+        } catch (err: any) {
+            console.error('Biomechanical Audit failed:', err);
+            setError(err?.response?.data?.detail || 'Failed to analyze biomechanics. Ensure your session is active.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const resetAudit = () => {
+        setAuditResult(null);
+        setError(null);
+    };
+
+    return {
+        runBiomechanicalAudit,
+        auditResult,
+        isLoading,
+        error,
+        resetAudit
+    };
+};

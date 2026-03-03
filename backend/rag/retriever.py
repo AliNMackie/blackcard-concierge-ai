@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from langchain_google_vertexai import VertexAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 import app.database
 from app.models import DocumentChunk
@@ -16,7 +16,7 @@ class Retriever:
     def _init_embeddings(self):
         try:
             if settings.is_production():
-                self.embeddings_model = VertexAIEmbeddings(model_name="text-embedding-004")
+                self.embeddings_model = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
             else:
                 try: 
                     # Try to init mock if available, or just set None

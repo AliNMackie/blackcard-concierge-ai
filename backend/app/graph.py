@@ -1,6 +1,7 @@
 import operator
 import logging
-from typing import TypedDict, Annotated, List, Union
+from typing import Annotated, List, Union
+from typing_extensions import TypedDict
 
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import BaseMessage

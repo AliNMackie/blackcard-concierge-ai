@@ -160,3 +160,5 @@ class DailyInsight(Base):
     actionable_advice: Mapped[str] = mapped_column(Text)
     suggested_plan_override: Mapped[dict] = mapped_column(JSON, default={})
 
+# Phase 4 Imports
+from app.contextual_memory import InferenceState, BiomechanicalSignature

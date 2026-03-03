@@ -1,4 +1,5 @@
-from typing import List, Optional, TypedDict
+from typing import List, Optional
+from typing_extensions import TypedDict
 
 class GymEquipmentDescription(TypedDict):
     detected_equipment: List[str]
