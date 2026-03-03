@@ -12,6 +12,7 @@ from app.models import User
 from app.auth import get_current_user, AuthenticatedUser, require_trainer, require_admin
 from app.config import logger
 from app.schema import UserUpdate
+from app.core.subscription import verify_premium_tier
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -51,6 +52,16 @@ class UserProfilePayload(BaseModel):
     days_per_week: Optional[int] = None
 
 
+class OnboardingPayload(BaseModel):
+    age: int
+    gender: str
+    current_weight: str
+    target_weight: str
+    goal: str  # Hypertrophy, Longevity, Strength, Fat Loss
+    injuries: Optional[str] = None
+    days_per_week: int = 4
+
+
 # --- Endpoints ---
 
 @router.get("/me", response_model=UserResponse)
@@ -72,12 +83,13 @@ async def get_current_user_profile(
     )
 
 async def generate_baseline_context_task(user_id: str, profile_text: str):
-    from app.database import async_session
+    from app.database import AsyncSessionLocal
     from app.models import DocumentChunk
     from rag.retriever import retriever
     try:
         query_vector = await retriever.get_embedding(profile_text)
-        async with async_session() as session:
+        async with AsyncSessionLocal() as session:
+
             doc = DocumentChunk(
                 content=profile_text,
                 embedding=query_vector,
@@ -118,6 +130,49 @@ async def update_user_profile_data(
     await db.refresh(user)
     
     return {"status": "ok", "profile_data": user.profile_data}
+
+
+@router.post("/onboard")
+async def onboard_user(
+    payload: OnboardingPayload,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(get_current_user)
+):
+    """
+    Cold-Start Onboarding: Collects user physiology and goals,
+    then vectorizes a natural-language summary as foundational RAG context.
+    """
+    stmt = select(User).where(User.id == current_user.uid)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+
+    if not user:
+        user = User(id=current_user.uid, role="client")
+        db.add(user)
+
+    # Persist structured data
+    profile_data = payload.model_dump()
+    profile_data["onboarded"] = True
+    user.profile_data = profile_data
+
+    # Generate natural-language summary for RAG vectorization
+    profile_summary = (
+        f"Blackcard Client Profile: {payload.age}-year-old {payload.gender}. "
+        f"Current weight: {payload.current_weight}, target: {payload.target_weight}. "
+        f"Primary training goal: {payload.goal}. "
+        f"Available {payload.days_per_week} days per week. "
+        f"Injury history: {payload.injuries or 'None reported'}."
+    )
+
+    # Vectorize into DocumentChunk (background task)
+    background_tasks.add_task(generate_baseline_context_task, current_user.uid, profile_summary)
+
+    await db.commit()
+    await db.refresh(user)
+
+    logger.info(f"Onboarded user {current_user.uid}: {payload.goal}")
+    return {"status": "onboarded", "profile_data": user.profile_data}
 
 
 @router.get("/clients", response_model=List[UserResponse])
@@ -387,31 +442,24 @@ async def toggle_travel(db: AsyncSession = Depends(get_db)):
 
 
 @router.patch("/travel-status", response_model=UserResponse)
-
 async def update_travel_status(
     is_traveling: bool = Body(..., embed=True),
     equipment_constraint: str = Body("Full Gym", embed=True),
     db: AsyncSession = Depends(get_db),
-    current_user: AuthenticatedUser = Depends(get_current_user)
+    premium_user: User = Depends(verify_premium_tier)
 ):
     """
     Updates the travel status and equipment constraints for the current user.
+    Gated behind the freemium paywall.
     """
-    stmt = select(User).where(User.id == current_user.uid)
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
-    
-    if not user:
-        user = User(id=current_user.uid, role="client")
-        db.add(user)
-    
-    user.is_traveling = is_traveling
-    user.equipment_constraint = equipment_constraint
+    premium_user.is_traveling = is_traveling
+    premium_user.equipment_constraint = equipment_constraint
     
     await db.commit()
-    await db.refresh(user)
+    await db.refresh(premium_user)
     
-    return user
+    return premium_user
+
 
 @router.patch("/me")
 async def update_user_profile(update_data: UserUpdate, db: AsyncSession = Depends(get_db)):

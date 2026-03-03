@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { fetchEvents, EventLog, updateTravelStatus, adaptWorkout } from '@/lib/api';
+import { fetchEvents, EventLog, updateTravelStatus, adaptWorkout, PaywallError } from '@/lib/api';
 import { useEvents, useTodayInsight, useUser } from '@/lib/swr-hooks';
 import { Activity, Heart, Camera, MessageSquare, Zap } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -9,31 +9,39 @@ import { requestNotificationPermission } from '@/lib/firebase-messaging';
 import { getIdToken } from '@/lib/firebase';
 import { ConciergeCard } from '@/components/dashboard/ConciergeCard';
 import { TravelModeToggle } from '@/components/dashboard/TravelModeToggle';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 export default function ClientDashboard() {
     const { events, isLoading: eventsLoading } = useEvents(5000);
     const { user: userData, mutate: mutateUser } = useUser();
     const { insight, isLoading: insightLoading, mutate: mutateInsight } = useTodayInsight();
     const [dismissed, setDismissed] = useState(false);
+    const [showUpgrade, setShowUpgrade] = useState(false);
 
     const handleTravelToggle = async (isTraveling: boolean, constraint: string) => {
         try {
-            // 1. Update Backend State
             await updateTravelStatus(isTraveling, constraint);
-            await mutateUser(); // Refresh user data locally
+            await mutateUser();
 
-            // 2. Trigger Instant Rewrite if traveling is turned ON
             if (isTraveling) {
-                console.log("Travel Mode activated. Triggering instant protocol rewrite...");
-                await adaptWorkout({
-                    context: `Environment changed: ${constraint}`,
-                    trigger: "travel_mode_toggle"
-                });
-                // Revalidate insight to show the travel-aware briefing
-                mutateInsight();
+                try {
+                    await adaptWorkout({
+                        context: `Environment changed: ${constraint}`,
+                        trigger: "travel_mode_toggle"
+                    });
+                    mutateInsight();
+                } catch (adaptError) {
+                    if (adaptError instanceof PaywallError) {
+                        setShowUpgrade(true);
+                    }
+                }
             }
         } catch (error) {
-            console.error("Travel toggle failed:", error);
+            if (error instanceof PaywallError) {
+                setShowUpgrade(true);
+            } else {
+                console.error("Travel toggle failed:", error);
+            }
         }
     };
 
@@ -172,6 +180,10 @@ export default function ClientDashboard() {
 
             </div>
 
+            {/* Paywall Modal */}
+            <UpgradeModal isOpen={showUpgrade} onClose={() => setShowUpgrade(false)} />
+
         </div>
     );
 }
+

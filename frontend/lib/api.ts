@@ -27,6 +27,15 @@ export type DailyInsight = {
 
 import { getIdToken } from './firebase';
 
+// Custom error for paywall interception
+export class PaywallError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'PaywallError';
+    }
+}
+
+
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 // If BACKEND_URL is set, use it. Otherwise use internal BFF (/api/client).
 const API_BASE = BACKEND_URL ? `${BACKEND_URL}` : '/api/client';
@@ -227,15 +236,20 @@ export async function adaptWorkout(payload: CoachAdaptPayload): Promise<CoachAda
             headers,
             body: JSON.stringify(payload),
         });
-        if (!res.ok) {
-            throw new Error('Coach adaptation failed');
+        if (res.status === 403) {
+            const body = await res.json();
+            if (body?.detail?.code === 'paywall_required') {
+                throw new PaywallError(body.detail.message);
+            }
         }
+        if (!res.ok) throw new Error('Coach adaptation failed');
         return res.json();
     } catch (error) {
         console.error('Coach adapt error:', error);
         throw error;
     }
 }
+
 
 export async function updateTravelStatus(isTraveling: boolean, constraint: string): Promise<any> {
     try {
@@ -245,6 +259,12 @@ export async function updateTravelStatus(isTraveling: boolean, constraint: strin
             headers,
             body: JSON.stringify({ is_traveling: isTraveling, equipment_constraint: constraint }),
         });
+        if (res.status === 403) {
+            const body = await res.json();
+            if (body?.detail?.code === 'paywall_required') {
+                throw new PaywallError(body.detail.message);
+            }
+        }
         if (!res.ok) throw new Error('Failed to update travel status');
         return res.json();
     } catch (error) {
@@ -252,6 +272,33 @@ export async function updateTravelStatus(isTraveling: boolean, constraint: strin
         throw error;
     }
 }
+
+export type OnboardingPayload = {
+    age: number;
+    gender: string;
+    current_weight: string;
+    target_weight: string;
+    goal: string;
+    injuries?: string;
+    days_per_week: number;
+};
+
+export async function submitOnboarding(payload: OnboardingPayload): Promise<any> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/users/onboard`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error('Onboarding failed');
+        return res.json();
+    } catch (error) {
+        console.error('Onboarding error:', error);
+        throw error;
+    }
+}
+
 
 export async function fetchUserProfile(): Promise<any> {
     try {
