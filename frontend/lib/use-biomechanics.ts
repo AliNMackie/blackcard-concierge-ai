@@ -6,7 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import { api } from '@/lib/api'; // Assuming a standard axios/fetch wrapper exists in lib/api
+import { submitBiomechanicsAudit } from '@/lib/api';
 
 interface AuditResponse {
     user_id: string;
@@ -21,23 +21,21 @@ export const useBiomechanics = () => {
     const [error, setError] = useState<string | null>(null);
     const [auditResult, setAuditResult] = useState<AuditResponse | null>(null);
 
-    const runBiomechanicalAudit = async (movementType: str, framesB64: string[]) => {
+    const runBiomechanicalAudit = async (movementType: string, framesB64: string[]) => {
         setIsLoading(true);
         setError(null);
 
         try {
-            // In a real app, 'api' would be an axios instance configured with 
-            // the base URL and Firebase auth headers.
-            const response = await api.post<AuditResponse>('/api/v1/biomechanics/audit', {
+            const data = await submitBiomechanicsAudit({
                 movement_type: movementType,
                 frames_b64: framesB64,
                 fps: 30
             });
 
-            setAuditResult(response.data);
+            setAuditResult(data);
         } catch (err: any) {
             console.error('Biomechanical Audit failed:', err);
-            setError(err?.response?.data?.detail || 'Failed to analyze biomechanics. Ensure your session is active.');
+            setError(err?.message || 'Failed to analyze biomechanics. Ensure your session is active.');
         } finally {
             setIsLoading(false);
         }

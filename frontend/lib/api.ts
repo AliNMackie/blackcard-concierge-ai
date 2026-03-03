@@ -365,3 +365,24 @@ export async function triggerSentry(): Promise<SentryResult | null> {
     }
 }
 
+/** Generic biomechanical audit for multi-frame kinetic analysis. */
+export async function submitBiomechanicsAudit(payload: {
+    movement_type: string;
+    frames_b64: string[];
+    fps: number;
+}): Promise<any> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/biomechanics/audit`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error('Biomechanical Audit failed');
+        return res.json();
+    } catch (error) {
+        console.error('Biomechanics audit error:', error);
+        throw error;
+    }
+}
+
