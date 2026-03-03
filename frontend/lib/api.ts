@@ -37,12 +37,12 @@ export class PaywallError extends Error {
 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-// If BACKEND_URL is set, use it. Otherwise use internal BFF (/api/client).
-const API_BASE = BACKEND_URL ? `${BACKEND_URL}` : '/api/client';
+// If BACKEND_URL is set, use it with the /api/v1 prefix. Otherwise use internal BFF (/api/client).
+const API_BASE = BACKEND_URL ? `${BACKEND_URL}/api/v1` : '/api/client';
 
 export async function fetchEvents(limit = 50): Promise<EventLog[]> {
     try {
-        const url = BACKEND_URL ? `${API_BASE}/events?limit=${limit}` : `${API_BASE}/events`;
+        const url = BACKEND_URL ? `${BACKEND_URL}/events?limit=${limit}` : `${API_BASE}/events`;
         const headers: HeadersInit = {};
 
         const token = await getIdToken();
