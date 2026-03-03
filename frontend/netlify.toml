@@ -12,7 +12,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://elite-concierge-api-zx7q.a.run.app/api/:splat" # Replace with actual Cloud Run URL after deployment
+  to = "https://elite-concierge-api-557456081985.europe-west2.run.app/api/:splat"
   status = 200
 
 # Continuous Inference WebSocket Proxy (Optional, direct connection preferred)
