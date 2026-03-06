@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.models import User
-from app.auth import get_current_user, AuthenticatedUser, require_trainer, require_admin
+from app.auth import get_current_user, AuthenticatedUser, require_trainer, require_admin, require_tenant_access
 from app.config import logger
 from app.schema import UserUpdate
 from app.core.subscription import verify_premium_tier
