@@ -12,6 +12,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+# from app.database import get_db (Move to lazy import to avoid circle)
 
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
@@ -233,19 +234,25 @@ def require_role(*allowed_roles: str):
     return role_checker
 
 
-from app.database import get_db, set_rls_context
-
 async def require_tenant_access(
-    user: AuthenticatedUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    user: AuthenticatedUser = Depends(get_current_user)
 ) -> AuthenticatedUser:
     """
     Global dependency to enforce tenant-level isolation via RLS.
     Sets the app.current_trainer_id in the DB session based on the authenticated user.
     """
-    # If the user is a trainer, they access their own tenant
-    # If the user is an admin, they can bypass or see all
-    # If the user is a client, we use their trainer_id context
+    from app.database import get_db, set_rls_context
+    
+    # We use a sub-dependency to get the DB session within the function
+    # but since this is a FastAPI dependency itself, we can just add it back to the signature 
+    # or use it inside. Let's keep it in the signature for performance but move the import.
+    return user
+
+async def require_tenant_access_v2(
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> AuthenticatedUser:
+    from app.database import set_rls_context
     
     trainer_id = None
     is_admin = user.role == "admin"
@@ -257,6 +264,9 @@ async def require_tenant_access(
     
     await set_rls_context(db, trainer_id, is_admin)
     return user
+
+# Point the global dependency to the fix
+require_tenant_access = require_tenant_access_v2
 
 
 # Convenience dependencies

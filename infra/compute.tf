@@ -20,6 +20,7 @@ resource "google_cloud_run_v2_service" "api" {
   location = each.key
   project  = var.project_id
   ingress  = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER" # Restrict to LB
+  deletion_protection = false
 
   template {
     service_account = google_service_account.backend_sa.email
