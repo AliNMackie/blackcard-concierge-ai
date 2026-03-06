@@ -307,7 +307,7 @@ async def send_message_to_client(
     client_id: str,
     msg: TrainerMessage,
     db: AsyncSession = Depends(get_db),
-    current_user: AuthenticatedUser = Depends(require_trainer)
+    current_user: AuthenticatedUser = Depends(require_tenant_access)
 ):
     """
     Send a message from trainer to client.
@@ -321,21 +321,16 @@ async def send_message_to_client(
     client = result.scalar_one_or_none()
     
     if not client:
-        if client_id == "1":
-            client = User(id="1", role="client")
-            db.add(client)
-            await db.commit()
-            await db.refresh(client)
-        else:
-            raise HTTPException(status_code=404, detail="Client not found")
+        raise HTTPException(status_code=404, detail="Client not found")
     
     # Check ownership (admin can message anyone)
     if not current_user.is_admin and client.trainer_id and client.trainer_id != current_user.uid:
         raise HTTPException(status_code=403, detail="Not your client")
     
-    # Log message as event
+    # Log message as event (Trainer is the "owner" of this event row for RLS)
     log_entry = EventLog(
         user_id=client_id,
+        trainer_id=current_user.uid if current_user.role == "trainer" else client.trainer_id,
         event_type="trainer_message",
         payload={
             "from_trainer": current_user.uid,

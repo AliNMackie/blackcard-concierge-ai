@@ -362,6 +362,21 @@ async def action_node(state: SentryState) -> dict:
                 suggested_plan_override=mutation,
             )
             db.add(insight)
+            
+            # Phase 5.1: Sovereign Protocol Mutation (Autonomous Healing)
+            # If the Sentry has synthesized a mutation, we apply it to the REAL database session
+            if mutation and state.get("recovery_status") in ["RED", "AMBER"]:
+                from app.services.sovereign_scheduler import sovereign_healer
+                # Mock ROI data for the healer based on recovery status
+                roi_mock = {
+                    "roi_score": 80 if state["recovery_status"] == "RED" else 50,
+                    "status": state["recovery_status"]
+                }
+                healing_result = await sovereign_healer.heal_protocol(user_id, roi_mock, db)
+                if healing_result:
+                    actions.append("workout_protocol_autonomously_healed")
+                    logger.info(f"[Sentry/Action] Sovereign Healer mutated session {healing_result['session_id']}")
+
             await db.commit()
             actions.append("daily_insight_persisted")
             logger.info(f"[Sentry/Action] DailyInsight persisted for user={user_id}")

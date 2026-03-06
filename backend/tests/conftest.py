@@ -12,21 +12,26 @@ def postgres_container():
     """
     return "postgresql+asyncpg://postgres:mysecretpassword@localhost:5436/postgres"
 
-@pytest.fixture(scope="session")
-def db_engine(postgres_container):
-    """Create a single DB engine for the session (Synchronous wrapper)."""
-    engine = create_async_engine(postgres_container, echo=False)
+@pytest.fixture(scope="session", autouse=True)
+async def setup_db(postgres_container):
+    """Force database initialization with the test container URL."""
+    from app.config import settings
+    import app.database as db
     
-    # Sync wrapper for async setup
-    async def setup():
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-            await conn.run_sync(Base.metadata.create_all)
-            
-    asyncio.run(setup())
-        
-    yield engine
+    # 1. Update settings
+    settings.DATABASE_URL = postgres_container
     
-    # Sync wrapper for async teardown
-    asyncio.run(engine.dispose())
+    # 2. Force re-initialization of the connection pool
+    await db.init_connection_pool()
+    
+    # 3. Create tables
+    async with db.async_engine.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    
+    yield
+    
+    # Cleanup
+    if db.async_engine:
+        await db.async_engine.dispose()

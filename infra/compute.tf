@@ -1,28 +1,31 @@
-# Artifact Registry Repo
-# Storing here as it is the source for the compute service
+# Locals for regional scaling
+locals {
+  regions = ["europe-west2", "us-central1"]
+}
+
+# Artifact Registry Repo is global/regional - we keep one for now or mirror
 resource "google_artifact_registry_repository" "repo" {
-  location      = var.region
+  location      = "europe-west2" # Primary repo
   repository_id = "${var.service_name}-repo"
   description   = "Docker repository for Elite Concierge services"
   format        = "DOCKER"
   project       = var.project_id
-  
-
 }
 
-# Cloud Run v2 Service
+# Cloud Run v2 Services (Multi-Region)
 resource "google_cloud_run_v2_service" "api" {
-  name     = "${var.service_name}-api"
-  location = var.region
+  for_each = toset(local.regions)
+  
+  name     = "${var.service_name}-api-${each.key}"
+  location = each.key
   project  = var.project_id
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER" # Restrict to LB
 
   template {
     service_account = google_service_account.backend_sa.email
 
-    # Resource tuning for Gemini Swarm & Biomechanics analysis
     max_instance_request_concurrency = 80
-    session_affinity                = true # Required for stable WebSockets
+    session_affinity                = true
 
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello" 
@@ -44,7 +47,6 @@ resource "google_cloud_run_v2_service" "api" {
         value = google_sql_database_instance.master.connection_name
       }
       
-      # In a real app we'd mount the secret as volume or env var from secret ref
       env {
         name = "DB_PASS"
         value_source {
@@ -79,15 +81,120 @@ resource "google_cloud_run_v2_service" "api" {
       client_version
     ]
   }
-
-
 }
 
-# Allow unauthenticated invocations for the MVP API (Publicly accessible PWA/Webhook)
-# resource "google_cloud_run_service_iam_member" "public_access" {
-#   location = google_cloud_run_v2_service.api.location
-#   project  = google_cloud_run_v2_service.api.project
-#   service  = google_cloud_run_v2_service.api.name
-#   role     = "roles/run.invoker"
-#   member   = "allUsers"
-# }
+# --- GLOBAL LOAD BALANCING (Autonomous Scale) ---
+
+# Serverless NEGs
+resource "google_compute_region_network_endpoint_group" "serverless_neg" {
+  for_each              = toset(local.regions)
+  name                  = "${var.service_name}-neg-${each.key}"
+  network_endpoint_type = "SERVERLESS"
+  region                = each.key
+  project               = var.project_id
+  cloud_run {
+    service = google_cloud_run_v2_service.api[each.key].name
+  }
+}
+
+# Backend Service
+resource "google_compute_backend_service" "default" {
+  name                  = "${var.service_name}-backend"
+  project               = var.project_id
+  protocol              = "HTTP"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  locality_lb_policy    = "ROUND_ROBIN"
+
+  # Enterprise Hardening: Automatic Failover & Outlier Detection
+  outlier_detection {
+    consecutive_errors = 5
+    base_ejection_time {
+      seconds = 30
+    }
+    interval {
+      seconds = 1
+    }
+    max_ejection_percent = 50 # If one region fails, 50% ejection allows failover to the other
+  }
+
+  circuit_breakers {
+    max_requests_per_connection = 100
+  }
+
+  dynamic "backend" {
+    for_each = toset(local.regions)
+    content {
+      group = google_compute_region_network_endpoint_group.serverless_neg[backend.key].id
+      balancing_mode = "UTILIZATION" # Required for some LB types, helps with failover
+      capacity_scaler = 1.0 
+    }
+  }
+
+  security_policy = google_compute_security_policy.policy.id
+}
+
+# URL Map
+resource "google_compute_url_map" "default" {
+  name            = "${var.service_name}-url-map"
+  project         = var.project_id
+  default_service = google_compute_backend_service.default.id
+}
+
+# HTTP Target Proxy
+resource "google_compute_target_http_proxy" "default" {
+  name    = "${var.service_name}-http-proxy"
+  project = var.project_id
+  url_map = google_compute_url_map.default.id
+}
+
+# Forwarding Rule (Global IP)
+resource "google_compute_global_forwarding_rule" "default" {
+  name                  = "${var.service_name}-forwarding-rule"
+  project               = var.project_id
+  target                = google_compute_target_http_proxy.default.id
+  port_range            = "80"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+}
+
+# --- CLOUD ARMOR WAF (Security Hardening) ---
+resource "google_compute_security_policy" "policy" {
+  name    = "${var.service_name}-waf-policy"
+  project = var.project_id
+
+  # Default rule (Allow all, then apply filters)
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "Default rule"
+  }
+
+  # Block SQL Injection
+  rule {
+    action   = "deny(403)"
+    priority = "1000"
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('sqli-v33-stable')"
+      }
+    }
+    description = "SQLi protection"
+  }
+
+  # Block XSS
+  rule {
+    action   = "deny(403)"
+    priority = "1001"
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('xss-v33-stable')"
+      }
+    }
+    description = "XSS protection"
+  }
+}

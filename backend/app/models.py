@@ -31,6 +31,7 @@ class WorkoutSession(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), index=True)
+    trainer_id: Mapped[Optional[str]] = mapped_column(String, index=True) # For RLS enforcement
     date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     focus_area: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     rpe: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
@@ -78,6 +79,7 @@ class EventLog(Base):
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[str] = mapped_column(String, nullable=True) # Loose FK for MVP
+    trainer_id: Mapped[Optional[str]] = mapped_column(String, index=True) # For RLS enforcement
     event_type: Mapped[str] = mapped_column(String) # "wearable", "vision", "chat"
     
     payload: Mapped[dict] = mapped_column(JSON, default={})
@@ -159,6 +161,49 @@ class DailyInsight(Base):
     insight_headline: Mapped[str] = mapped_column(String)
     actionable_advice: Mapped[str] = mapped_column(Text)
     suggested_plan_override: Mapped[dict] = mapped_column(JSON, default={})
+
+# Phase 5.3: Enterprise Hardening
+class AIInterventionLedger(Base):
+    """
+    An immutable, append-only event store for high-compliance auditing 
+    of autonomous AI interventions.
+    """
+    __tablename__ = "ai_interventions_ledger"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    session_id: Mapped[str] = mapped_column(String, ForeignKey("workout_sessions.id"), index=True)
+    user_id: Mapped[str] = mapped_column(String, index=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    
+    # Context
+    biometric_trigger: Mapped[dict] = mapped_column(JSON) # e.g., {"roi_score": 85, "status": "RED", "deviations": [...]}
+    
+    # Decisions
+    original_protocol: Mapped[dict] = mapped_column(JSON) # List of exercise_logs before mutation
+    mutated_protocol: Mapped[dict] = mapped_column(JSON)  # List of exercise_logs after mutation
+    
+    # Metadata
+    reasoning: Mapped[str] = mapped_column(Text)
+    agent_version: Mapped[str] = mapped_column(String, default="sovereign_v1.0")
+
+# Phase 6.1: Hyper-Personalized Persona Cloning
+class TrainerPersona(Base):
+    """
+    Stores stylistic signatures and samples for a trainer to 
+    allow AI cloning of their coaching voice.
+    """
+    __tablename__ = "trainer_personas"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    trainer_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), unique=True, index=True)
+    
+    # Stylistic Markers
+    voice_signature: Mapped[Optional[str]] = mapped_column(Text) # The distilled "Voice" prompt
+    style_samples: Mapped[list] = mapped_column(JSON, default=[]) # List of raw text strings/transcripts
+    
+    # Metadata
+    last_tuned: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    is_active: Mapped[bool] = mapped_column(default=True)
 
 # Phase 4 Imports
 from app.contextual_memory import InferenceState, BiomechanicalSignature

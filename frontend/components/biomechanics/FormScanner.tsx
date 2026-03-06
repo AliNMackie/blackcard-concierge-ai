@@ -5,10 +5,17 @@
 */
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFormCapture } from '@/hooks/useFormCapture';
+import { useVoiceFeedback } from '@/hooks/useVoiceFeedback';
 import { SVGOverlay } from './SVGOverlay';
+import { PoseStandardizer, Landmark } from '@/lib/pose-standardizer';
+import { submitBiomechanicsAudit, fetchUserProfile } from '@/lib/api';
+
+// MediaPipe & TFJS
+import * as poseDetection from '@tensorflow-models/pose-detection';
+import '@tensorflow/tfjs-backend-webgl';
 
 interface AuditResult {
     svg_overlay: string;
@@ -27,12 +34,74 @@ export const FormScanner: React.FC = () => {
         startRecording,
     } = useFormCapture();
 
+    const { analyzeAndSpeak } = useVoiceFeedback({ debounceMs: 4000 });
+
     const videoRef = useRef<HTMLVideoElement>(null);
+    const detectorRef = useRef<poseDetection.PoseDetector | null>(null);
+    const frameVectorsRef = useRef<number[][]>([]);
+    const animationFrameRef = useRef<number | null>(null);
 
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
     const [capturedVideoUrl, setCapturedVideoUrl] = useState<string | null>(null);
     const [apiError, setApiError] = useState<string | null>(null);
+    const [userTier, setUserTier] = useState<string>('free');
+
+    // Load User Tier & Initialize Detector
+    useEffect(() => {
+        const init = async () => {
+            const profile = await fetchUserProfile();
+            if (profile) setUserTier(profile.role === 'admin' ? 'elite' : 'free');
+
+            const model = poseDetection.SupportedModels.BlazePose;
+            const detectorConfig = {
+                runtime: 'tfjs',
+                modelType: 'full'
+            } as any;
+            detectorRef.current = await poseDetection.createDetector(model, detectorConfig);
+        };
+        init();
+    }, []);
+
+    // Frame-by-frame pose detection loop
+    const runDetection = useCallback(async () => {
+        if (!isRecording) return;
+
+        if (videoRef.current && detectorRef.current) {
+            try {
+                const poses = await detectorRef.current.estimatePoses(videoRef.current);
+                if (poses.length > 0) {
+                    const landmarks = poses[0].keypoints.map(kp => ({
+                        x: kp.x,
+                        y: kp.y,
+                        z: (kp as any).z || 0,
+                        visibility: kp.score || 0
+                    }));
+                    const vector = PoseStandardizer.standardize(landmarks as Landmark[]);
+                    frameVectorsRef.current.push(vector);
+
+                    // Real-time Voice Feedback
+                    analyzeAndSpeak(landmarks as Landmark[]);
+                }
+            } catch (e) {
+                console.warn("Pose detection error:", e);
+            }
+        }
+
+        animationFrameRef.current = requestAnimationFrame(runDetection);
+    }, [isRecording]);
+
+    useEffect(() => {
+        if (isRecording) {
+            frameVectorsRef.current = [];
+            runDetection();
+        } else {
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        }
+        return () => {
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        };
+    }, [isRecording, runDetection]);
 
     // Attach the camera stream to the video element
     useEffect(() => {
@@ -76,24 +145,40 @@ export const FormScanner: React.FC = () => {
             // Begin backend analysis
             setIsAnalyzing(true);
 
-            const formData = new FormData();
-            formData.append('video', videoBlob, 'audit.webm');
-            formData.append('movement_type', 'unknown'); // Let Gemini determine it, or could be passed via props
+            let result;
+            if (userTier === 'elite' && frameVectorsRef.current.length > 0) {
+                // Elite Tier: Submit aggregated mean vector
+                const numFrames = frameVectorsRef.current.length;
+                const vectorDim = PoseStandardizer.TARGET_DIM;
+                const meanVector = new Array(vectorDim).fill(0);
 
-            const response = await fetch('/api/v1/biomechanics/audit', {
-                method: 'POST',
-                // 'Authorization': `Bearer ${token}`
-                body: formData,
-            });
+                for (const vec of frameVectorsRef.current) {
+                    for (let i = 0; i < vectorDim; i++) {
+                        meanVector[i] += vec[i] / numFrames;
+                    }
+                }
 
-            if (!response.ok) {
-                throw new Error('Analysis failed. Please try again.');
+                result = await submitBiomechanicsAudit({
+                    movement_type: 'unknown',
+                    vectors: meanVector
+                });
+            } else {
+                // Free Tier: Submit raw video
+                const reader = new FileReader();
+                const videoBase64 = await new Promise<string>((resolve) => {
+                    reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+                    reader.readAsDataURL(videoBlob);
+                });
+
+                result = await submitBiomechanicsAudit({
+                    movement_type: 'unknown',
+                    video_base64: videoBase64
+                });
             }
 
-            const data = await response.json();
             setAuditResult({
-                svg_overlay: data.svg_overlay,
-                coaching_cue: data.coaching_cue || data.intervention_cue,
+                svg_overlay: result.svg_overlay || "",
+                coaching_cue: result.coaching_cue || result.message || "Analysis complete.",
             });
 
         } catch (err: any) {

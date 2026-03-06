@@ -113,21 +113,48 @@ async def generate_coach_adaptation(
     
     history_str = "\n".join(history_summaries) if history_summaries else "No relevant history found."
     
-    # 2. Get User State (Travel)
-    from app.models import User
-    stmt = select(User).where(User.id == user_id)
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
+    # 2. Get User State (Injuries, Biometrics, Travel)
+    from app.models import User, DailyBiometrics
     
+    # Fetch User and latest Biometrics in parallel (or sequential for simplicity in async)
+    user_stmt = select(User).where(User.id == user_id)
+    bio_stmt = select(DailyBiometrics).where(DailyBiometrics.user_id == user_id).order_by(DailyBiometrics.date.desc()).limit(1)
+    
+    user_result = await db.execute(user_stmt)
+    bio_result = await db.execute(bio_stmt)
+    
+    user = user_result.scalar_one_or_none()
+    latest_bio = bio_result.scalar_one_or_none()
+    
+    # Construct State Context
+    injuries = "None reported"
+    if user and user.profile_data:
+        injuries = user.profile_data.get("injuries", "None reported")
+        
+    recovery_status = "Unknown"
+    sleep_score = "N/A"
+    if latest_bio:
+        recovery_status = latest_bio.recovery_status
+        sleep_score = str(latest_bio.sleep_score)
+
     travel_constraint = ""
     if user and user.is_traveling:
-        travel_constraint = f"\nCRITICAL CONSTRAINT: The user is currently TRAVELING. You MUST restrict all exercise selection to: {user.equipment_constraint}. Preserve muscle group targets but adapt for limited equipment."
+        travel_constraint = f"\n- TRAVEL MODE: ACTIVE (Limit equipment to: {user.equipment_constraint})"
 
-    # 3. Construct Prompt
+    state_context = f"""
+    USER STATE CONTEXT:
+    - Injury History: {injuries}
+    - Recovery Status: {recovery_status}
+    - Sleep Score: {sleep_score}
+    {travel_constraint}
+    """
+
+    # 3. Construct Standardized Prompt
     prompt = f"""
     You are an elite, world-class Personal Trainer AI.
-    Your task is to adapt the user's current workout plan based on their immediate feedback and past history.
-    {travel_constraint}
+    Your task is to adapt the user's current workout plan based on their immediate feedback, past history, and current physical state.
+    
+    {state_context}
     
     USER FEEDBACK: "{user_feedback}"
     
@@ -137,8 +164,13 @@ async def generate_coach_adaptation(
     USER RELEVANT HISTORY (Past Sessions):
     {history_str}
     
+    ADAPTATION RULES:
+    1. If Recovery Status is 'RED', drastically reduce volume and intensity.
+    2. If Injuries are present, ensure no exercises aggravate the listed areas.
+    3. If TRAVEL MODE is active, strictly adhere to equipment constraints while maintaining target stimulus.
+    
     Generate a highly personalized response. Adhere strictly to the requested JSON schema.
-    Provide a 'coaching_cue' (2 sentences max) that is motivating and incorporates insight from history/feedback.
+    Provide a 'coaching_cue' (2 sentences max) that is motivating and incorporates insights from history/feedback/state.
     Provide the 'adapted_plan' which is the updated iteration of the current workout plan.
     """
 

@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import text
@@ -33,6 +34,17 @@ async def init_connection_pool():
         autoflush=False,
     )
     logger.info("Database connection pool initialized.")
+
+async def set_rls_context(session: AsyncSession, trainer_id: Optional[str], is_admin: bool = False):
+    """
+    Sets the current_trainer_id in the database session for RLS enforcement.
+    """
+    if trainer_id:
+        await session.execute(text("SELECT set_config('app.current_trainer_id', :trainer_id, true)"), {"trainer_id": trainer_id})
+    if is_admin:
+        await session.execute(text("SELECT set_config('app.is_admin', 'true', true)"))
+    else:
+        await session.execute(text("SELECT set_config('app.is_admin', 'false', true)"))
 
 async def get_db():
     """Dependency for ensuring a database session."""

@@ -14,7 +14,7 @@ from app.analytics import router as analytics_router
 from app.database import get_db, init_connection_pool, create_tables
 from app.models import User, EventLog
 from app.schema import AgentResponse, WearableEvent, VisionEvent, ChatEvent, UserUpdate
-from app.auth import get_current_user, get_current_user_optional, AuthenticatedUser, require_trainer, require_admin
+from app.auth import get_current_user, get_current_user_optional, AuthenticatedUser, require_trainer, require_admin, require_tenant_access
 # AI Graph
 from app.graph import app_graph
 
@@ -37,12 +37,13 @@ def get_api_key(api_key: str = Depends(api_key_header)):
     logger.error(f"Auth Failed: Received key '{api_key[:4] if api_key else 'None'}...'")
     raise HTTPException(status_code=403, detail="Invalid or missing API Key")
 from app.api.routes.coach import router as coach_router
-from app.api.routes.proactive import router as proactive_router
+from app.api.routes.concierge import router as concierge_router
 from app.api.routes.sentry import router as sentry_router
 from app.api.routes.spatial import router as spatial_router
 from app.api.routes.vision_mapper import router as vision_router
 from app.api.routes.agent_swarm import router as swarm_router
 from app.api.routes.biomechanics import router as biomechanics_router
+from app.api.routes.wearables import router as wearables_router
 from app.webhooks import router as webhook_router
 from app.workouts import router as workout_router
 from app.users import router as users_router
@@ -70,16 +71,17 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title=settings.APP_NAME, version=settings.VERSION, lifespan=lifespan)
-app.include_router(webhook_router, prefix="/api/v1")
-app.include_router(workout_router, prefix="/api/v1")
-app.include_router(users_router, prefix="/api/v1")
-app.include_router(coach_router, prefix="/api/v1")
-app.include_router(proactive_router, prefix="/api/v1")
-app.include_router(sentry_router, prefix="/api/v1")
-app.include_router(spatial_router, prefix="/api/v1")
-app.include_router(vision_router, prefix="/api/v1")
-app.include_router(swarm_router, prefix="/api/v1")
-app.include_router(biomechanics_router, prefix="/api/v1")
+app.include_router(webhook_router, prefix="/api/v1") # Stripe Webhooks handle their own security
+app.include_router(workout_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
+app.include_router(users_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
+app.include_router(wearables_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
+app.include_router(coach_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
+app.include_router(concierge_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
+app.include_router(sentry_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
+app.include_router(spatial_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
+app.include_router(vision_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
+app.include_router(swarm_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
+app.include_router(biomechanics_router, prefix="/api/v1", dependencies=[Depends(require_tenant_access)])
 
 
 
@@ -158,7 +160,11 @@ async def list_events(
          raise HTTPException(status_code=500, detail="Database query failed")
 
 @app.post("/events/wearable", response_model=AgentResponse)
-async def handle_wearable(event: WearableEvent, db: AsyncSession = Depends(get_db)):
+async def handle_wearable(
+    event: WearableEvent, 
+    db: AsyncSession = Depends(get_db), 
+    user: AuthenticatedUser = Depends(require_tenant_access)
+):
     logger.info(f"Event: Wearable, Device: {event.device_type}, Score: {event.recovery_score}")
     
     # Run Agent
@@ -179,7 +185,8 @@ async def handle_wearable(event: WearableEvent, db: AsyncSession = Depends(get_d
         # Persist
         if db:
             log_entry = EventLog(
-                user_id="1", # Linked to Demo Client (User 1) for dashboard visibility
+                user_id=user.uid,
+                trainer_id=user.db_user.trainer_id if user.db_user else None,
                 event_type="wearable",
                 payload=event.model_dump(),
                 agent_decision=response.suggested_action,
@@ -203,7 +210,11 @@ async def handle_wearable(event: WearableEvent, db: AsyncSession = Depends(get_d
         raise HTTPException(status_code=500, detail="Internal processing error")
 
 @app.post("/events/vision", response_model=AgentResponse)
-async def handle_vision(event: VisionEvent, db: AsyncSession = Depends(get_db)):
+async def handle_vision(
+    event: VisionEvent, 
+    db: AsyncSession = Depends(get_db),
+    user: AuthenticatedUser = Depends(require_tenant_access)
+):
     logger.info(f"Event: Vision, Equipment Count: {len(event.detected_equipment)}")
     
     # Run Agent
@@ -224,7 +235,8 @@ async def handle_vision(event: VisionEvent, db: AsyncSession = Depends(get_db)):
         # Persist
         if db:
             log_entry = EventLog(
-                user_id="1", # Demo Client
+                user_id=user.uid,
+                trainer_id=user.db_user.trainer_id if user.db_user else None,
                 event_type="vision",
                 payload=sanitize_payload(event.model_dump()),
                 agent_decision=response.suggested_action,
@@ -285,7 +297,11 @@ async def wipe_user_data(user_id: str, db: AsyncSession = Depends(get_db), auth:
         raise HTTPException(status_code=500, detail="Failed to wipe data")
 
 @app.post("/events/chat", response_model=AgentResponse)
-async def handle_chat(event: ChatEvent, db: AsyncSession = Depends(get_db)):
+async def handle_chat(
+    event: ChatEvent, 
+    db: AsyncSession = Depends(get_db),
+    user: AuthenticatedUser = Depends(require_tenant_access)
+):
     logger.info(f"Event: Chat, User: {event.user_id}")
     
     # Run Agent
@@ -306,7 +322,8 @@ async def handle_chat(event: ChatEvent, db: AsyncSession = Depends(get_db)):
         # Persist
         if db:
             log_entry = EventLog(
-                user_id=event.user_id,
+                user_id=user.uid,
+                trainer_id=user.db_user.trainer_id if user.db_user else None,
                 event_type="chat",
                 payload=event.model_dump(),
                 agent_decision=response.suggested_action,

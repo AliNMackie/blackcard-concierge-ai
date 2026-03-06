@@ -28,3 +28,5 @@ alembic
 websockets
 uvloop
 langchain-google-genai
+google-cloud-pubsub
+google-cloud-storage

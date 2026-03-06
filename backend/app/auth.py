@@ -233,6 +233,32 @@ def require_role(*allowed_roles: str):
     return role_checker
 
 
+from app.database import get_db, set_rls_context
+
+async def require_tenant_access(
+    user: AuthenticatedUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> AuthenticatedUser:
+    """
+    Global dependency to enforce tenant-level isolation via RLS.
+    Sets the app.current_trainer_id in the DB session based on the authenticated user.
+    """
+    # If the user is a trainer, they access their own tenant
+    # If the user is an admin, they can bypass or see all
+    # If the user is a client, we use their trainer_id context
+    
+    trainer_id = None
+    is_admin = user.role == "admin"
+    
+    if user.role == "trainer":
+        trainer_id = user.uid
+    elif user.role == "client" and user.db_user:
+        trainer_id = user.db_user.trainer_id
+    
+    await set_rls_context(db, trainer_id, is_admin)
+    return user
+
+
 # Convenience dependencies
 require_trainer = require_role("trainer", "admin")
 require_admin = require_role("admin")

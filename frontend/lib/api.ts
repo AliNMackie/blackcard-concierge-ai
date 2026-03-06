@@ -26,6 +26,7 @@ export type DailyInsight = {
 
 
 import { getIdToken } from './firebase';
+import { mutate as globalMutate } from 'swr';
 
 // Custom error for paywall interception
 export class PaywallError extends Error {
@@ -172,6 +173,45 @@ export type PerformanceMetricInput = {
     unit: string;
     timestamp: string;
 };
+
+export type WorkoutData = {
+    session_id: string;
+    exercise_name: string;
+    sets: number;
+    reps: number;
+    weight_kg: number;
+};
+
+export async function logWorkoutSession(data: WorkoutData): Promise<void> {
+    const endpoint = `${API_BASE}/telemetry/session`;
+    const headers = await getAuthHeaders();
+
+    // Optimistic Update: Update the local cache immediately
+    const cacheKey = `/api/v1/telemetry/history?session_id=${data.session_id}`;
+
+    await globalMutate(
+        cacheKey,
+        async (currentData: any) => {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) throw new Error('Failed to log workout session');
+            return res.json();
+        },
+        {
+            optimisticData: (currentData: any) => {
+                const updated = currentData ? [...currentData] : [];
+                updated.unshift({ ...data, id: 'temp-id', created_at: new Date().toISOString() });
+                return updated;
+            },
+            rollbackOnError: true,
+            populateCache: true,
+            revalidate: false,
+        }
+    );
+}
 
 export async function logPerformanceMetric(data: PerformanceMetricInput): Promise<void> {
     try {
@@ -368,8 +408,10 @@ export async function triggerSentry(): Promise<SentryResult | null> {
 /** Generic biomechanical audit for multi-frame kinetic analysis. */
 export async function submitBiomechanicsAudit(payload: {
     movement_type: string;
-    frames_b64: string[];
-    fps: number;
+    frames_b64?: string[];
+    video_base64?: string;
+    vectors?: number[];
+    fps?: number;
 }): Promise<any> {
     try {
         const headers = await getAuthHeaders();
@@ -383,6 +425,30 @@ export async function submitBiomechanicsAudit(payload: {
     } catch (error) {
         console.error('Biomechanics audit error:', error);
         throw error;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Trainer Command Center (TCC) — Multi-Tenant Scale Triage
+// ---------------------------------------------------------------------------
+export type ClientStatus = {
+    id: string;
+    full_name: string;
+    roi_score: number;
+    last_check_in: string;
+    status: 'RED' | 'AMBER' | 'GREEN';
+    risk_flags: string[];
+};
+
+export async function fetchTrainerClients(): Promise<ClientStatus[]> {
+    try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE}/coach/clients`, { headers });
+        if (!res.ok) throw new Error('Failed to fetch trainer clients');
+        return res.json();
+    } catch (error) {
+        console.error('Fetch trainer clients error:', error);
+        return [];
     }
 }
 

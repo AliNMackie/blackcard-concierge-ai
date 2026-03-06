@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from app.main import app
 from app.models import User
-from app.database import async_session
+from app.database import AsyncSessionLocal
 
 @pytest.mark.asyncio
 async def test_onboarding_saves_to_db():
@@ -31,7 +31,7 @@ async def test_onboarding_saves_to_db():
     assert data["profile_data"]["primary_goal"] == "Hypertrophy"
     
     # Verify in DB
-    async with async_session() as session:
+    async with AsyncSessionLocal() as session:
         stmt = select(User).where(User.id == "testuser123")
         result = await session.execute(stmt)
         user = result.scalar_one_or_none()
@@ -51,7 +51,7 @@ async def test_paywall_blocks_4th_request():
     }
     
     # Ensure user has 0 uses
-    async with async_session() as session:
+    async with AsyncSessionLocal() as session:
         user = User(id="testuser456", role="client", tier="free", ai_usage_count=0)
         session.add(user)
         await session.commit()
