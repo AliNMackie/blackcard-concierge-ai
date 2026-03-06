@@ -1,6 +1,11 @@
-output "cloud_run_url" {
-  description = "The URL of the deployed Cloud Run service"
-  value       = google_cloud_run_v2_service.api.uri
+output "cloud_run_urls" {
+  description = "The URLs of the deployed Cloud Run services across regions"
+  value       = { for k, v in google_cloud_run_v2_service.api : k => v.uri }
+}
+
+output "load_balancer_ip" {
+  description = "The IP address of the Global Load Balancer"
+  value       = google_compute_global_forwarding_rule.default.ip_address
 }
 
 output "db_instance_connection_name" {
