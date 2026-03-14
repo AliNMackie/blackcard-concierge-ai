@@ -9,16 +9,15 @@ import os
 
 # Use the override_get_db fixture to inject the container DB
 @pytest.mark.asyncio
-async def test_health_check(override_get_db):
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.get("/health")
+async def test_health_check(api_client):
+    response = await api_client.get("/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
     assert data["db"] == "connected"
 
 @pytest.mark.asyncio
-async def test_create_user_on_login(override_get_db, db_session):
+async def test_create_user_on_login(db_session):
     """Verify that a user is created in the DB when they login (via mock auth for now)."""
     # For integration test, we can manually insert a user or assume auth middleware does it.
     # Let's manually insert to test the DB
@@ -36,7 +35,7 @@ async def test_create_user_on_login(override_get_db, db_session):
     assert fetched_user.email == "test1@example.com"
 
 @pytest.mark.asyncio
-async def test_gdpr_wipe(override_get_db, db_session):
+async def test_gdpr_wipe(api_client, db_session):
     """Verify the /wipe endpoint removes logs and anonymizes user."""
     
     # 1. Setup Data
@@ -51,31 +50,12 @@ async def test_gdpr_wipe(override_get_db, db_session):
     await db_session.commit()
     
     # 2. Call Wipe Endpoint
-    # We need to act as Admin or the user themselves. Auth dependency mocks might be needed.
-    # For this Integration test, let's bypass the API and call the logic function directly OR 
-    # use a client with the right headers if we want to test Auth + Logic.
+    headers = {"X-Elite-Key": "test-secret-key"} 
     
-    # Let's bypass auth for this specific test by overriding `get_current_user`?
-    # Or just use the API Key which acts as Admin.
-    
-    headers = {"X-Elite-Key": "test-secret-key"} # Assuming current config uses this fallback
-    
-    # Need to mock settings to ensure "test-secret-key" is valid if not set in env
-    # But usually .env loaded.
-    
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        # We need to make sure app.dependency_overrides[get_api_key] or similar allows us.
-        # See auth.py: get_api_key uses ELITE_API_KEY env var.
-        
-        # Hack: Inject the key into os.environ for the test execution or patch settings
-        # We need to ensure the mocked settings in auth.py are used if we are relying on that, 
-        # but here we are hitting the app which imports config.
-        # Let's just assume the default test key if not set, or set env var.
+    # Need to mock settings for the app's internal checks
+    with patch("app.auth.settings.ELITE_API_KEY", "test-secret-key"):
         os.environ["ELITE_API_KEY"] = "test-secret-key"
-        
-        # Also need to patch the settings object that basic auth uses
-        with patch("app.auth.settings.ELITE_API_KEY", "test-secret-key"):
-             response = await ac.delete(f"/users/{user.id}/wipe", headers=headers) 
+        response = await api_client.delete(f"/users/{user_id}/wipe", headers=headers) 
             
     assert response.status_code == 200
     

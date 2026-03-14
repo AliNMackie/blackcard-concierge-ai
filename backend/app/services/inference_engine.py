@@ -5,12 +5,15 @@ Retrieves historical InferenceStates that mathematically align with
 the user's current situation using pgvector cosine distance:
 Distance = 1 - (V_current . V_past) / (||V_current|| ||V_past||)
 """
-import logging
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel, Field
+import numpy as np
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
+
+from app.config import logger
+from app.database import AsyncSessionLocal # or pass it in
 
 from app.contextual_memory import InferenceState, BiomechanicalSignature
 

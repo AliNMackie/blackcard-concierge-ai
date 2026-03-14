@@ -1,0 +1,2099 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-8.4.2, pluggy-1.6.0
+codspeed: 4.2.0 (disabled, mode: walltime, callgraph: not supported, timer_resolution: 100.0ns)
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.6.7, asyncio-1.3.0, benchmark-5.2.3, codspeed-4.2.0, recording-0.13.4, socket-0.7.0, syrupy-4.9.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 59 items
+
+backend\tests\test_api.py FF                                             [  3%]
+backend\tests\test_auth.py ....                                          [ 10%]
+backend\tests\test_basic.py .                                            [ 11%]
+backend\tests\test_flow.py ..                                            [ 15%]
+backend\tests\test_inference_engine.py FFF                               [ 20%]
+backend\tests\test_integration_user.py FEE                               [ 25%]
+backend\tests\test_multi_agent_graph.py ................                 [ 52%]
+backend\tests\test_onboarding.py F                                       [ 54%]
+backend\tests\test_phase3.py FF                                          [ 57%]
+backend\tests\test_proactive.py F                                        [ 59%]
+backend\tests\test_sanity.py .                                           [ 61%]
+backend\tests\test_sentry_graph.py ...........                           [ 79%]
+backend\tests\test_sovereign_logic.py ..                                 [ 83%]
+backend\tests\test_spatial_sentry.py .........                           [ 98%]
+backend\tests\test_travel_mode.py F                                      [100%]
+
+=================================== ERRORS ====================================
+_________________ ERROR at setup of test_create_user_on_login _________________
+file C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\tests\test_integration_user.py, line 20
+  @pytest.mark.asyncio
+  async def test_create_user_on_login(override_get_db, db_session):
+      """Verify that a user is created in the DB when they login (via mock auth for now)."""
+      # For integration test, we can manually insert a user or assume auth middleware does it.
+      # Let's manually insert to test the DB
+
+      user1 = User(id="test_uid_1", email="test1@example.com", role="client")
+      db_session.add(user1)
+      await db_session.commit()
+
+      # Verify via Select
+      stmt = select(User).where(User.id == "test_uid_1")
+      result = await db_session.execute(stmt)
+      fetched_user = result.scalar_one_or_none()
+
+      assert fetched_user is not None
+      assert fetched_user.email == "test1@example.com"
+E       fixture 'db_session' not found
+>       available fixtures: _class_scoped_runner, _function_scoped_runner, _module_scoped_runner, _package_scoped_runner, _session_scoped_runner, _syrupy_apply_ide_patches, allowed_hosts, anyio_backend, anyio_backend_name, anyio_backend_options, benchmark, benchmark_weave, block_network, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, codspeed_benchmark, db_engine, default_cassette_name, disable_recording, doctest_namespace, event_loop_policy, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, override_get_db, postgres_container, pytestconfig, record_mode, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_db, snapshot, socket_disabled, socket_enabled, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory, vcr, vcr_cassette_dir, vcr_config, vcr_markers
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\tests\test_integration_user.py:20
+______________________ ERROR at setup of test_gdpr_wipe _______________________
+file C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\tests\test_integration_user.py, line 38
+  @pytest.mark.asyncio
+  async def test_gdpr_wipe(override_get_db, db_session):
+      """Verify the /wipe endpoint removes logs and anonymizes user."""
+
+      # 1. Setup Data
+      user_id = "gdpr_victim"
+      user = User(id=user_id, email="victim@example.com", role="client", coach_style="aggressive")
+      db_session.add(user)
+
+      log1 = EventLog(user_id=user_id, event_type="chat", payload={"msg": "I love metadata"})
+      log2 = EventLog(user_id=user_id, event_type="wearable", payload={"hr": 60})
+      db_session.add_all([log1, log2])
+
+      await db_session.commit()
+
+      # 2. Call Wipe Endpoint
+      # We need to act as Admin or the user themselves. Auth dependency mocks might be needed.
+      # For this Integration test, let's bypass the API and call the logic function directly OR
+      # use a client with the right headers if we want to test Auth + Logic.
+
+      # Let's bypass auth for this specific test by overriding `get_current_user`?
+      # Or just use the API Key which acts as Admin.
+
+      headers = {"X-Elite-Key": "test-secret-key"} # Assuming current config uses this fallback
+
+      # Need to mock settings to ensure "test-secret-key" is valid if not set in env
+      # But usually .env loaded.
+
+      async with AsyncClient(app=app, base_url="http://test") as ac:
+          # We need to make sure app.dependency_overrides[get_api_key] or similar allows us.
+          # See auth.py: get_api_key uses ELITE_API_KEY env var.
+
+          # Hack: Inject the key into os.environ for the test execution or patch settings
+          # We need to ensure the mocked settings in auth.py are used if we are relying on that,
+          # but here we are hitting the app which imports config.
+          # Let's just assume the default test key if not set, or set env var.
+          os.environ["ELITE_API_KEY"] = "test-secret-key"
+
+          # Also need to patch the settings object that basic auth uses
+          with patch("app.auth.settings.ELITE_API_KEY", "test-secret-key"):
+               response = await ac.delete(f"/users/{user.id}/wipe", headers=headers)
+
+      assert response.status_code == 200
+
+      # 3. Verify Data Gone
+      # Logs should be 0
+      result = await db_session.execute(select(EventLog).where(EventLog.user_id == user_id))
+      logs = result.scalars().all()
+      assert len(logs) == 0
+
+      # User should be reset
+      # Re-fetch user
+      # Note: Session might need refreshing
+      await db_session.refresh(user)
+
+      # Check anonymization fields from main.py implementation
+      assert user.coach_style == "standard"
+      assert user.is_traveling == False
+E       fixture 'db_session' not found
+>       available fixtures: _class_scoped_runner, _function_scoped_runner, _module_scoped_runner, _package_scoped_runner, _session_scoped_runner, _syrupy_apply_ide_patches, allowed_hosts, anyio_backend, anyio_backend_name, anyio_backend_options, benchmark, benchmark_weave, block_network, cache, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, codspeed_benchmark, db_engine, default_cassette_name, disable_recording, doctest_namespace, event_loop_policy, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, monkeypatch, override_get_db, postgres_container, pytestconfig, record_mode, record_property, record_testsuite_property, record_xml_attribute, recwarn, setup_db, snapshot, socket_disabled, socket_enabled, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory, vcr, vcr_cassette_dir, vcr_config, vcr_markers
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\tests\test_integration_user.py:38
+================================== FAILURES ===================================
+______________________________ test_health_check ______________________________
+
+    @pytest.mark.asyncio
+    async def test_health_check():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            response = await ac.get("/health")
+    
+        if response.status_code != 200:
+            print(f"Health check failed with {response.status_code}: {response.text}")
+    
+>       assert response.status_code == 200
+E       assert 503 == 200
+E        +  where 503 = <Response [503 Service Unavailable]>.status_code
+
+backend\tests\test_api.py:13: AssertionError
+---------------------------- Captured stderr setup ----------------------------
+2026-03-14 17:54:21,987 [INFO] elite-concierge: Database connection pool initialized.
+----------------------------- Captured log setup ------------------------------
+INFO     elite-concierge:database.py:36 Database connection pool initialized.
+---------------------------- Captured stdout call -----------------------------
+Health check failed with 503: {"detail":"Database Unavailable"}
+---------------------------- Captured stderr call -----------------------------
+2026-03-14 17:54:22,370 [ERROR] elite-concierge: Health Check Failed: Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\starlette\middleware\base.py:144> cb=[TaskGroup._spawn.<locals>.task_done() at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:805]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2026-03-14 17:54:22,372 [INFO] elite-concierge: Path: /health Method: GET Status: 503 Duration: 0.0098s
+2026-03-14 17:54:22,372 [INFO] httpx: HTTP Request: GET http://test/health "HTTP/1.1 503 Service Unavailable"
+------------------------------ Captured log call ------------------------------
+ERROR    elite-concierge:main.py:120 Health Check Failed: Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\starlette\middleware\base.py:144> cb=[TaskGroup._spawn.<locals>.task_done() at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:805]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+INFO     elite-concierge:main.py:107 Path: /health Method: GET Status: 503 Duration: 0.0098s
+INFO     httpx:_client.py:1740 HTTP Request: GET http://test/health "HTTP/1.1 503 Service Unavailable"
+____________________________ test_direct_db_smoke _____________________________
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+
+    async def _start_transaction(self):
+        if self.isolation_level == "autocommit":
+            return
+    
+        try:
+            self._transaction = self._connection.transaction(
+                isolation=self.isolation_level,
+                readonly=self.readonly,
+                deferrable=self.deferrable,
+            )
+>           await self._transaction.start()
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:848: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:146: in start
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncpg/protocol/protocol.pyx:354: in query
+    self._check_state()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+>   raise apg_exc.InterfaceError(
+E   asyncpg.exceptions._base.InterfaceError: cannot perform operation: another operation is in progress
+
+asyncpg/protocol/protocol.pyx:735: InterfaceError
+
+The above exception was the direct cause of the following exception:
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000026EE9F17A80>
+dialect = <sqlalchemy.dialects.postgresql.asyncpg.PGDialect_asyncpg object at 0x0000026EEB0D01A0>
+context = <sqlalchemy.dialects.postgresql.asyncpg.PGExecutionContext_asyncpg object at 0x0000026EEB148C00>
+statement = <sqlalchemy.dialects.postgresql.asyncpg.PGCompiler_asyncpg object at 0x0000026EEB102350>
+parameters = [()]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:585: in execute
+    self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:520: in _prepare_and_execute
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+error = InterfaceError('cannot perform operation: another operation is in progress')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.InterfaceError: <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:797: InterfaceError
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.mark.asyncio
+    async def test_direct_db_smoke():
+        from app.database import AsyncSessionLocal
+        from sqlalchemy import text
+    
+        async with AsyncSessionLocal() as session:
+>           result = await session.execute(text("SELECT 1"))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_api.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:449: in execute
+    result = await greenlet_spawn(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2258: in _execute_internal
+    result = conn.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:585: in execute
+    self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:520: in _prepare_and_execute
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+error = InterfaceError('cannot perform operation: another operation is in progress')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.exc.InterfaceError: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+E                   [SQL: SELECT 1]
+E                   (Background on this error at: https://sqlalche.me/e/20/rvf5)
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:797: InterfaceError
+______________ TestContextualMemoryVectors.test_vector_insertion ______________
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+
+    async def _start_transaction(self):
+        if self.isolation_level == "autocommit":
+            return
+    
+        try:
+            self._transaction = self._connection.transaction(
+                isolation=self.isolation_level,
+                readonly=self.readonly,
+                deferrable=self.deferrable,
+            )
+>           await self._transaction.start()
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:848: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:146: in start
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncpg/protocol/protocol.pyx:354: in query
+    self._check_state()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+>   raise apg_exc.InterfaceError(
+E   asyncpg.exceptions._base.InterfaceError: cannot perform operation: another operation is in progress
+
+asyncpg/protocol/protocol.pyx:735: InterfaceError
+
+The above exception was the direct cause of the following exception:
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000026EEB3F4FC0>
+dialect = <sqlalchemy.dialects.postgresql.asyncpg.PGDialect_asyncpg object at 0x0000026EEB0D01A0>
+context = <sqlalchemy.dialects.postgresql.asyncpg.PGExecutionContext_asyncpg object at 0x0000026EEB149590>
+statement = <sqlalchemy.dialects.postgresql.asyncpg.PGCompiler_asyncpg object at 0x0000026EEB3ECE10>
+parameters = [('5910af0f-8956-43a9-ac3b-5fe58b93cd28', 'test_vector_insert_user', 'barbell_squat', True, '[0.20000000298023224,0.20...3224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224]', None, ...)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:585: in execute
+    self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:520: in _prepare_and_execute
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+error = InterfaceError('cannot perform operation: another operation is in progress')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.InterfaceError: <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:797: InterfaceError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.test_inference_engine.TestContextualMemoryVectors object at 0x0000026EE936CCD0>
+db_session = <sqlalchemy.orm.session.AsyncSession object at 0x0000026EEB13B8C0>
+
+    async def test_vector_insertion(self, db_session: AsyncSession):
+        """Test 1: Ensure state_vector and embedding save correctly to PostgreSQL."""
+        user_id = "test_vector_insert_user"
+    
+        # Insert InferenceState
+        mock_vec = [0.1] * 768
+        state = InferenceState(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            state_vector=mock_vec,
+            context_summary="Test insertion state",
+        )
+        db_session.add(state)
+    
+        # Insert BiomechanicalSignature
+        movement_vec = [0.2] * 768
+        signature = BiomechanicalSignature(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            movement_type="barbell_squat",
+            is_golden=True,
+            embedding=movement_vec,
+        )
+        db_session.add(signature)
+    
+>       await db_session.commit()
+
+backend\tests\test_inference_engine.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:1000: in commit
+    await greenlet_spawn(self.sync_session.commit)
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:1048: in _emit_insert_statements
+    result = connection.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:585: in execute
+    self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:520: in _prepare_and_execute
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+error = InterfaceError('cannot perform operation: another operation is in progress')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.exc.InterfaceError: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+E                   [SQL: INSERT INTO biomechanical_signatures (id, user_id, movement_type, is_golden, embedding, kinematic_notes, created_at) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::BOOLEAN, $5, $6::VARCHAR, $7::TIMESTAMP WITH TIME ZONE)]
+E                   [parameters: ('5910af0f-8956-43a9-ac3b-5fe58b93cd28', 'test_vector_insert_user', 'barbell_squat', True, '[0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.200000 ... (15063 characters truncated) ... 98023224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.20000000298023224]', None, datetime.datetime(2026, 3, 14, 17, 54, 23, 175209, tzinfo=datetime.timezone.utc))]
+E                   (Background on this error at: https://sqlalche.me/e/20/rvf5)
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:797: InterfaceError
+____ TestSituationalSimilarityEngine.test_situational_similarity_retrieval ____
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+
+    async def _start_transaction(self):
+        if self.isolation_level == "autocommit":
+            return
+    
+        try:
+            self._transaction = self._connection.transaction(
+                isolation=self.isolation_level,
+                readonly=self.readonly,
+                deferrable=self.deferrable,
+            )
+>           await self._transaction.start()
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:848: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:146: in start
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncpg/protocol/protocol.pyx:354: in query
+    self._check_state()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+>   raise apg_exc.InterfaceError(
+E   asyncpg.exceptions._base.InterfaceError: cannot perform operation: another operation is in progress
+
+asyncpg/protocol/protocol.pyx:735: InterfaceError
+
+The above exception was the direct cause of the following exception:
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000026EEB11F2F0>
+dialect = <sqlalchemy.dialects.postgresql.asyncpg.PGDialect_asyncpg object at 0x0000026EEB0D01A0>
+context = <sqlalchemy.dialects.postgresql.asyncpg.PGExecutionContext_asyncpg object at 0x0000026EEB14A250>
+statement = <sqlalchemy.dialects.postgresql.asyncpg.PGCompiler_asyncpg object at 0x0000026EEB3EE210>
+parameters = [('exact_match_id', 'test_sim_user_a1f331', '[0.5390625,0.5546875,0.640625,0.3203125,-0.8046875,0.0078125,0.484375,-0....03125,-0.8203125,-0.3125,-0.25]', 'Carb-loaded after a cheat meal, feeling energetic.', 'Regular workout.', '{}', ...)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1936: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:949: in do_executemany
+    cursor.executemany(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:590: in executemany
+    return self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:575: in _executemany
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+error = InterfaceError('cannot perform operation: another operation is in progress')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.InterfaceError: <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:797: InterfaceError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.test_inference_engine.TestSituationalSimilarityEngine object at 0x0000026EE936EC10>
+db_session = <sqlalchemy.orm.session.AsyncSession object at 0x0000026EEB13BA10>
+
+    async def test_situational_similarity_retrieval(self, db_session: AsyncSession):
+        """
+        Test 2: Mock 5 InferenceState rows. Query V_current that matches one row exactly.
+        Assert cosine distance operator returns it as top match.
+        """
+        user_id = f"test_sim_user_{uuid.uuid4().hex[:6]}"
+    
+        # We'll use embed_text here so we can generate identical deterministic vectors
+        exact_match_context = "Slept 4 hours after a late transatlantic flight, resting HR 65."
+        orthogonal_contexts = [
+            "Fully rested, 8 hours of sleep, ready for a PR.",
+            "Normal training day, moderate stress.",
+            "Recovering from a slight cold, HRV is baseline.",
+            "Carb-loaded after a cheat meal, feeling energetic."
+        ]
+    
+        # Seed exact match
+        exact_vec = await embed_text(exact_match_context)
+        db_session.add(InferenceState(
+            id="exact_match_id",
+            user_id=user_id,
+            state_vector=exact_vec,
+            context_summary=exact_match_context,
+            resulting_outcome="Skipped heavy squats, did mobility."
+        ))
+    
+        # Seed pseudo-orthogonal ones
+        for i, ctx in enumerate(orthogonal_contexts):
+            vec = await embed_text(ctx)
+            db_session.add(InferenceState(
+                id=f"other_{i}",
+                user_id=user_id,
+                state_vector=vec,
+                context_summary=ctx,
+                resulting_outcome="Regular workout."
+            ))
+    
+>       await db_session.commit()
+
+backend\tests\test_inference_engine.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:1000: in commit
+    await greenlet_spawn(self.sync_session.commit)
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:1048: in _emit_insert_statements
+    result = connection.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1936: in _exec_single_context
+    self.dialect.do_executemany(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:949: in do_executemany
+    cursor.executemany(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:590: in executemany
+    return self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:575: in _executemany
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+error = InterfaceError('cannot perform operation: another operation is in progress')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.exc.InterfaceError: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+E                   [SQL: INSERT INTO inference_states (id, user_id, state_vector, context_summary, resulting_outcome, raw_metrics, created_at) VALUES ($1::VARCHAR, $2::VARCHAR, $3, $4::VARCHAR, $5::VARCHAR, $6::JSON, $7::TIMESTAMP WITH TIME ZONE)]
+E                   [parameters: [('exact_match_id', 'test_sim_user_a1f331', '[0.5390625,0.5546875,0.640625,0.3203125,-0.8046875,0.0078125,0.484375,-0.4921875,0.84375,-0.3515625,-0.421875,0.6875,0.3125,-0.8828125,-0.15625,-0.54 ... (7047 characters truncated) ... 40625,0.8125,-0.078125,0.671875,0.09375,-0.4453125,-0.5625,-0.109375,0.3203125,-0.90625,-0.5625,-0.6484375,-0.4609375,0.3515625,-0.4140625,0.5859375]', 'Slept 4 hours after a late transatlantic flight, resting HR 65.', 'Skipped heavy squats, did mobility.', '{}', datetime.datetime(2026, 3, 14, 17, 54, 23, 627001, tzinfo=datetime.timezone.utc)), ('other_0', 'test_sim_user_a1f331', '[0.5234375,-0.78125,0.828125,-0.7578125,0.7265625,0.8671875,0.6953125,-0.5859375,-0.734375,0.1875,0.28125,-0.3125,0.4609375,0.4140625,0.7890625,-0.09 ... (7167 characters truncated) ... ,-0.609375,0.390625,0.21875,-0.296875,-0.3046875,0.140625,0.640625,-0.171875,0.203125,-0.3828125,-0.765625,0.453125,-0.1015625,-0.8984375,-0.7734375]', 'Fully rested, 8 hours of sleep, ready for a PR.', 'Regular workout.', '{}', datetime.datetime(2026, 3, 14, 17, 54, 23, 627010, tzinfo=datetime.timezone.utc)), ('other_1', 'test_sim_user_a1f331', '[0.2578125,0.4765625,0.703125,0.84375,0.7421875,0.21875,-0.0078125,0.9375,-0.6640625,-0.921875,-0.9296875,0.2890625,0.75,-0.7109375,0.71875,0.0390625 ... (7071 characters truncated) ... .109375,-0.0078125,0.1328125,-0.234375,0.5234375,0.9765625,0.8203125,0.3515625,-0.8046875,-0.578125,-0.8046875,-0.6171875,0.8359375,-0.265625,0.1875]', 'Normal training day, moderate stress.', 'Regular workout.', '{}', datetime.datetime(2026, 3, 14, 17, 54, 23, 627011, tzinfo=datetime.timezone.utc)), ('other_2', 'test_sim_user_a1f331', '[0.9296875,-0.6484375,0.5859375,-0.3359375,-0.46875,-0.328125,-0.25,0.3203125,0.1171875,-0.15625,-0.1015625,0.3203125,0.7890625,-0.78125,0.3828125,0. ... (7167 characters truncated) ... 125,0.8359375,-0.53125,0.4296875,-0.796875,-0.6640625,-0.421875,-0.0390625,-0.9375,0.390625,-0.9765625,-0.25,-0.71875,0.4765625,-0.7421875,-0.078125]', 'Recovering from a slight cold, HRV is baseline.', 'Regular workout.', '{}', datetime.datetime(2026, 3, 14, 17, 54, 23, 627012, tzinfo=datetime.timezone.utc)), ('other_3', 'test_sim_user_a1f331', '[0.0234375,-0.8671875,0.28125,-0.9765625,0.8515625,0.921875,0.421875,0.1171875,-0.4140625,0.7421875,-0.921875,-0.9296875,-0.0078125,-0.5625,0.546875, ... (7047 characters truncated) ... .6953125,0.2109375,0.25,0.4375,-0.3203125,-0.7734375,-0.3359375,-0.6484375,0.2421875,-0.8671875,-0.53125,0.421875,-0.703125,-0.8203125,-0.3125,-0.25]', 'Carb-loaded after a cheat meal, feeling energetic.', 'Regular workout.', '{}', datetime.datetime(2026, 3, 14, 17, 54, 23, 627013, tzinfo=datetime.timezone.utc))]]
+E                   (Background on this error at: https://sqlalche.me/e/20/rvf5)
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:797: InterfaceError
+_______ TestBiomechanicalSignatureRetrieval.test_golden_form_retrieval ________
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+
+    async def _start_transaction(self):
+        if self.isolation_level == "autocommit":
+            return
+    
+        try:
+            self._transaction = self._connection.transaction(
+                isolation=self.isolation_level,
+                readonly=self.readonly,
+                deferrable=self.deferrable,
+            )
+>           await self._transaction.start()
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:848: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:146: in start
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncpg/protocol/protocol.pyx:354: in query
+    self._check_state()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+>   raise apg_exc.InterfaceError(
+E   asyncpg.exceptions._base.InterfaceError: cannot perform operation: another operation is in progress
+
+asyncpg/protocol/protocol.pyx:735: InterfaceError
+
+The above exception was the direct cause of the following exception:
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000026EEB14B8A0>
+dialect = <sqlalchemy.dialects.postgresql.asyncpg.PGDialect_asyncpg object at 0x0000026EEB0D01A0>
+context = <sqlalchemy.dialects.postgresql.asyncpg.PGExecutionContext_asyncpg object at 0x0000026EEB14B790>
+statement = <sqlalchemy.dialects.postgresql.asyncpg.PGCompiler_asyncpg object at 0x0000026EEB3EE350>
+parameters = [('4955f040-0a5c-44f6-826e-c7e87758d9e8', 'test_golden_411d82', 'barbell_squat', True, '[0.30000001192092896,0.3000000...059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645]', None, ...)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1936: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:949: in do_executemany
+    cursor.executemany(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:590: in executemany
+    return self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:575: in _executemany
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+error = InterfaceError('cannot perform operation: another operation is in progress')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.InterfaceError: <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:797: InterfaceError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.test_inference_engine.TestBiomechanicalSignatureRetrieval object at 0x0000026EE936ED50>
+db_session = <sqlalchemy.orm.session.AsyncSession object at 0x0000026EEB1396A0>
+
+    async def test_golden_form_retrieval(self, db_session: AsyncSession):
+        """
+        Test 3: Ensure we can query movement_type + vector and retrieve the Golden Form correctly.
+        """
+        user_id = f"test_golden_{uuid.uuid4().hex[:6]}"
+    
+        # Add a golden squat
+        golden_squat = BiomechanicalSignature(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            movement_type="barbell_squat",
+            is_golden=True,
+            embedding=[0.3] * 768,
+            kinematic_notes="Perfect depth, rigid torso."
+        )
+        db_session.add(golden_squat)
+    
+        # Add a non-golden squat (e.g. daily drift log)
+        daily_squat = BiomechanicalSignature(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            movement_type="barbell_squat",
+            is_golden=False,
+            embedding=[0.31] * 768,
+            kinematic_notes="Shifted slightly to the right."
+        )
+        db_session.add(daily_squat)
+    
+        # Add a golden deadlift
+        golden_deadlift = BiomechanicalSignature(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            movement_type="deadlift",
+            is_golden=True,
+            embedding=[0.4] * 768,
+        )
+        db_session.add(golden_deadlift)
+    
+>       await db_session.commit()
+
+backend\tests\test_inference_engine.py:172: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:1000: in commit
+    await greenlet_spawn(self.sync_session.commit)
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:1048: in _emit_insert_statements
+    result = connection.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1936: in _exec_single_context
+    self.dialect.do_executemany(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:949: in do_executemany
+    cursor.executemany(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:590: in executemany
+    return self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:575: in _executemany
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <AdaptedConnection <asyncpg.connection.Connection object at 0x0000026EE9F77B60>>
+error = InterfaceError('cannot perform operation: another operation is in progress')
+
+    def _handle_exception(self, error):
+        if self._connection.is_closed():
+            self._transaction = None
+            self._started = False
+    
+        if not isinstance(error, AsyncAdapt_asyncpg_dbapi.Error):
+            exception_mapping = self.dbapi._asyncpg_error_translate
+    
+            for super_ in type(error).__mro__:
+                if super_ in exception_mapping:
+                    translated_error = exception_mapping[super_](
+                        "%s: %s" % (type(error), error)
+                    )
+                    translated_error.pgcode = translated_error.sqlstate = (
+                        getattr(error, "sqlstate", None)
+                    )
+>                   raise translated_error from error
+E                   sqlalchemy.exc.InterfaceError: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+E                   [SQL: INSERT INTO biomechanical_signatures (id, user_id, movement_type, is_golden, embedding, kinematic_notes, created_at) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::BOOLEAN, $5, $6::VARCHAR, $7::TIMESTAMP WITH TIME ZONE)]
+E                   [parameters: [('4955f040-0a5c-44f6-826e-c7e87758d9e8', 'test_golden_411d82', 'barbell_squat', True, '[0.30000001192092896,0.30000001192092896,0.30000001192092896,0.30000001192092896,0.30000001192092896,0.30000001192092896,0.30000001192092896,0.300000 ... (15063 characters truncated) ... 92092896,0.30000001192092896,0.30000001192092896,0.30000001192092896,0.30000001192092896,0.30000001192092896,0.30000001192092896,0.30000001192092896]', 'Perfect depth, rigid torso.', datetime.datetime(2026, 3, 14, 17, 54, 24, 71431, tzinfo=datetime.timezone.utc)), ('c0a9ffb8-3dc4-4014-afc5-39c229b3b295', 'test_golden_411d82', 'barbell_squat', False, '[0.3100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841 ... (14295 characters truncated) ... 100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841858,0.3100000023841858]', 'Shifted slightly to the right.', datetime.datetime(2026, 3, 14, 17, 54, 24, 71437, tzinfo=datetime.timezone.utc)), ('4d9d08e9-b677-401b-ae52-0cd58fafe9c3', 'test_golden_411d82', 'deadlift', True, '[0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604 ... (14295 characters truncated) ... 000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645,0.4000000059604645]', None, datetime.datetime(2026, 3, 14, 17, 54, 24, 71438, tzinfo=datetime.timezone.utc))]]
+E                   (Background on this error at: https://sqlalche.me/e/20/rvf5)
+
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:797: InterfaceError
+______________________________ test_health_check ______________________________
+
+override_get_db = None
+
+    @pytest.mark.asyncio
+    async def test_health_check(override_get_db):
+>       async with AsyncClient(app=app, base_url="http://test") as ac:
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: AsyncClient.__init__() got an unexpected keyword argument 'app'
+
+backend\tests\test_integration_user.py:13: TypeError
+____________________________ test_onboarding_flow _____________________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000026EEB130950>
+dialect = <sqlalchemy.dialects.sqlite.aiosqlite.SQLiteDialect_aiosqlite object at 0x0000026EEB13A510>
+context = <sqlalchemy.dialects.sqlite.aiosqlite.SQLiteExecutionContext_aiosqlite object at 0x0000026EEBE7E210>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000026EEB130A50>
+parameters = [()]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\sqlite\aiosqlite.py:182: in execute
+    self._adapt_connection._handle_exception(error)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\sqlite\aiosqlite.py:342: in _handle_exception
+    raise error
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\sqlite\aiosqlite.py:164: in execute
+    self.await_(_cursor.execute(operation, parameters))
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\aiosqlite\cursor.py:40: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+backend\.venv\Lib\site-packages\aiosqlite\cursor.py:32: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\aiosqlite\core.py:160: in _execute
+    return await future
+           ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+tx = <_queue.SimpleQueue object at 0x0000026EEB0E26E0>
+
+    def _connection_worker_thread(tx: _TxQueue):
+        """
+        Execute function calls on a separate thread.
+    
+        :meta private:
+        """
+        while True:
+            # Continues running until all queue items are processed,
+            # even after connection is closed (so we can finalize all
+            # futures)
+    
+            future, function = tx.get()
+    
+            try:
+                LOG.debug("executing %s", function)
+>               result = function()
+                         ^^^^^^^^^^
+E               sqlite3.OperationalError: no such function: set_config
+
+backend\.venv\Lib\site-packages\aiosqlite\core.py:63: OperationalError
+
+The above exception was the direct cause of the following exception:
+
+client = <httpx.AsyncClient object at 0x0000026EEB3B9810>
+test_db = <sqlalchemy.orm.session.AsyncSession object at 0x0000026EEB0D2660>
+
+    @pytest.mark.asyncio
+    async def test_onboarding_flow(client, test_db):
+        # 1. Mock Auth
+        from app.auth import get_current_user
+        async def override_get_current_user():
+            return type('AuthUser', (), {
+                'uid': 'test_onboard_user',
+                'email': 'onboard@example.com',
+                'is_trainer': False,
+                'is_client': True,
+                'is_admin': False,
+                'role': 'client',
+                'db_user': None
+            })
+        app.dependency_overrides[get_current_user] = override_get_current_user
+    
+        # 2. Submit onboarding
+        payload = {
+            "age": 35,
+            "gender": "Male",
+            "current_weight": "85",
+            "target_weight": "80",
+            "goal": "hypertrophy",
+            "injuries": "Lower back pain",
+            "days_per_week": 4
+        }
+    
+>       response = await client.post("/api/v1/users/onboard", json=payload)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_onboarding.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\httpx\_client.py:1859: in post
+    return await self.request(
+backend\.venv\Lib\site-packages\httpx\_client.py:1540: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1629: in send
+    response = await self._send_handling_auth(
+backend\.venv\Lib\site-packages\httpx\_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+backend\.venv\Lib\site-packages\httpx\_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_transports\asgi.py:170: in handle_async_request
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\applications.py:1135: in __call__
+    await super().__call__(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\applications.py:107: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\contextlib.py:162: in __exit__
+    self.gen.throw(value)
+backend\.venv\Lib\site-packages\starlette\_utils.py:85: in collapse_excgroups
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:105: in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+backend\.venv\Lib\site-packages\starlette\middleware\cors.py:85: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:736: in app
+    await route.handle(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:290: in handle
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\routing.py:115: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\routing.py:101: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\fastapi\routing.py:345: in app
+    solved_result = await solve_dependencies(
+backend\.venv\Lib\site-packages\fastapi\dependencies\utils.py:643: in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\auth.py:265: in require_tenant_access_v2
+    await set_rls_context(db, trainer_id, is_admin)
+backend\app\database.py:47: in set_rls_context
+    await session.execute(text("SELECT set_config('app.is_admin', 'false', true)"))
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:449: in execute
+    result = await greenlet_spawn(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2258: in _execute_internal
+    result = conn.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\sqlite\aiosqlite.py:182: in execute
+    self._adapt_connection._handle_exception(error)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\sqlite\aiosqlite.py:342: in _handle_exception
+    raise error
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\sqlite\aiosqlite.py:164: in execute
+    self.await_(_cursor.execute(operation, parameters))
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\aiosqlite\cursor.py:40: in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+backend\.venv\Lib\site-packages\aiosqlite\cursor.py:32: in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\aiosqlite\core.py:160: in _execute
+    return await future
+           ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+tx = <_queue.SimpleQueue object at 0x0000026EEB0E26E0>
+
+    def _connection_worker_thread(tx: _TxQueue):
+        """
+        Execute function calls on a separate thread.
+    
+        :meta private:
+        """
+        while True:
+            # Continues running until all queue items are processed,
+            # even after connection is closed (so we can finalize all
+            # futures)
+    
+            future, function = tx.get()
+    
+            try:
+                LOG.debug("executing %s", function)
+>               result = function()
+                         ^^^^^^^^^^
+E               sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such function: set_config
+E               [SQL: SELECT set_config('app.is_admin', 'false', true)]
+E               (Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+backend\.venv\Lib\site-packages\aiosqlite\core.py:63: OperationalError
+_________________________ test_onboarding_saves_to_db _________________________
+
+    @pytest.mark.asyncio
+    async def test_onboarding_saves_to_db():
+        # Mock Headers to bypass Firebase and use Mock user
+        headers = {"Authorization": "Bearer MOCK_TOKEN_testuser123"}
+    
+        payload = {
+            "height": "180cm",
+            "weight": "85kg",
+            "age": 28,
+            "gender": "Male",
+            "primary_goal": "Hypertrophy",
+            "injuries": "None",
+            "days_per_week": 4
+        }
+    
+>       async with AsyncClient(app=app, base_url="http://test") as ac:
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: AsyncClient.__init__() got an unexpected keyword argument 'app'
+
+backend\tests\test_phase3.py:25: TypeError
+_______________________ test_paywall_blocks_4th_request _______________________
+
+    @pytest.mark.asyncio
+    async def test_paywall_blocks_4th_request():
+        headers = {"Authorization": "Bearer MOCK_TOKEN_testuser456"}
+    
+        # Needs a mock workout plan
+        payload = {
+            "current_workout_plan": {"name": "Test", "exercises": []},
+            "user_feedback": "Too heavy"
+        }
+    
+        # Ensure user has 0 uses
+>       async with AsyncSessionLocal() as session:
+                   ^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not callable
+
+backend\tests\test_phase3.py:54: TypeError
+_____________________ test_simulate_morning_briefing_flow _____________________
+
+client = <httpx.AsyncClient object at 0x0000026EEB3A0C30>
+test_db = <sqlalchemy.orm.session.AsyncSession object at 0x0000026EEB0D30E0>
+
+    @pytest.mark.asyncio
+    async def test_simulate_morning_briefing_flow(client, test_db):
+        # 1. Setup Mock User
+        user = User(id="test_user_proactive", role="client")
+        test_db.add(user)
+        await test_db.commit()
+    
+        # 2. Mock Auth (Simplified for test)
+        # We'll need a way to bypass get_current_user or mock it.
+        # For this test, we can override it.
+        from app.auth import get_current_user
+        async def override_get_current_user():
+            return type('AuthUser', (), {'uid': 'test_user_proactive', 'email': 'test@example.com', 'is_trainer': False, 'is_client': True, 'is_admin': False})
+    
+        app.dependency_overrides[get_current_user] = override_get_current_user
+    
+        # 3. Trigger Simulation
+        payload = {
+            "sleep_score": 42,
+            "recovery_status": "RED"
+        }
+    
+>       response = await client.post("/api/v1/concierge/simulate-morning", json=payload)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_proactive.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\httpx\_client.py:1859: in post
+    return await self.request(
+backend\.venv\Lib\site-packages\httpx\_client.py:1540: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1629: in send
+    response = await self._send_handling_auth(
+backend\.venv\Lib\site-packages\httpx\_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+backend\.venv\Lib\site-packages\httpx\_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_transports\asgi.py:170: in handle_async_request
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\applications.py:1135: in __call__
+    await super().__call__(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\applications.py:107: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\contextlib.py:162: in __exit__
+    self.gen.throw(value)
+backend\.venv\Lib\site-packages\starlette\_utils.py:85: in collapse_excgroups
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:105: in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+backend\.venv\Lib\site-packages\starlette\middleware\cors.py:85: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:736: in app
+    await route.handle(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:290: in handle
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\routing.py:115: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\routing.py:101: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\fastapi\routing.py:345: in app
+    solved_result = await solve_dependencies(
+backend\.venv\Lib\site-packages\fastapi\dependencies\utils.py:643: in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+user = <class 'tests.test_proactive.AuthUser'>
+db = <sqlalchemy.orm.session.AsyncSession object at 0x0000026EEB0D30E0>
+
+    async def require_tenant_access_v2(
+        user: AuthenticatedUser = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+    ) -> AuthenticatedUser:
+        from app.database import set_rls_context
+    
+        trainer_id = None
+>       is_admin = user.role == "admin"
+                   ^^^^^^^^^
+E       AttributeError: type object 'AuthUser' has no attribute 'role'
+
+backend\app\auth.py:258: AttributeError
+_________________________ test_travel_mode_full_flow __________________________
+
+client = <httpx.AsyncClient object at 0x0000026EEB11EF90>
+test_db = <sqlalchemy.orm.session.AsyncSession object at 0x0000026EEBB58590>
+
+    @pytest.mark.asyncio
+    async def test_travel_mode_full_flow(client, test_db):
+        # 1. Setup Mock User
+        user = User(id="test_travel_user", role="client")
+        test_db.add(user)
+        await test_db.commit()
+    
+        # 2. Mock Auth
+        from app.auth import get_current_user
+        async def override_get_current_user():
+            return type('AuthUser', (), {'uid': 'test_travel_user', 'email': 'travel@example.com', 'is_trainer': False, 'is_client': True, 'is_admin': False})
+    
+        app.dependency_overrides[get_current_user] = override_get_current_user
+    
+        # 3. Toggle Travel Mode ON
+        payload = {
+            "is_traveling": True,
+            "equipment_constraint": "Hotel Gym (Dumbbells Only)"
+        }
+    
+>       response = await client.patch("/api/v1/users/travel-status", json=payload)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_travel_mode.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\httpx\_client.py:1933: in patch
+    return await self.request(
+backend\.venv\Lib\site-packages\httpx\_client.py:1540: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1629: in send
+    response = await self._send_handling_auth(
+backend\.venv\Lib\site-packages\httpx\_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+backend\.venv\Lib\site-packages\httpx\_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_transports\asgi.py:170: in handle_async_request
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\applications.py:1135: in __call__
+    await super().__call__(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\applications.py:107: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\contextlib.py:162: in __exit__
+    self.gen.throw(value)
+backend\.venv\Lib\site-packages\starlette\_utils.py:85: in collapse_excgroups
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:105: in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+backend\.venv\Lib\site-packages\starlette\middleware\cors.py:85: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:736: in app
+    await route.handle(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:290: in handle
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\routing.py:115: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\routing.py:101: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\fastapi\routing.py:345: in app
+    solved_result = await solve_dependencies(
+backend\.venv\Lib\site-packages\fastapi\dependencies\utils.py:643: in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+user = <class 'tests.test_travel_mode.AuthUser'>
+db = <sqlalchemy.orm.session.AsyncSession object at 0x0000026EEBB58590>
+
+    async def require_tenant_access_v2(
+        user: AuthenticatedUser = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+    ) -> AuthenticatedUser:
+        from app.database import set_rls_context
+    
+        trainer_id = None
+>       is_admin = user.role == "admin"
+                   ^^^^^^^^^
+E       AttributeError: type object 'AuthUser' has no attribute 'role'
+
+backend\app\auth.py:258: AttributeError
+-------------------------- Captured stderr teardown ---------------------------
+2026-03-14 17:54:30,853 [ERROR] asyncio: Future exception was never retrieved
+future: <Future finished exception=InternalClientError('got result for unknown protocol state 3')>
+Traceback (most recent call last):
+  File "asyncpg/protocol/protocol.pyx", line 892, in asyncpg.protocol.protocol.BaseProtocol._dispatch_result
+    raise apg_exc.InternalClientError(
+asyncpg.exceptions._base.InternalClientError: got result for unknown protocol state 3
+---------------------------- Captured log teardown ----------------------------
+ERROR    asyncio:base_events.py:1879 Future exception was never retrieved
+future: <Future finished exception=InternalClientError('got result for unknown protocol state 3')>
+Traceback (most recent call last):
+  File "asyncpg/protocol/protocol.pyx", line 892, in asyncpg.protocol.protocol.BaseProtocol._dispatch_result
+    raise apg_exc.InternalClientError(
+asyncpg.exceptions._base.InternalClientError: got result for unknown protocol state 3
+============================== warnings summary ===============================
+backend\app\users.py:20
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\users.py:20: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(BaseModel):
+
+tests/test_flow.py::test_wearable_graph_flow
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\langchain_core\runnables\config.py:601: RuntimeWarning: coroutine 'Retriever.retrieve_protocol' was never awaited
+    return func(*args, **kwargs)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_proactive.py: 1 warning
+tests/test_sentry_graph.py: 7 warnings
+tests/test_spatial_sentry.py: 4 warnings
+tests/test_travel_mode.py: 1 warning
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\sqlalchemy\sql\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+
+tests/test_sovereign_logic.py::test_sovereign_healer_swaps_exercise_and_logs_audit
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\core\audit_ledger.py:32: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    db.add(entry)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_sovereign_logic.py::test_sovereign_healer_swaps_exercise_and_logs_audit
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\services\sovereign_scheduler.py:138: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    db.add(log_entry)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED backend\tests\test_api.py::test_health_check - assert 503 == 200
+FAILED backend\tests\test_api.py::test_direct_db_smoke - sqlalchemy.exc.Inter...
+FAILED backend\tests\test_inference_engine.py::TestContextualMemoryVectors::test_vector_insertion
+FAILED backend\tests\test_inference_engine.py::TestSituationalSimilarityEngine::test_situational_similarity_retrieval
+FAILED backend\tests\test_inference_engine.py::TestBiomechanicalSignatureRetrieval::test_golden_form_retrieval
+FAILED backend\tests\test_integration_user.py::test_health_check - TypeError:...
+FAILED backend\tests\test_onboarding.py::test_onboarding_flow - sqlalchemy.ex...
+FAILED backend\tests\test_phase3.py::test_onboarding_saves_to_db - TypeError:...
+FAILED backend\tests\test_phase3.py::test_paywall_blocks_4th_request - TypeEr...
+FAILED backend\tests\test_proactive.py::test_simulate_morning_briefing_flow
+FAILED backend\tests\test_travel_mode.py::test_travel_mode_full_flow - Attrib...
+ERROR backend\tests\test_integration_user.py::test_create_user_on_login
+ERROR backend\tests\test_integration_user.py::test_gdpr_wipe
+============ 11 failed, 46 passed, 17 warnings, 2 errors in 19.72s ============

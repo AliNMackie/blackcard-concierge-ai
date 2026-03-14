@@ -92,7 +92,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://blackcard-concierge.netlify.app"
+        "https://blackcard-concierge.netlify.app",
+        "https://black-card-concierge.netlify.app" # Alternate name seen in logs
     ],
     allow_credentials=True,
     allow_methods=["*"],

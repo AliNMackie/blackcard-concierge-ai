@@ -17,15 +17,6 @@ from app.services.inference_engine import find_similar_situations, SimilarityQue
 
 pytestmark = pytest.mark.asyncio
 
-@pytest.fixture
-async def db_session(db_engine):
-    """Provides a fresh async session from the conftest.py engine."""
-    async_session = sessionmaker(
-        db_engine, class_=AsyncSession, expire_on_commit=False
-    )
-    async with async_session() as session:
-        yield session
-        await session.rollback()
 
 class TestContextualMemoryVectors:
     

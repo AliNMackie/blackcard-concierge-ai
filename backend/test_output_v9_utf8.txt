@@ -1,0 +1,1329 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-8.4.2, pluggy-1.6.0
+codspeed: 4.2.0 (disabled, mode: walltime, callgraph: not supported, timer_resolution: 100.0ns)
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.6.7, asyncio-1.3.0, benchmark-5.2.3, codspeed-4.2.0, recording-0.13.4, socket-0.7.0, syrupy-4.9.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=function
+collected 59 items
+
+backend\tests\test_api.py F.E                                            [  3%]
+backend\tests\test_auth.py ....                                          [ 10%]
+backend\tests\test_basic.py .                                            [ 11%]
+backend\tests\test_flow.py ..                                            [ 15%]
+backend\tests\test_inference_engine.py ..E.E                             [ 20%]
+backend\tests\test_integration_user.py F.EF                              [ 25%]
+backend\tests\test_multi_agent_graph.py ................                 [ 52%]
+backend\tests\test_onboarding.py F                                       [ 54%]
+backend\tests\test_phase3.py FF                                          [ 57%]
+backend\tests\test_proactive.py F                                        [ 59%]
+backend\tests\test_sanity.py .                                           [ 61%]
+backend\tests\test_sentry_graph.py ...........                           [ 79%]
+backend\tests\test_sovereign_logic.py ..                                 [ 83%]
+backend\tests\test_spatial_sentry.py .........                           [ 98%]
+backend\tests\test_travel_mode.py F                                      [100%]
+
+=================================== ERRORS ====================================
+__________________ ERROR at teardown of test_direct_db_smoke __________________
+
+self = <ProactorEventLoop running=False closed=True debug=False>
+callback = <bound method BaseProtocol._on_waiter_completed of <asyncpg.protocol.protocol.Protocol object at 0x000001DAE767FB70>>
+context = <_contextvars.Context object at 0x000001DAE73E8A80>
+args = (<Future finished exception=AttributeError("'NoneType' object has no attribute 'send'")>,)
+
+    def call_soon(self, callback, *args, context=None):
+        """Arrange for a callback to be called as soon as possible.
+    
+        This operates as a FIFO queue: callbacks are called in the
+        order in which they are registered.  Each callback will be
+        called exactly once.
+    
+        Any positional arguments after the callback will be passed to
+        the callback when it is called.
+        """
+>       self._check_closed()
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:833: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <ProactorEventLoop running=False closed=True debug=False>
+
+    def _check_closed(self):
+        if self._closed:
+>           raise RuntimeError('Event loop is closed')
+E           RuntimeError: Event loop is closed
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:556: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+    def finalizer() -> None:
+        """Yield again, to finalize."""
+    
+        async def async_finalizer() -> None:
+            try:
+                await gen_obj.__anext__()
+            except StopAsyncIteration:
+                pass
+            else:
+                msg = "Async generator fixture didn't stop."
+                msg += "Yield only once."
+                raise ValueError(msg)
+    
+>       runner.run(async_finalizer(), context=context)
+
+backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:330: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:322: in async_finalizer
+    await gen_obj.__anext__()
+backend\tests\conftest.py:36: in db_session
+    await session.close()
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:1016: in close
+    await greenlet_spawn(self.sync_session.close)
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2507: in close
+    self._close_impl(invalidate=False)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2576: in _close_impl
+    transaction.close(invalidate)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1417: in close
+    transaction.close()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2597: in close
+    self._do_close()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2735: in _do_close
+    self._close_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2721: in _close_impl
+    self._connection_rollback_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2713: in _connection_rollback_impl
+    self.connection._rollback_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1130: in _rollback_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2366: in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1128: in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:712: in do_rollback
+    dbapi_connection.rollback()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:887: in rollback
+    self._handle_exception(error)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:799: in _handle_exception
+    raise error
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:881: in rollback
+    self.await_(self._rollback_and_discard())
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:862: in _rollback_and_discard
+    await self._transaction.rollback()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:227: in rollback
+    await self.__rollback()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:206: in __rollback
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncpg/protocol/protocol.pyx:369: in query
+    ???
+asyncpg/protocol/protocol.pyx:362: in asyncpg.protocol.protocol.BaseProtocol.query
+    ???
+asyncpg/protocol/coreproto.pyx:1174: in asyncpg.protocol.protocol.CoreProtocol._simple_query
+    ???
+asyncpg/protocol/protocol.pyx:956: in asyncpg.protocol.protocol.BaseProtocol._write
+    ???
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py:366: in write
+    self._loop_writing(data=bytes(data))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <_ProactorSocketTransport fd=1204 read=<_OverlappedFuture cancelled>>
+f = None, data = b'Q\x00\x00\x00\x0eROLLBACK;\x00'
+
+    def _loop_writing(self, f=None, data=None):
+        try:
+            if f is not None and self._write_fut is None and self._closing:
+                # XXX most likely self._force_close() has been called, and
+                # it has set self._write_fut to None.
+                return
+            assert f is self._write_fut
+            self._write_fut = None
+            self._pending_write = 0
+            if f:
+                f.result()
+            if data is None:
+                data = self._buffer
+                self._buffer = None
+            if not data:
+                if self._closing:
+                    self._loop.call_soon(self._call_connection_lost, None)
+                if self._eof_written:
+                    self._sock.shutdown(socket.SHUT_WR)
+                # Now that we've reduced the buffer size, tell the
+                # protocol to resume writing if it was paused.  Note that
+                # we do this last since the callback is called immediately
+                # and it may add more data to the buffer (even causing the
+                # protocol to be paused again).
+                self._maybe_resume_protocol()
+            else:
+>               self._write_fut = self._loop._proactor.send(self._sock, data)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'NoneType' object has no attribute 'send'
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py:402: AttributeError
+_ ERROR at teardown of TestSituationalSimilarityEngine.test_situational_similarity_retrieval _
+
+self = <ProactorEventLoop running=False closed=True debug=False>
+callback = <bound method BaseProtocol._on_waiter_completed of <asyncpg.protocol.protocol.Protocol object at 0x000001DAE980C1B0>>
+context = <_contextvars.Context object at 0x000001DAE75FF080>
+args = (<Future finished exception=AttributeError("'NoneType' object has no attribute 'send'")>,)
+
+    def call_soon(self, callback, *args, context=None):
+        """Arrange for a callback to be called as soon as possible.
+    
+        This operates as a FIFO queue: callbacks are called in the
+        order in which they are registered.  Each callback will be
+        called exactly once.
+    
+        Any positional arguments after the callback will be passed to
+        the callback when it is called.
+        """
+>       self._check_closed()
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:833: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <ProactorEventLoop running=False closed=True debug=False>
+
+    def _check_closed(self):
+        if self._closed:
+>           raise RuntimeError('Event loop is closed')
+E           RuntimeError: Event loop is closed
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:556: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+    def finalizer() -> None:
+        """Yield again, to finalize."""
+    
+        async def async_finalizer() -> None:
+            try:
+                await gen_obj.__anext__()
+            except StopAsyncIteration:
+                pass
+            else:
+                msg = "Async generator fixture didn't stop."
+                msg += "Yield only once."
+                raise ValueError(msg)
+    
+>       runner.run(async_finalizer(), context=context)
+
+backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:330: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:322: in async_finalizer
+    await gen_obj.__anext__()
+backend\tests\conftest.py:36: in db_session
+    await session.close()
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:1016: in close
+    await greenlet_spawn(self.sync_session.close)
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2507: in close
+    self._close_impl(invalidate=False)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2576: in _close_impl
+    transaction.close(invalidate)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1417: in close
+    transaction.close()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2597: in close
+    self._do_close()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2735: in _do_close
+    self._close_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2721: in _close_impl
+    self._connection_rollback_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2713: in _connection_rollback_impl
+    self.connection._rollback_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1130: in _rollback_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2366: in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1128: in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:712: in do_rollback
+    dbapi_connection.rollback()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:887: in rollback
+    self._handle_exception(error)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:799: in _handle_exception
+    raise error
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:881: in rollback
+    self.await_(self._rollback_and_discard())
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:862: in _rollback_and_discard
+    await self._transaction.rollback()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:227: in rollback
+    await self.__rollback()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:206: in __rollback
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncpg/protocol/protocol.pyx:369: in query
+    ???
+asyncpg/protocol/protocol.pyx:362: in asyncpg.protocol.protocol.BaseProtocol.query
+    ???
+asyncpg/protocol/coreproto.pyx:1174: in asyncpg.protocol.protocol.CoreProtocol._simple_query
+    ???
+asyncpg/protocol/protocol.pyx:956: in asyncpg.protocol.protocol.BaseProtocol._write
+    ???
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py:366: in write
+    self._loop_writing(data=bytes(data))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <_ProactorSocketTransport fd=2440 read=<_OverlappedFuture cancelled>>
+f = None, data = b'Q\x00\x00\x00\x0eROLLBACK;\x00'
+
+    def _loop_writing(self, f=None, data=None):
+        try:
+            if f is not None and self._write_fut is None and self._closing:
+                # XXX most likely self._force_close() has been called, and
+                # it has set self._write_fut to None.
+                return
+            assert f is self._write_fut
+            self._write_fut = None
+            self._pending_write = 0
+            if f:
+                f.result()
+            if data is None:
+                data = self._buffer
+                self._buffer = None
+            if not data:
+                if self._closing:
+                    self._loop.call_soon(self._call_connection_lost, None)
+                if self._eof_written:
+                    self._sock.shutdown(socket.SHUT_WR)
+                # Now that we've reduced the buffer size, tell the
+                # protocol to resume writing if it was paused.  Note that
+                # we do this last since the callback is called immediately
+                # and it may add more data to the buffer (even causing the
+                # protocol to be paused again).
+                self._maybe_resume_protocol()
+            else:
+>               self._write_fut = self._loop._proactor.send(self._sock, data)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'NoneType' object has no attribute 'send'
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py:402: AttributeError
+---------------------------- Captured stderr call -----------------------------
+2026-03-14 18:00:53,137 [INFO] elite-concierge: [InferenceEngine] Embedding context: 'Slept 4 hours after a late transatlantic flight, r...'
+------------------------------ Captured log call ------------------------------
+INFO     elite-concierge:inference_engine.py:64 [InferenceEngine] Embedding context: 'Slept 4 hours after a late transatlantic flight, r...'
+_ ERROR at teardown of TestBiomechanicalSignatureRetrieval.test_golden_form_retrieval _
+
+self = <ProactorEventLoop running=False closed=True debug=False>
+callback = <bound method BaseProtocol._on_waiter_completed of <asyncpg.protocol.protocol.Protocol object at 0x000001DAE980C5D0>>
+context = <_contextvars.Context object at 0x000001DAE777F500>
+args = (<Future finished exception=AttributeError("'NoneType' object has no attribute 'send'")>,)
+
+    def call_soon(self, callback, *args, context=None):
+        """Arrange for a callback to be called as soon as possible.
+    
+        This operates as a FIFO queue: callbacks are called in the
+        order in which they are registered.  Each callback will be
+        called exactly once.
+    
+        Any positional arguments after the callback will be passed to
+        the callback when it is called.
+        """
+>       self._check_closed()
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:833: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <ProactorEventLoop running=False closed=True debug=False>
+
+    def _check_closed(self):
+        if self._closed:
+>           raise RuntimeError('Event loop is closed')
+E           RuntimeError: Event loop is closed
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:556: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+    def finalizer() -> None:
+        """Yield again, to finalize."""
+    
+        async def async_finalizer() -> None:
+            try:
+                await gen_obj.__anext__()
+            except StopAsyncIteration:
+                pass
+            else:
+                msg = "Async generator fixture didn't stop."
+                msg += "Yield only once."
+                raise ValueError(msg)
+    
+>       runner.run(async_finalizer(), context=context)
+
+backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:330: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:322: in async_finalizer
+    await gen_obj.__anext__()
+backend\tests\conftest.py:36: in db_session
+    await session.close()
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:1016: in close
+    await greenlet_spawn(self.sync_session.close)
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2507: in close
+    self._close_impl(invalidate=False)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2576: in _close_impl
+    transaction.close(invalidate)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1417: in close
+    transaction.close()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2597: in close
+    self._do_close()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2735: in _do_close
+    self._close_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2721: in _close_impl
+    self._connection_rollback_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2713: in _connection_rollback_impl
+    self.connection._rollback_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1130: in _rollback_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2366: in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1128: in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:712: in do_rollback
+    dbapi_connection.rollback()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:887: in rollback
+    self._handle_exception(error)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:799: in _handle_exception
+    raise error
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:881: in rollback
+    self.await_(self._rollback_and_discard())
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:862: in _rollback_and_discard
+    await self._transaction.rollback()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:227: in rollback
+    await self.__rollback()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:206: in __rollback
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncpg/protocol/protocol.pyx:369: in query
+    ???
+asyncpg/protocol/protocol.pyx:362: in asyncpg.protocol.protocol.BaseProtocol.query
+    ???
+asyncpg/protocol/coreproto.pyx:1174: in asyncpg.protocol.protocol.CoreProtocol._simple_query
+    ???
+asyncpg/protocol/protocol.pyx:956: in asyncpg.protocol.protocol.BaseProtocol._write
+    ???
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py:366: in write
+    self._loop_writing(data=bytes(data))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <_ProactorSocketTransport fd=2392 read=<_OverlappedFuture cancelled>>
+f = None, data = b'Q\x00\x00\x00\x0eROLLBACK;\x00'
+
+    def _loop_writing(self, f=None, data=None):
+        try:
+            if f is not None and self._write_fut is None and self._closing:
+                # XXX most likely self._force_close() has been called, and
+                # it has set self._write_fut to None.
+                return
+            assert f is self._write_fut
+            self._write_fut = None
+            self._pending_write = 0
+            if f:
+                f.result()
+            if data is None:
+                data = self._buffer
+                self._buffer = None
+            if not data:
+                if self._closing:
+                    self._loop.call_soon(self._call_connection_lost, None)
+                if self._eof_written:
+                    self._sock.shutdown(socket.SHUT_WR)
+                # Now that we've reduced the buffer size, tell the
+                # protocol to resume writing if it was paused.  Note that
+                # we do this last since the callback is called immediately
+                # and it may add more data to the buffer (even causing the
+                # protocol to be paused again).
+                self._maybe_resume_protocol()
+            else:
+>               self._write_fut = self._loop._proactor.send(self._sock, data)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'NoneType' object has no attribute 'send'
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py:402: AttributeError
+_______________ ERROR at teardown of test_create_user_on_login ________________
+
+self = <ProactorEventLoop running=False closed=True debug=False>
+callback = <bound method BaseProtocol._on_waiter_completed of <asyncpg.protocol.protocol.Protocol object at 0x000001DAE980CCB0>>
+context = <_contextvars.Context object at 0x000001DAE93B6E80>
+args = (<Future finished exception=AttributeError("'NoneType' object has no attribute 'send'")>,)
+
+    def call_soon(self, callback, *args, context=None):
+        """Arrange for a callback to be called as soon as possible.
+    
+        This operates as a FIFO queue: callbacks are called in the
+        order in which they are registered.  Each callback will be
+        called exactly once.
+    
+        Any positional arguments after the callback will be passed to
+        the callback when it is called.
+        """
+>       self._check_closed()
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:833: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <ProactorEventLoop running=False closed=True debug=False>
+
+    def _check_closed(self):
+        if self._closed:
+>           raise RuntimeError('Event loop is closed')
+E           RuntimeError: Event loop is closed
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:556: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+    def finalizer() -> None:
+        """Yield again, to finalize."""
+    
+        async def async_finalizer() -> None:
+            try:
+                await gen_obj.__anext__()
+            except StopAsyncIteration:
+                pass
+            else:
+                msg = "Async generator fixture didn't stop."
+                msg += "Yield only once."
+                raise ValueError(msg)
+    
+>       runner.run(async_finalizer(), context=context)
+
+backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:330: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:322: in async_finalizer
+    await gen_obj.__anext__()
+backend\tests\conftest.py:36: in db_session
+    await session.close()
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:1016: in close
+    await greenlet_spawn(self.sync_session.close)
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2507: in close
+    self._close_impl(invalidate=False)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2576: in _close_impl
+    transaction.close(invalidate)
+backend\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:1417: in close
+    transaction.close()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2597: in close
+    self._do_close()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2735: in _do_close
+    self._close_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2721: in _close_impl
+    self._connection_rollback_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2713: in _connection_rollback_impl
+    self.connection._rollback_impl()
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1130: in _rollback_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2366: in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1128: in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:712: in do_rollback
+    dbapi_connection.rollback()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:887: in rollback
+    self._handle_exception(error)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:799: in _handle_exception
+    raise error
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:881: in rollback
+    self.await_(self._rollback_and_discard())
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:862: in _rollback_and_discard
+    await self._transaction.rollback()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:227: in rollback
+    await self.__rollback()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:206: in __rollback
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncpg/protocol/protocol.pyx:369: in query
+    ???
+asyncpg/protocol/protocol.pyx:362: in asyncpg.protocol.protocol.BaseProtocol.query
+    ???
+asyncpg/protocol/coreproto.pyx:1174: in asyncpg.protocol.protocol.CoreProtocol._simple_query
+    ???
+asyncpg/protocol/protocol.pyx:956: in asyncpg.protocol.protocol.BaseProtocol._write
+    ???
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py:366: in write
+    self._loop_writing(data=bytes(data))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <_ProactorSocketTransport fd=2428 read=<_OverlappedFuture cancelled>>
+f = None, data = b'Q\x00\x00\x00\x0eROLLBACK;\x00'
+
+    def _loop_writing(self, f=None, data=None):
+        try:
+            if f is not None and self._write_fut is None and self._closing:
+                # XXX most likely self._force_close() has been called, and
+                # it has set self._write_fut to None.
+                return
+            assert f is self._write_fut
+            self._write_fut = None
+            self._pending_write = 0
+            if f:
+                f.result()
+            if data is None:
+                data = self._buffer
+                self._buffer = None
+            if not data:
+                if self._closing:
+                    self._loop.call_soon(self._call_connection_lost, None)
+                if self._eof_written:
+                    self._sock.shutdown(socket.SHUT_WR)
+                # Now that we've reduced the buffer size, tell the
+                # protocol to resume writing if it was paused.  Note that
+                # we do this last since the callback is called immediately
+                # and it may add more data to the buffer (even causing the
+                # protocol to be paused again).
+                self._maybe_resume_protocol()
+            else:
+>               self._write_fut = self._loop._proactor.send(self._sock, data)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: 'NoneType' object has no attribute 'send'
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py:402: AttributeError
+================================== FAILURES ===================================
+______________________________ test_health_check ______________________________
+
+api_client = <httpx.AsyncClient object at 0x000001DAE93930E0>
+
+    @pytest.mark.asyncio
+    async def test_health_check(api_client: AsyncClient):
+        response = await api_client.get("/health")
+    
+        if response.status_code != 200:
+            print(f"Health check failed with {response.status_code}: {response.text}")
+    
+>       assert response.status_code == 200
+E       assert 503 == 200
+E        +  where 503 = <Response [503 Service Unavailable]>.status_code
+
+backend\tests\test_api.py:12: AssertionError
+---------------------------- Captured stderr setup ----------------------------
+2026-03-14 18:00:51,891 [INFO] elite-concierge: Database connection pool initialized.
+----------------------------- Captured log setup ------------------------------
+INFO     elite-concierge:database.py:36 Database connection pool initialized.
+---------------------------- Captured stdout call -----------------------------
+Health check failed with 503: {"detail":"Database Unavailable"}
+---------------------------- Captured stderr call -----------------------------
+2026-03-14 18:00:52,233 [ERROR] elite-concierge: Health Check Failed: Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\starlette\middleware\base.py:144> cb=[TaskGroup._spawn.<locals>.task_done() at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:805]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2026-03-14 18:00:52,234 [INFO] elite-concierge: Path: /health Method: GET Status: 503 Duration: 0.0076s
+2026-03-14 18:00:52,235 [INFO] httpx: HTTP Request: GET http://test/health "HTTP/1.1 503 Service Unavailable"
+------------------------------ Captured log call ------------------------------
+ERROR    elite-concierge:main.py:120 Health Check Failed: Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\starlette\middleware\base.py:144> cb=[TaskGroup._spawn.<locals>.task_done() at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:805]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+INFO     elite-concierge:main.py:107 Path: /health Method: GET Status: 503 Duration: 0.0076s
+INFO     httpx:_client.py:1740 HTTP Request: GET http://test/health "HTTP/1.1 503 Service Unavailable"
+______________________________ test_health_check ______________________________
+
+override_get_db = None
+
+    @pytest.mark.asyncio
+    async def test_health_check(override_get_db):
+>       async with AsyncClient(app=app, base_url="http://test") as ac:
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: AsyncClient.__init__() got an unexpected keyword argument 'app'
+
+backend\tests\test_integration_user.py:13: TypeError
+_______________________________ test_gdpr_wipe ________________________________
+
+override_get_db = None
+db_session = <sqlalchemy.orm.session.AsyncSession object at 0x000001DAE93F3770>
+
+    @pytest.mark.asyncio
+    async def test_gdpr_wipe(override_get_db, db_session):
+        """Verify the /wipe endpoint removes logs and anonymizes user."""
+    
+        # 1. Setup Data
+        user_id = "gdpr_victim"
+        user = User(id=user_id, email="victim@example.com", role="client", coach_style="aggressive")
+        db_session.add(user)
+    
+        log1 = EventLog(user_id=user_id, event_type="chat", payload={"msg": "I love metadata"})
+        log2 = EventLog(user_id=user_id, event_type="wearable", payload={"hr": 60})
+        db_session.add_all([log1, log2])
+    
+        await db_session.commit()
+    
+        # 2. Call Wipe Endpoint
+        # We need to act as Admin or the user themselves. Auth dependency mocks might be needed.
+        # For this Integration test, let's bypass the API and call the logic function directly OR
+        # use a client with the right headers if we want to test Auth + Logic.
+    
+        # Let's bypass auth for this specific test by overriding `get_current_user`?
+        # Or just use the API Key which acts as Admin.
+    
+        headers = {"X-Elite-Key": "test-secret-key"} # Assuming current config uses this fallback
+    
+        # Need to mock settings to ensure "test-secret-key" is valid if not set in env
+        # But usually .env loaded.
+    
+>       async with AsyncClient(app=app, base_url="http://test") as ac:
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: AsyncClient.__init__() got an unexpected keyword argument 'app'
+
+backend\tests\test_integration_user.py:66: TypeError
+____________________________ test_onboarding_flow _____________________________
+
+api_client = <httpx.AsyncClient object at 0x000001DAE9AFE2C0>
+db_session = <sqlalchemy.orm.session.AsyncSession object at 0x000001DAE93F2BA0>
+
+    @pytest.mark.asyncio
+    async def test_onboarding_flow(api_client: AsyncClient, db_session):
+        # 1. Mock Auth
+        from app.auth import get_current_user
+        from app.main import app
+    
+        async def override_get_current_user():
+            return type('AuthUser', (), {
+                'uid': 'test_onboard_user',
+                'email': 'onboard@example.com',
+                'is_trainer': False,
+                'is_client': True,
+                'is_admin': False,
+                'role': 'client',
+                'db_user': None
+            })
+        app.dependency_overrides[get_current_user] = override_get_current_user
+    
+        # 2. Submit onboarding
+        payload = {
+            "age": 35,
+            "gender": "Male",
+            "current_weight": "85",
+            "target_weight": "80",
+            "goal": "hypertrophy",
+            "injuries": "Lower back pain",
+            "days_per_week": 4
+        }
+    
+>       response = await api_client.post("/api/v1/users/onboard", json=payload)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_onboarding.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\httpx\_client.py:1859: in post
+    return await self.request(
+backend\.venv\Lib\site-packages\httpx\_client.py:1540: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1629: in send
+    response = await self._send_handling_auth(
+backend\.venv\Lib\site-packages\httpx\_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+backend\.venv\Lib\site-packages\httpx\_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_transports\asgi.py:170: in handle_async_request
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\applications.py:1135: in __call__
+    await super().__call__(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\applications.py:107: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\contextlib.py:162: in __exit__
+    self.gen.throw(value)
+backend\.venv\Lib\site-packages\starlette\_utils.py:85: in collapse_excgroups
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:105: in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+backend\.venv\Lib\site-packages\starlette\middleware\cors.py:85: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:736: in app
+    await route.handle(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:290: in handle
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\routing.py:115: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\routing.py:101: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\fastapi\routing.py:345: in app
+    solved_result = await solve_dependencies(
+backend\.venv\Lib\site-packages\fastapi\dependencies\utils.py:643: in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\auth.py:265: in require_tenant_access_v2
+    await set_rls_context(db, trainer_id, is_admin)
+backend\app\database.py:47: in set_rls_context
+    await session.execute(text("SELECT set_config('app.is_admin', 'false', true)"))
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:449: in execute
+    result = await greenlet_spawn(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2258: in _execute_internal
+    result = conn.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2366: in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:585: in execute
+    self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:520: in _prepare_and_execute
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:799: in _handle_exception
+    raise error
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:848: in _start_transaction
+    await self._transaction.start()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:146: in start
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+>   ???
+E   RuntimeError: Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\starlette\middleware\base.py:144> cb=[TaskGroup._spawn.<locals>.task_done() at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:805]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+
+asyncpg/protocol/protocol.pyx:369: RuntimeError
+_________________________ test_onboarding_saves_to_db _________________________
+
+api_client = <httpx.AsyncClient object at 0x000001DAE9AFEB10>
+db_session = <sqlalchemy.orm.session.AsyncSession object at 0x000001DAE93F2900>
+
+    @pytest.mark.asyncio
+    async def test_onboarding_saves_to_db(api_client: AsyncClient, db_session):
+        # Mock Headers to bypass Firebase and use Mock user
+        headers = {"Authorization": "Bearer MOCK_TOKEN_testuser123"}
+    
+        payload = {
+            "height": "180cm",
+            "weight": "85kg",
+            "age": 28,
+            "gender": "Male",
+            "primary_goal": "Hypertrophy",
+            "injuries": "None",
+            "days_per_week": 4
+        }
+    
+        response = await api_client.post("/api/v1/users/profile", json=payload, headers=headers)
+    
+>       assert response.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+backend\tests\test_phase3.py:24: AssertionError
+---------------------------- Captured stderr call -----------------------------
+2026-03-14 18:00:54,805 [INFO] elite-concierge: Firebase Admin SDK initialized for project: blackcard-concierge
+2026-03-14 18:00:56,073 [WARNING] elite-concierge: Firebase auth failed: Wrong number of segments in token: b'MOCK_TOKEN_testuser123'
+2026-03-14 18:00:56,073 [INFO] elite-concierge: Path: /api/v1/users/profile Method: POST Status: 401 Duration: 1.2710s
+2026-03-14 18:00:56,075 [INFO] httpx: HTTP Request: POST http://test/api/v1/users/profile "HTTP/1.1 401 Unauthorized"
+------------------------------ Captured log call ------------------------------
+INFO     elite-concierge:auth.py:51 Firebase Admin SDK initialized for project: blackcard-concierge
+WARNING  elite-concierge:auth.py:154 Firebase auth failed: Wrong number of segments in token: b'MOCK_TOKEN_testuser123'
+INFO     elite-concierge:main.py:107 Path: /api/v1/users/profile Method: POST Status: 401 Duration: 1.2710s
+INFO     httpx:_client.py:1740 HTTP Request: POST http://test/api/v1/users/profile "HTTP/1.1 401 Unauthorized"
+_______________________ test_paywall_blocks_4th_request _______________________
+
+api_client = <httpx.AsyncClient object at 0x000001DAE9388950>
+db_session = <sqlalchemy.orm.session.AsyncSession object at 0x000001DAE93F16A0>
+
+    @pytest.mark.asyncio
+    async def test_paywall_blocks_4th_request(api_client: AsyncClient, db_session):
+        headers = {"Authorization": "Bearer MOCK_TOKEN_testuser456"}
+    
+        # Needs a mock workout plan
+        payload = {
+            "current_workout_plan": {"name": "Test", "exercises": []},
+            "user_feedback": "Too heavy"
+        }
+    
+        # Ensure user has 0 uses
+        user = User(id="testuser456", role="client", tier="free", ai_usage_count=0)
+        db_session.add(user)
+        await db_session.commit()
+    
+        # First 3 requests should succeed
+        # We mock the coach response to avoid hitting real Gemini in integration tests if not configured
+        # But here we just test the paywall logic in the route
+        from unittest.mock import patch
+>       with patch("app.api.routes.coach.get_coach_response", return_value={"exercises": []}):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_phase3.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\unittest\mock.py:1497: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <unittest.mock._patch object at 0x000001DAE96B5390>
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'app.api.routes.coach' from 'C:\\Users\\Alastair Mackie\\.gemini\\antigravity\\scratch\\elite_concierge_ai\\backend\\app\\api\\routes\\coach.py'> does not have the attribute 'get_coach_response'
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\unittest\mock.py:1467: AttributeError
+_____________________ test_simulate_morning_briefing_flow _____________________
+
+client = <httpx.AsyncClient object at 0x000001DAE96A3350>
+test_db = <sqlalchemy.orm.session.AsyncSession object at 0x000001DAE9CA9A90>
+
+    @pytest.mark.asyncio
+    async def test_simulate_morning_briefing_flow(client, test_db):
+        # 1. Setup Mock User
+        user = User(id="test_user_proactive", role="client")
+        test_db.add(user)
+        await test_db.commit()
+    
+        # 2. Mock Auth (Simplified for test)
+        # We'll need a way to bypass get_current_user or mock it.
+        # For this test, we can override it.
+        from app.auth import get_current_user
+        async def override_get_current_user():
+            return type('AuthUser', (), {'uid': 'test_user_proactive', 'email': 'test@example.com', 'is_trainer': False, 'is_client': True, 'is_admin': False})
+    
+        app.dependency_overrides[get_current_user] = override_get_current_user
+    
+        # 3. Trigger Simulation
+        payload = {
+            "sleep_score": 42,
+            "recovery_status": "RED"
+        }
+    
+>       response = await client.post("/api/v1/concierge/simulate-morning", json=payload)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_proactive.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\httpx\_client.py:1859: in post
+    return await self.request(
+backend\.venv\Lib\site-packages\httpx\_client.py:1540: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1629: in send
+    response = await self._send_handling_auth(
+backend\.venv\Lib\site-packages\httpx\_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+backend\.venv\Lib\site-packages\httpx\_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_transports\asgi.py:170: in handle_async_request
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\applications.py:1135: in __call__
+    await super().__call__(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\applications.py:107: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\contextlib.py:162: in __exit__
+    self.gen.throw(value)
+backend\.venv\Lib\site-packages\starlette\_utils.py:85: in collapse_excgroups
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:105: in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+backend\.venv\Lib\site-packages\starlette\middleware\cors.py:85: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:736: in app
+    await route.handle(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:290: in handle
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\routing.py:115: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\routing.py:101: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\fastapi\routing.py:345: in app
+    solved_result = await solve_dependencies(
+backend\.venv\Lib\site-packages\fastapi\dependencies\utils.py:643: in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+user = <class 'tests.test_proactive.AuthUser'>
+db = <sqlalchemy.orm.session.AsyncSession object at 0x000001DAE9CA9A90>
+
+    async def require_tenant_access_v2(
+        user: AuthenticatedUser = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+    ) -> AuthenticatedUser:
+        from app.database import set_rls_context
+    
+        trainer_id = None
+>       is_admin = user.role == "admin"
+                   ^^^^^^^^^
+E       AttributeError: type object 'AuthUser' has no attribute 'role'
+
+backend\app\auth.py:258: AttributeError
+_________________________ test_travel_mode_full_flow __________________________
+
+api_client = <httpx.AsyncClient object at 0x000001DAE9EFF9B0>
+db_session = <sqlalchemy.orm.session.AsyncSession object at 0x000001DAEA096120>
+
+    @pytest.mark.asyncio
+    async def test_travel_mode_full_flow(api_client: AsyncClient, db_session):
+        # 1. Setup Mock User
+        user = User(id="test_travel_user", role="client")
+        db_session.add(user)
+        await db_session.commit()
+    
+        # 2. Mock Auth
+        from app.auth import get_current_user
+        async def override_get_current_user():
+            return type('AuthUser', (), {'uid': 'test_travel_user', 'email': 'travel@example.com', 'is_trainer': False, 'is_client': True, 'is_admin': False, 'role': 'client', 'db_user': user})
+    
+        app.dependency_overrides[get_current_user] = override_get_current_user
+    
+        # 3. Toggle Travel Mode ON
+        payload = {
+            "is_traveling": True,
+            "equipment_constraint": "Hotel Gym (Dumbbells Only)"
+        }
+    
+>       response = await api_client.patch("/api/v1/users/travel-status", json=payload)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend\tests\test_travel_mode.py:27: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend\.venv\Lib\site-packages\httpx\_client.py:1933: in patch
+    return await self.request(
+backend\.venv\Lib\site-packages\httpx\_client.py:1540: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1629: in send
+    response = await self._send_handling_auth(
+backend\.venv\Lib\site-packages\httpx\_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+backend\.venv\Lib\site-packages\httpx\_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\httpx\_transports\asgi.py:170: in handle_async_request
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\applications.py:1135: in __call__
+    await super().__call__(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\applications.py:107: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\contextlib.py:162: in __exit__
+    self.gen.throw(value)
+backend\.venv\Lib\site-packages\starlette\_utils.py:85: in collapse_excgroups
+    raise exc
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\main.py:105: in log_requests
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+backend\.venv\Lib\site-packages\starlette\middleware\base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+backend\.venv\Lib\site-packages\starlette\middleware\cors.py:85: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:736: in app
+    await route.handle(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\routing.py:290: in handle
+    await self.app(scope, receive, send)
+backend\.venv\Lib\site-packages\fastapi\routing.py:115: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+backend\.venv\Lib\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+backend\.venv\Lib\site-packages\fastapi\routing.py:101: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\fastapi\routing.py:345: in app
+    solved_result = await solve_dependencies(
+backend\.venv\Lib\site-packages\fastapi\dependencies\utils.py:643: in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\app\auth.py:265: in require_tenant_access_v2
+    await set_rls_context(db, trainer_id, is_admin)
+backend\app\database.py:47: in set_rls_context
+    await session.execute(text("SELECT set_config('app.is_admin', 'false', true)"))
+backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py:449: in execute
+    result = await greenlet_spawn(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+backend\.venv\Lib\site-packages\sqlalchemy\orm\session.py:2258: in _execute_internal
+    result = conn.execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:2366: in _handle_dbapi_exception
+    raise exc_info[1].with_traceback(exc_info[2])
+backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:585: in execute
+    self._adapt_connection.await_(
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:520: in _prepare_and_execute
+    await adapt_connection._start_transaction()
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:850: in _start_transaction
+    self._handle_exception(error)
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:799: in _handle_exception
+    raise error
+backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py:848: in _start_transaction
+    await self._transaction.start()
+backend\.venv\Lib\site-packages\asyncpg\transaction.py:146: in start
+    await self._connection.execute(query)
+backend\.venv\Lib\site-packages\asyncpg\connection.py:354: in execute
+    result = await self._protocol.query(query, timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+>   ???
+E   RuntimeError: Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\starlette\middleware\base.py:144> cb=[TaskGroup._spawn.<locals>.task_done() at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py:805]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+
+asyncpg/protocol/protocol.pyx:369: RuntimeError
+============================== warnings summary ===============================
+backend\app\users.py:20
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\users.py:20: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(BaseModel):
+
+tests/test_flow.py::test_wearable_graph_flow
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\langchain_core\runnables\config.py:601: RuntimeWarning: coroutine 'Retriever.retrieve_protocol' was never awaited
+    return func(*args, **kwargs)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_integration_user.py: 4 warnings
+tests/test_phase3.py: 1 warning
+tests/test_proactive.py: 1 warning
+tests/test_sentry_graph.py: 7 warnings
+tests/test_spatial_sentry.py: 4 warnings
+tests/test_travel_mode.py: 1 warning
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\sqlalchemy\sql\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+
+tests/test_sovereign_logic.py::test_sovereign_healer_swaps_exercise_and_logs_audit
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\core\audit_ledger.py:32: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    db.add(entry)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_sovereign_logic.py::test_sovereign_healer_swaps_exercise_and_logs_audit
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\services\sovereign_scheduler.py:138: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    db.add(log_entry)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED backend\tests\test_api.py::test_health_check - assert 503 == 200
+FAILED backend\tests\test_integration_user.py::test_health_check - TypeError:...
+FAILED backend\tests\test_integration_user.py::test_gdpr_wipe - TypeError: As...
+FAILED backend\tests\test_onboarding.py::test_onboarding_flow - RuntimeError:...
+FAILED backend\tests\test_phase3.py::test_onboarding_saves_to_db - assert 401...
+FAILED backend\tests\test_phase3.py::test_paywall_blocks_4th_request - Attrib...
+FAILED backend\tests\test_proactive.py::test_simulate_morning_briefing_flow
+FAILED backend\tests\test_travel_mode.py::test_travel_mode_full_flow - Runtim...
+ERROR backend\tests\test_api.py::test_direct_db_smoke - AttributeError: 'None...
+ERROR backend\tests\test_inference_engine.py::TestSituationalSimilarityEngine::test_situational_similarity_retrieval
+ERROR backend\tests\test_inference_engine.py::TestBiomechanicalSignatureRetrieval::test_golden_form_retrieval
+ERROR backend\tests\test_integration_user.py::test_create_user_on_login - Att...
+============ 8 failed, 51 passed, 22 warnings, 4 errors in 20.51s =============

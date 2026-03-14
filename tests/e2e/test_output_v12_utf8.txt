@@ -1,0 +1,218 @@
+﻿
+> elite-concierge-e2e@1.0.0 test
+> playwright test
+
+[dotenv@17.2.3] injecting env (2) from .env -- tip: ÔÜÖ´©Å  enable debug logging with { debug: true }
+
+Running 6 tests using 6 workers
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒôí add observability to secrets: https://dotenvx.com/ops
+
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env -- tip: Ô£à audit secrets and track compliance: https://dotenvx.com/ops
+
+[1A[2K[1/6] [chromium] ÔÇ║ god-mode.spec.ts:4:9 ÔÇ║ Trainer God Mode ÔÇ║ should load the dashboard and display live events
+[1A[2K[2/6] [chromium] ÔÇ║ realtime.spec.ts:3:5 ÔÇ║ Dashboard polls for new events (Real-time)
+[1A[2K[3/6] [chromium] ÔÇ║ messaging.spec.ts:4:9 ÔÇ║ Trainer-Client Messaging ÔÇ║ should allow trainer to message client and client to reply
+[1A[2K[4/6] [chromium] ÔÇ║ client-dashboard.spec.ts:4:9 ÔÇ║ Client Dashboard ÔÇ║ should load the main dashboard
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  enable debug logging with { debug: true }
+
+[1A[2K[5/6] [chromium] ÔÇ║ video-coaching.spec.ts:15:9 ÔÇ║ Video Coaching Feature ÔÇ║ should load exercise card and activate camera form check
+[1A[2K[dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  override existing env vars with { override: true }
+
+[1A[2K[6/6] [chromium] ÔÇ║ concierge-chat.spec.ts:4:9 ÔÇ║ Concierge Chat Interaction ÔÇ║ should allow user to send a message and receive a response
+[1A[2K[chromium] ÔÇ║ messaging.spec.ts:4:9 ÔÇ║ Trainer-Client Messaging ÔÇ║ should allow trainer to message client and client to reply
+Test Started
+
+[1A[2KInitial Navigation Complete (with Query Bypass)
+
+[1A[2KSeeding User 1 via WhatsApp Webhook (Browser)...
+
+[1A[2KBROWSER: E2E Auth Bypass Active
+
+[1A[2KBROWSER: Initializing Firebase with hardcoded config. AppID: 1:54133106168:web:4ff07ea4da5e3fea50a20d
+
+[1A[2K[chromium] ÔÇ║ concierge-chat.spec.ts:4:9 ÔÇ║ Concierge Chat Interaction ÔÇ║ should allow user to send a message and receive a response
+Seeding User 1 via WhatsApp Webhook...
+
+[1A[2KBROWSER: E2E Auth Bypass Active
+
+[1A[2K[chromium] ÔÇ║ messaging.spec.ts:4:9 ÔÇ║ Trainer-Client Messaging ÔÇ║ should allow trainer to message client and client to reply
+BROWSER: Access to fetch at 'https://elite-concierge-api-557456081985.europe-west2.run.app/events?limit=50' from origin 'https://blackcard-concierge.netlify.app' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+
+[1A[2KBROWSER: Failed to load resource: net::ERR_FAILED
+
+[1A[2KBROWSER: TypeError: Failed to fetch
+    at o (https://blackcard-concierge.netlify.app/_next/static/chunks/app/(trainer)/god-mode/page-fc5e5bbc73b010a0.js:1:1864)
+    at async y (https://blackcard-concierge.netlify.app/_next/static/chunks/app/(trainer)/god-mode/page-fc5e5bbc73b010a0.js:1:6618)
+
+[1A[2KBROWSER: Access to fetch at 'https://elite-concierge-api-557456081985.europe-west2.run.app/webhooks/whatsapp' from origin 'https://blackcard-concierge.netlify.app' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+
+[1A[2KBROWSER: Failed to load resource: net::ERR_FAILED
+
+[1A[2K[chromium] ÔÇ║ concierge-chat.spec.ts:4:9 ÔÇ║ Concierge Chat Interaction ÔÇ║ should allow user to send a message and receive a response
+BROWSER: Access to fetch at 'https://elite-concierge-api-557456081985.europe-west2.run.app/webhooks/whatsapp' from origin 'https://blackcard-concierge.netlify.app' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+
+[1A[2KBROWSER: Failed to load resource: net::ERR_FAILED
+
+[1A[2K  1) [chromium] ÔÇ║ concierge-chat.spec.ts:4:9 ÔÇ║ Concierge Chat Interaction ÔÇ║ should allow user to send a message and receive a response 
+
+    Error: page.evaluate: TypeError: Failed to fetch
+        at eval (eval at evaluate (:290:30), <anonymous>:2:25)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:290:30), <anonymous>:2:25)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\tests\e2e\concierge-chat.spec.ts:30:43
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\concierge-chat-Concierge-C-af2ce-sage-and-receive-a-response-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\concierge-chat-Concierge-C-af2ce-sage-and-receive-a-response-chromium\error-context.md
+
+
+[1A[2K  2) [chromium] ÔÇ║ messaging.spec.ts:4:9 ÔÇ║ Trainer-Client Messaging ÔÇ║ should allow trainer to message client and client to reply 
+
+    Error: page.evaluate: TypeError: Failed to fetch
+        at eval (eval at evaluate (:290:30), <anonymous>:2:25)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:290:30), <anonymous>:2:25)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\tests\e2e\messaging.spec.ts:36:43
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\messaging-Trainer-Client-M-621c9--client-and-client-to-reply-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\messaging-Trainer-Client-M-621c9--client-and-client-to-reply-chromium\error-context.md
+
+
+[1A[2K[chromium] ÔÇ║ video-coaching.spec.ts:15:9 ÔÇ║ Video Coaching Feature ÔÇ║ should load exercise card and activate camera form check
+Locating Check Form button...
+
+[1A[2KButton found, attempting click...
+
+[1A[2KClick action completed.
+
+[1A[2K  3) [chromium] ÔÇ║ god-mode.spec.ts:4:9 ÔÇ║ Trainer God Mode ÔÇ║ should load the dashboard and display live events 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByRole('button', { name: /Refresh Stream/i })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('button', { name: /Refresh Stream/i })[22m
+
+
+      32 |         // Assuming there's a refresh button we can click
+      33 |         const refreshButton = page.getByRole('button', { name: /Refresh Stream/i });
+    > 34 |         await expect(refreshButton).toBeVisible();
+         |                                     ^
+      35 |         await refreshButton.click();
+      36 |
+      37 |         // Check for "Biometric Sentry" or similar text which indicates data loaded
+        at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\tests\e2e\god-mode.spec.ts:34:37
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\god-mode-Trainer-God-Mode--a9199-ard-and-display-live-events-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\god-mode-Trainer-God-Mode--a9199-ard-and-display-live-events-chromium\error-context.md
+
+
+[1A[2K  4) [chromium] ÔÇ║ video-coaching.spec.ts:15:9 ÔÇ║ Video Coaching Feature ÔÇ║ should load exercise card and activate camera form check 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.fixed.inset-0.bg-black').locator('button').filter({ has: locator('.rounded-full') }).last()[22m
+    [2m    - locator resolved to <button class="w-20 h-20 rounded-full border-4 flex items-center justify-center transition-all border-white bg-white/10 active:scale-95">ÔÇª</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 ├ù waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <a href="/workout" class="flex flex-col items-center gap-1 transition-all text-white scale-110">ÔÇª</a> from <nav class="fixed bottom-0 left-0 right-0 border-t border-gray-900 bg-black/95 backdrop-blur-lg pb-8 pb-safe pt-4 flex justify-around text-gray-500 max-w-md mx-auto z-50 px-2 shadow-2xl">ÔÇª</nav> subtree intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 ├ù waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - element is outside of the viewport[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    41 ├ù waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - element is outside of the viewport[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+    [2m    - element is visible, enabled and stable[22m
+    [2m    - scrolling into view if needed[22m
+
+
+      68 |
+      69 |         // Start Recording
+    > 70 |         await recordBtn.click();
+         |                         ^
+      71 |
+      72 |         // Verify "Recording" indicator appears (it has a bullet point so exact: false is safer)
+      73 |         await expect(page.getByText('RECORDING', { exact: false }).first()).toBeVisible({ timeout: 10000 });
+        at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\tests\e2e\video-coaching.spec.ts:70:25
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\video-coaching-Video-Coach-a3875--activate-camera-form-check-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\video-coaching-Video-Coach-a3875--activate-camera-form-check-chromium\error-context.md
+
+
+[1A[2K  5) [chromium] ÔÇ║ realtime.spec.ts:3:5 ÔÇ║ Dashboard polls for new events (Real-time) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "/dashboard" until "load"
+    ============================================================
+
+      20 |     await page.fill('input[type="password"]', 'password123');
+      21 |     await page.click('button[type="submit"]');
+    > 22 |     await page.waitForURL('/dashboard');
+         |                ^
+      23 |
+      24 |     // 3. Verify Initial State
+      25 |     await expect(page.getByText('Initial Message')).toBeVisible();
+        at C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\tests\e2e\realtime.spec.ts:22:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\realtime-Dashboard-polls-for-new-events-Real-time--chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\realtime-Dashboard-polls-for-new-events-Real-time--chromium\error-context.md
+
+
+[1A[2K  5 failed
+    [chromium] ÔÇ║ concierge-chat.spec.ts:4:9 ÔÇ║ Concierge Chat Interaction ÔÇ║ should allow user to send a message and receive a response 
+    [chromium] ÔÇ║ god-mode.spec.ts:4:9 ÔÇ║ Trainer God Mode ÔÇ║ should load the dashboard and display live events 
+    [chromium] ÔÇ║ messaging.spec.ts:4:9 ÔÇ║ Trainer-Client Messaging ÔÇ║ should allow trainer to message client and client to reply 
+    [chromium] ÔÇ║ realtime.spec.ts:3:5 ÔÇ║ Dashboard polls for new events (Real-time) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    [chromium] ÔÇ║ video-coaching.spec.ts:15:9 ÔÇ║ Video Coaching Feature ÔÇ║ should load exercise card and activate camera form check 
+  1 passed (32.6s)
+
+[36m  Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.[39m

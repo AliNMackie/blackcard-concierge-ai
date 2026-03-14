@@ -8,7 +8,7 @@ from app.services.rag_service import generate_coach_adaptation
 from app.core.subscription import verify_premium_tier
 from app.models import User
 
-router = APIRouter(prefix="/api/v1/coach", tags=["Coach"])
+router = APIRouter(prefix="/coach", tags=["Coach"])
 
 class CoachAdaptRequest(BaseModel):
     current_workout_plan: Dict[str, Any]

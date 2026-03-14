@@ -1,21 +1,20 @@
 import pytest
-from httpx import AsyncClient, ASGITransport
-from app.main import app
+from httpx import AsyncClient
+from sqlalchemy import text
 
 @pytest.mark.asyncio
-async def test_health_check():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        response = await ac.get("/health")
+async def test_health_check(api_client: AsyncClient):
+    response = await api_client.get("/health")
     
     if response.status_code != 200:
         print(f"Health check failed with {response.status_code}: {response.text}")
         
     assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ok"
+    assert data["db"] == "connected"
+
 @pytest.mark.asyncio
-async def test_direct_db_smoke():
-    from app.database import AsyncSessionLocal
-    from sqlalchemy import text
-    
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(text("SELECT 1"))
-        assert result.scalar() == 1
+async def test_direct_db_smoke(db_session):
+    result = await db_session.execute(text("SELECT 1"))
+    assert result.scalar() == 1

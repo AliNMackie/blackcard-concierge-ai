@@ -1,0 +1,75 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-8.4.2, pluggy-1.6.0
+codspeed: 4.2.0 (disabled, mode: walltime, callgraph: not supported, timer_resolution: 100.0ns)
+benchmark: 5.2.3 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.6.7, asyncio-1.3.0, benchmark-5.2.3, codspeed-4.2.0, recording-0.13.4, socket-0.7.0, syrupy-4.9.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=session
+collected 59 items
+
+backend\tests\test_api.py ..                                             [  3%]
+backend\tests\test_auth.py ....                                          [ 10%]
+backend\tests\test_basic.py .                                            [ 11%]
+backend\tests\test_flow.py ..                                            [ 15%]
+backend\tests\test_inference_engine.py ...                               [ 20%]
+backend\tests\test_integration_user.py ...                               [ 25%]
+backend\tests\test_multi_agent_graph.py ................                 [ 52%]
+backend\tests\test_onboarding.py .                                       [ 54%]
+backend\tests\test_phase3.py ..                                          [ 57%]
+backend\tests\test_proactive.py .                                        [ 59%]
+backend\tests\test_sanity.py .                                           [ 61%]
+backend\tests\test_sentry_graph.py ...........                           [ 79%]
+backend\tests\test_sovereign_logic.py ..                                 [ 83%]
+backend\tests\test_spatial_sentry.py .........                           [ 98%]
+backend\tests\test_travel_mode.py .                                      [100%]
+
+============================== warnings summary ===============================
+backend\app\users.py:20
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\users.py:20: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(BaseModel):
+
+tests/test_flow.py::test_wearable_graph_flow
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\langchain_core\runnables\config.py:601: RuntimeWarning: coroutine 'Retriever.retrieve_protocol' was never awaited
+    return func(*args, **kwargs)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_integration_user.py: 4 warnings
+tests/test_onboarding.py: 2 warnings
+tests/test_phase3.py: 3 warnings
+tests/test_proactive.py: 1 warning
+tests/test_sentry_graph.py: 7 warnings
+tests/test_spatial_sentry.py: 4 warnings
+tests/test_travel_mode.py: 1 warning
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\sqlalchemy\sql\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+
+tests/test_proactive.py::test_simulate_morning_briefing_flow
+tests/test_travel_mode.py::test_travel_mode_full_flow
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\api\routes\concierge.py:43: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    date=datetime.utcnow()
+
+tests/test_proactive.py::test_simulate_morning_briefing_flow
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\.venv\Lib\site-packages\vertexai\generative_models\_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+    warning_logs.show_deprecation_warning()
+
+tests/test_proactive.py::test_simulate_morning_briefing_flow
+tests/test_travel_mode.py::test_travel_mode_full_flow
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\api\routes\concierge.py:59: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    date=datetime.utcnow(),
+
+tests/test_sovereign_logic.py::test_sovereign_healer_swaps_exercise_and_logs_audit
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\core\audit_ledger.py:32: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    db.add(entry)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_sovereign_logic.py::test_sovereign_healer_swaps_exercise_and_logs_audit
+  C:\Users\Alastair Mackie\.gemini\antigravity\scratch\elite_concierge_ai\backend\app\services\sovereign_scheduler.py:138: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    db.add(log_entry)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+====================== 59 passed, 31 warnings in 19.05s =======================
